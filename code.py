@@ -1,15 +1,16 @@
-import customtkinter
 import getpass
-import subprocess
-import pyautogui
-from time import sleep
-import os
 import json
+import os
+import subprocess
+from time import sleep
+import customtkinter
+import pyautogui
 
 
 class FrameLateral(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
+        self.CriaInterface = None
 
         self.label_titulo = customtkinter.CTkLabel(self, text="Acesso Remoto", font=("Calibri Bold", 25),
                                                    justify="center")
@@ -42,22 +43,26 @@ class FrameLateral(customtkinter.CTkFrame):
         usuario = self.entry_usuario.get()
         senha = self.entry_senha.get()
 
-        try:
-            self.remover_aviso_certificado(ip)
-            arquivo_rdp = self.criar_arquivo_rdp(ip, usuario, senha)
-            subprocess.Popen(['mstsc', arquivo_rdp])
-            app.lower()
-            self.entry_ip.delete(0, 'end')
-            self.entry_senha.delete(0, 'end')
-            self.entry_senha.insert(0, senha)
-            self.entry_senha.focus()
-        except Exception as e:
-            print(f"Erro ao conectar: {e}")
+        if not (ip and usuario and senha):
+            self.CriaInterface.mensagem_de_alertas()
 
-        sleep(3.75)
-        pyautogui.click(517, 391)
-        pyautogui.write(senha)
-        pyautogui.click(580, 534)
+        else:
+            try:
+                self.remover_aviso_certificado(ip)
+                arquivo_rdp = self.criar_arquivo_rdp(ip, usuario)
+                subprocess.Popen(['mstsc', arquivo_rdp])
+                app.lower()
+                self.entry_ip.delete(0, 'end')
+                self.entry_senha.delete(0, 'end')
+                self.entry_senha.insert(0, senha)
+                self.entry_senha.focus()
+            except Exception as e:
+                print(f"Erro ao conectar: {e}")
+
+            sleep(3.75)
+            pyautogui.click(517, 391)
+            pyautogui.write(senha)
+            pyautogui.click(580, 534)
 
     @staticmethod
     def remover_aviso_certificado(ip):
@@ -72,7 +77,7 @@ class FrameLateral(customtkinter.CTkFrame):
             print(f"Erro ao remover aviso de certificado: {e}")
 
     @staticmethod
-    def criar_arquivo_rdp(ip, usuario, senha):
+    def criar_arquivo_rdp(ip, usuario):
         pasta_acesso_remoto = "C:\\AcessoRemoto"
         filename = os.path.join(pasta_acesso_remoto, f"conexao_remota_{ip}.rdp")
         with open(filename, 'w') as file:
@@ -115,6 +120,7 @@ class FrameSuperior(customtkinter.CTkFrame):
 class FramePrincipal(customtkinter.CTkTabview):
     def __init__(self, master):
         super().__init__(master)
+        self.CriaInterface = None
         self.frame_lateral = None
 
         self.add("Favoritos")
@@ -193,7 +199,8 @@ class FramePrincipal(customtkinter.CTkTabview):
             self.tab2.delete(1.0, "end")
             self.tab2.insert("end", texto_anotacoes)
 
-    def ler_arquivo_anotacoes(self):
+    @staticmethod
+    def ler_arquivo_anotacoes():
         pasta_anotacoes = "C:\\AcessoRemoto\\Dados"
         arquivo_anotacoes = os.path.join(pasta_anotacoes, "anotacoes.json")
 
@@ -236,7 +243,8 @@ class FramePrincipal(customtkinter.CTkTabview):
                 self.camp_fav3.delete(0, "end")
                 self.camp_fav3.insert(0, dados_favoritos["fav3"])
 
-    def ler_arquivo_favoritos(self):
+    @staticmethod
+    def ler_arquivo_favoritos():
         pasta_favoritos = "C:\\AcessoRemoto\\Dados"
         arquivo_favoritos = os.path.join(pasta_favoritos, "favoritos.json")
 
@@ -252,37 +260,40 @@ class FramePrincipal(customtkinter.CTkTabview):
             usuario = self.frame_lateral.entry_usuario.get()
             senha = self.frame_lateral.entry_senha.get()
 
-            ip = None
-            if numero == 1:
-                ip = self.camp_fav1.get()
-            elif numero == 2:
-                ip = self.camp_fav2.get()
-            elif numero == 3:
-                ip = self.camp_fav3.get()
+            if not (usuario and senha):
+                self.CriaInterface.mensagem_de_alertas()
             else:
-                ip = ""
+                if numero == 1:
+                    ip = self.camp_fav1.get()
+                elif numero == 2:
+                    ip = self.camp_fav2.get()
+                elif numero == 3:
+                    ip = self.camp_fav3.get()
+                else:
+                    ip = ""
+    
+                if ip and ip.startswith("172.16."):
+                    try:
+                        self.frame_lateral.remover_aviso_certificado(ip)
+                        arquivo_rdp = self.frame_lateral.criar_arquivo_rdp(ip, usuario)
+                        subprocess.Popen(['mstsc', arquivo_rdp])
+                        app.lower()
 
-            if ip and ip.startswith("172.16."):
-                try:
-                    self.frame_lateral.remover_aviso_certificado(ip)
-                    arquivo_rdp = self.frame_lateral.criar_arquivo_rdp(ip, usuario, senha)
-                    subprocess.Popen(['mstsc', arquivo_rdp])
-                    app.lower()
-                except Exception as e:
-                    print(f"Erro ao conectar: {e}")
-            else:
-                print("Favorito não configurado corretamente.")
-                print(ip)
+                        sleep(3.75)
+                        pyautogui.click(517, 391)
+                        pyautogui.write(senha)
+                        pyautogui.click(580, 534)
 
-        sleep(3.75)
-        pyautogui.click(517, 391)
-        pyautogui.write(senha)
-        pyautogui.click(580, 534)
+                    except Exception as e:
+                        print(f"Erro ao conectar: {e}")
+                else:
+                    print("Favorito não configurado corretamente.")
 
 
 class CriarInterface(customtkinter.CTk):
     def __init__(self):
         super().__init__()
+        self.mensagem = None
         self.title("Acesso Remoto")
         self.geometry("600x440")
         self.resizable(width=False, height=False)
@@ -290,11 +301,13 @@ class CriarInterface(customtkinter.CTk):
         self.grid_rowconfigure(1, weight=1)
 
         self.sidebar_frameL = FrameLateral(self)
+        self.sidebar_frameL.CriaInterface = self
         self.sidebar_frameL.grid(row=1, column=0, padx=(20, 0), pady=(18, 15), sticky="nsw")
         self.sidebar_frameS = FrameSuperior(self)
         self.sidebar_frameS.grid(row=0, column=1, sticky="e")
         self.sidebar_frameS.configure(fg_color="transparent")
         self.sidebar_frameP = FramePrincipal(self)
+        self.sidebar_frameP.CriaInterface = self
         self.sidebar_frameP.frame_lateral = self.sidebar_frameL
         self.sidebar_frameP.configure(segmented_button_selected_color="#c75416",
                                       segmented_button_selected_hover_color="#3E3E63")
@@ -315,6 +328,30 @@ class CriarInterface(customtkinter.CTk):
         FramePrincipal.exibir_anotacoes(self.sidebar_frameP)
         FramePrincipal.exibir_favoritos(self.sidebar_frameP)
 
+    def mensagem_de_alertas(self):
+        self.tela_de_alerta = customtkinter.CTkToplevel(self)
+        self.tela_de_alerta.title("AVISO")
+        self.tela_de_alerta.focus_set()
+        self.tela_de_alerta.grab_set()
+        self.tela_de_alerta.resizable(width=False, height=False)
+
+        largura_janela = 245
+        altura_janela = 100
+
+        # ajuste para aparecer no centro da tela principal
+        largura_tela = self.tela_de_alerta.winfo_screenwidth()
+        altura_tela = self.tela_de_alerta.winfo_screenheight()
+        pos_x = (largura_tela // 2) - (largura_janela // 2)
+        pos_y = (altura_tela // 2) - (altura_janela // 2)
+        self.tela_de_alerta.geometry(f"{largura_janela}x{altura_janela}+{pos_x}+{pos_y}")
+
+        self.mensagem = customtkinter.CTkLabel(self.tela_de_alerta, text="Revise os dados digitados", font=("Calibri", 20),
+                                               justify="center")
+        self.mensagem.grid(row=0, column=0, padx=15, pady=15)
+        self.but_ok = customtkinter.CTkButton(self.tela_de_alerta, text="OK", command=self.tela_de_alerta.destroy, corner_radius=15)
+        self.but_ok.grid(row=1, column=0, padx=0, pady=0)
+        return
+
     @staticmethod
     def criar_pastas():
         pasta_acesso_remoto = "C:\\AcessoRemoto\\Dados"
@@ -324,24 +361,17 @@ class CriarInterface(customtkinter.CTk):
             os.makedirs(pasta_acesso_remoto)
 
     def on_mouse_press(self, event):
-        if self.draggable:
-            self.start_x = event.x
-            self.start_y = event.y
+        self.start_x = event.x_root - self.winfo_x()
+        self.start_y = event.y_root - self.winfo_y()
 
     def on_mouse_drag(self, event):
-        if self.draggable:
-            x = self.winfo_x() + (event.x - self.start_x)
-            y = self.winfo_y() + (event.y - self.start_y)
-            self.geometry(f"+{x}+{y}")
+        x = event.x_root - self.start_x
+        y = event.y_root - self.start_y
+        self.geometry(f"+{x}+{y}")
 
     def on_mouse_release(self, event):
-        self.draggable = True
-
-    def on_button_press(self, event):
-        self.draggable = False
-
-    def on_button_release(self,event):
-        self.draggable = True
+        self.start_x = None
+        self.start_y = None
 
 
 if __name__ == "__main__":
