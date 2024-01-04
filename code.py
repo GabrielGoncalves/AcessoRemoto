@@ -5,6 +5,7 @@ import subprocess
 from time import sleep
 import customtkinter
 import pyautogui
+import webbrowser
 
 
 class FrameLateral(customtkinter.CTkFrame):
@@ -149,9 +150,12 @@ class FramePrincipal(customtkinter.CTkTabview):
                                                    command=lambda: self.conectar_favorito(3), fg_color="transparent",
                                                    width=100, height=30)
         self.button_fav3.grid(row=3, column=1, padx=(0, 5), pady=(10, 5), sticky="w")
+        self.info = customtkinter.CTkButton(master=self.tab("Favoritos"), text="?", command=self.informacao, width=20, height=20,
+            corner_radius=15, hover_color="#3E3E63", fg_color="#c75416")
+        self.info.grid(row=4, column=1, padx=(20,5), pady=(130, 0), sticky="e")
 
         self.tab1 = customtkinter.CTkFrame(master=self.tab("Favoritos"), fg_color="transparent", width=330, height=330)
-        self.tab1.grid(row=4, column=1, padx=0, pady=(5, 0), sticky="ew")
+        self.tab1.grid(row=5, column=1, padx=0, pady=(5, 0), sticky="ew")
 
         self.tab2 = customtkinter.CTkTextbox(master=self.tab("Anotações"), width=330, height=300)
         self.tab2.grid(row=1, column=1, padx=0, pady=(5, 0), sticky="ew")
@@ -160,6 +164,46 @@ class FramePrincipal(customtkinter.CTkTabview):
                                                    hover_color="#3E3E63", fg_color="#c75416", text_color="white",
                                                    corner_radius=15)
         self.button_save.grid(row=2, column=1, padx=0, pady=(8, 2))
+
+    def informacao(self):
+        self.tela_de_informacao = customtkinter.CTkToplevel(self)
+        self.tela_de_informacao.title("Informações")
+        self.tela_de_informacao.focus_set()
+        self.tela_de_informacao.grab_set()
+        self.tela_de_informacao.resizable(width=False, height=False)
+
+        largura_janela = 500
+        altura_janela = 180
+
+        # ajuste para aparecer no centro da tela principal
+        largura_tela = self.tela_de_informacao.winfo_screenwidth()
+        altura_tela = self.tela_de_informacao.winfo_screenheight()
+        pos_x = (largura_tela // 2) - (largura_janela // 2)
+        pos_y = (altura_tela // 2) - (altura_janela // 2)
+        self.tela_de_informacao.geometry(f"{largura_janela}x{altura_janela}+{pos_x}+{pos_y}")
+        self.frame = customtkinter.CTkFrame(self.tela_de_informacao, width=460, height=115)
+        self.frame.grid(row=0, column=0, padx=15, pady=15)
+
+        self.titulo = customtkinter.CTkLabel(self.tela_de_informacao, text="Versão: 0.0.15, desenvolvido por Gabriel Aragão", 
+            font=("Calibri", 13), fg_color="#2B2B2B")
+        self.titulo.grid(row=0, column=0, padx=15, pady=(0, 50))
+        self.dados = customtkinter.CTkLabel(self.tela_de_informacao, text="Sistema de uso comercial livre, para acesso à licença e ao código, clique",
+            font=("Calibri", 13), fg_color="#2B2B2B")
+        self.dados.grid(row=0, column=0, padx=(0, 25), pady=(30, 0))
+        self.hyperlink = customtkinter.CTkLabel(self.tela_de_informacao, text="aqui", text_color="#E4621B", cursor="hand2", fg_color="#2B2B2B",
+            font=("Calibri Black", 13))
+        self.hyperlink.grid(row=0, column=0, padx=(0, 30), pady=(30, 0), sticky="e")
+        self.hyperlink.bind("<Button-1>", lambda event: self.link_licenca())
+
+
+        self.but_ok = customtkinter.CTkButton(self.tela_de_informacao, text="OK", command=self.tela_de_informacao.destroy, 
+            corner_radius=15, hover_color="#3E3E63", fg_color="#c75416")
+        self.but_ok.grid(row=3, column=0, padx=0, pady=0)
+        
+        return
+
+    def link_licenca(self):
+        self.link = webbrowser.open_new("https://github.com/GabrielGoncalves/AcessoRemoto.git")
 
     def gerenciar_edicao(self):
         self.cor_texto_padrao = "gray"
