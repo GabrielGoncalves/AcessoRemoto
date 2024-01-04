@@ -171,6 +171,7 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.tela_de_informacao.focus_set()
         self.tela_de_informacao.grab_set()
         self.tela_de_informacao.resizable(width=False, height=False)
+        self.tela_de_informacao.overrideredirect(True)
 
         largura_janela = 500
         altura_janela = 180
@@ -278,14 +279,17 @@ class FramePrincipal(customtkinter.CTkTabview):
             if "fav1" in dados_favoritos:
                 self.camp_fav1.delete(0, "end")
                 self.camp_fav1.insert(0, dados_favoritos["fav1"])
+                self.camp_fav1.configure(state="disabled")
 
             if "fav2" in dados_favoritos:
                 self.camp_fav2.delete(0, "end")
                 self.camp_fav2.insert(0, dados_favoritos["fav2"])
+                self.camp_fav2.configure(state="disabled")
 
             if "fav3" in dados_favoritos:
                 self.camp_fav3.delete(0, "end")
                 self.camp_fav3.insert(0, dados_favoritos["fav3"])
+                self.camp_fav3.configure(state="disabled")
 
     @staticmethod
     def ler_arquivo_favoritos():
