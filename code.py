@@ -97,21 +97,22 @@ class FrameSuperior(customtkinter.CTkFrame):
 
         self.variavel_opcao = customtkinter.StringVar(self)
 
-        self.button_saida = customtkinter.CTkLabel(self, text="Tempo para fazer o login:", width=10, height=15,
-                                                    font=("Calibri", 15))
-        self.button_saida.grid(row=0, column=1, padx=(0, 70), pady=(8, 0), sticky="e")
-        self.seletor_de_tempo = customtkinter.CTkOptionMenu(self, variable=self.variavel_opcao, 
-                                                    dropdown_fg_color="#3F5663", width=23, height=20, 
-                                                    button_color="#3E3E63", fg_color="#3E3E63", 
-                                                    button_hover_color="#3F4A63",
-                                                    values=("0.5", "1.0", "1.5", "2.0", "2.5", "3.0", "3.5"))
-        self.seletor_de_tempo.grid(row=0, column=1, padx=(0, 15), pady=(8, 0), sticky="e")
-        self.seletor_de_tempo.configure(command=lambda value:self.atualiza_opcoes(self.variavel_opcao, self.salvar_tempo))
+        self.label_seletor_de_tempo = customtkinter.CTkLabel(self, text="Tempo para fazer o login:", width=10, height=15
+                                                             , font=("Calibri", 15))
+        self.label_seletor_de_tempo.grid(row=0, column=0, padx=(10, 45), pady=(8, 0), sticky="w")
+        self.seletor_de_tempo = customtkinter.CTkOptionMenu(self, variable=self.variavel_opcao,
+                                                            dropdown_fg_color="#3F5663", width=23, height=20,
+                                                            button_color="#3E3E63", fg_color="#3E3E63",
+                                                            button_hover_color="#3F4A63",
+                                                            values=("0.5", "1.0", "1.5", "2.0", "2.5", "3.0", "3.5"))
+        self.seletor_de_tempo.grid(row=0, column=0, padx=(170, 0), pady=(8, 0), sticky="w")
+        self.seletor_de_tempo.configure(
+            command=lambda value: self.atualiza_opcoes(self.variavel_opcao, self.salvar_tempo))
 
     @staticmethod
     def atualiza_opcoes(variavel_opcao, salvar_tempo):
         valor_selecionado = variavel_opcao.get()
-        salvar_tempo() 
+        salvar_tempo()
 
     def salvar_tempo(self):
         pasta_config_tempo = "C:\\AcessoRemoto\\Dados"
@@ -167,6 +168,7 @@ class FrameSuperior(customtkinter.CTkFrame):
                 continue
             os.remove(os.path.join(pasta_dados, arquivo))
             app.quit()
+
 
 class FramePrincipal(customtkinter.CTkTabview):
     def __init__(self, master):
@@ -237,7 +239,7 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.frame.grid(row=0, column=0, padx=15, pady=15)
 
         self.titulo = customtkinter.CTkLabel(self.tela_de_informacao,
-                                             text="Versão: 0.0.30, desenvolvido por Gabriel Aragão",
+                                             text="Versão: 0.0.48, desenvolvido por Gabriel Aragão",
                                              font=("Calibri", 13), fg_color="#2B2B2B")
         self.titulo.grid(row=0, column=0, padx=15, pady=(0, 50))
         self.dados = customtkinter.CTkLabel(self.tela_de_informacao,
@@ -252,7 +254,7 @@ class FramePrincipal(customtkinter.CTkTabview):
 
         self.but_ok = customtkinter.CTkButton(self.tela_de_informacao, text="OK",
                                               command=self.tela_de_informacao.destroy,
-                                              corner_radius=15, hover_color="#3E3E63", fg_color="#c75416")
+                                              corner_radius=15)
         self.but_ok.grid(row=3, column=0, padx=0, pady=0)
 
         return
@@ -289,6 +291,7 @@ class FramePrincipal(customtkinter.CTkTabview):
 
         with open(arquivo_anotacoes, "w") as file:
             json.dump({"anotacoes": texto}, file)
+
     @staticmethod
     def exibir_anotacoes(self):
         texto_anotacoes = self.ler_arquivo_anotacoes()
@@ -296,6 +299,7 @@ class FramePrincipal(customtkinter.CTkTabview):
         if texto_anotacoes:
             self.tab2.delete(1.0, "end")
             self.tab2.insert("end", texto_anotacoes)
+
     @staticmethod
     def ler_arquivo_anotacoes():
         pasta_anotacoes = "C:\\AcessoRemoto\\Dados"
@@ -322,6 +326,7 @@ class FramePrincipal(customtkinter.CTkTabview):
 
         with open(arquivo_favoritos, "w") as file:
             json.dump(dados, file)
+
     @staticmethod
     def exibir_favoritos(self):
         dados_favoritos = self.ler_arquivo_favoritos()
@@ -341,6 +346,7 @@ class FramePrincipal(customtkinter.CTkTabview):
                 self.camp_fav3.delete(0, "end")
                 self.camp_fav3.insert(0, dados_favoritos["fav3"])
                 self.camp_fav3.configure(state="disabled")
+
     @staticmethod
     def ler_arquivo_favoritos():
         pasta_favoritos = "C:\\AcessoRemoto\\Dados"
@@ -391,10 +397,10 @@ class FramePrincipal(customtkinter.CTkTabview):
                     self.tela_de_notificacao.grab_set()
                     self.tela_de_notificacao.resizable(width=False, height=False)
                     self.tela_de_notificacao.overrideredirect(True)
-            
+
                     largura_janela = 280
                     altura_janela = 110
-            
+
                     # ajuste para aparecer no centro da tela principal
                     largura_tela = self.tela_de_notificacao.winfo_screenwidth()
                     altura_tela = self.tela_de_notificacao.winfo_screenheight()
@@ -402,12 +408,14 @@ class FramePrincipal(customtkinter.CTkTabview):
                     pos_y = (altura_tela // 2) - (altura_janela // 2)
                     self.tela_de_notificacao.geometry(f"{largura_janela}x{altura_janela}+{pos_x}+{pos_y}")
 
-                    self.mensagem_fav = customtkinter.CTkLabel(self.tela_de_notificacao, text="Favorito não configurado corretamente",
-                                                                font=("Calibri", 16))
+                    self.mensagem_fav = customtkinter.CTkLabel(self.tela_de_notificacao,
+                                                               text="Favorito não configurado corretamente",
+                                                               font=("Calibri", 16))
                     self.mensagem_fav.grid(row=0, column=0, padx=15, pady=20)
                     self.bnt_mensagem_fav = customtkinter.CTkButton(self.tela_de_notificacao, text="OK",
-                                            command=self.tela_de_notificacao.destroy,
-                                            corner_radius=15, hover_color="#3E3E63", fg_color="#c75416")
+                                                                    command=self.tela_de_notificacao.destroy,
+                                                                    corner_radius=15, hover_color="#3E3E63",
+                                                                    fg_color="#c75416")
                     self.bnt_mensagem_fav.grid(row=1, column=0, padx=15, pady=(0, 10))
 
 
@@ -427,7 +435,7 @@ class CriarInterface(customtkinter.CTk):
         self.sidebar_frameL.CriaInterface = self
         self.sidebar_frameL.grid(row=1, column=0, padx=(15, 0), pady=(18, 15), sticky="nsw")
         self.sidebar_frameS = FrameSuperior(self)
-        self.sidebar_frameS.grid(row=0, column=1, sticky="e")
+        self.sidebar_frameS.grid(row=0, column=0)
         self.sidebar_frameS.configure(fg_color="transparent")
         self.sidebar_frameP = FramePrincipal(self)
         self.sidebar_frameP.CriaInterface = self
@@ -438,13 +446,11 @@ class CriarInterface(customtkinter.CTk):
         self.sidebar_frameL.Frame_Superior = self.sidebar_frameS
         self.sidebar_frameP.Frame_Superior = self.sidebar_frameS
 
-
         # chamadas
         self.criar_pastas()
         FramePrincipal.exibir_anotacoes(self.sidebar_frameP)
         FramePrincipal.exibir_favoritos(self.sidebar_frameP)
         FrameSuperior.exibir_tempo(self.sidebar_frameS)
-
 
     def mensagem_de_alertas(self):
         self.tela_de_alerta = customtkinter.CTkToplevel(self)
@@ -480,7 +486,6 @@ class CriarInterface(customtkinter.CTk):
         # Verifica se a pasta não existe
         if not os.path.exists(pasta_acesso_remoto):
             os.makedirs(pasta_acesso_remoto)
-
 
 
 if __name__ == "__main__":
