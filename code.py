@@ -27,7 +27,11 @@ class FrameLateral(customtkinter.CTkFrame):
         username = getpass.getuser()
         self.entry_usuario = customtkinter.CTkEntry(self, corner_radius=25, justify="center")
         self.entry_usuario.grid(row=9, column=0, padx=(5, 15), pady=(13, 0), sticky="ew")
+<<<<<<< HEAD
         self.entry_usuario.insert(0, f"{username}@cloud")
+=======
+        self.entry_usuario.insert(0, username)
+>>>>>>> 544f86ee3f06642d711208d3e5366242d200598e
         self.label_senha = customtkinter.CTkLabel(self, text="Senha:")
         self.label_senha.grid(row=10, column=0, padx=30, pady=(13, 0), sticky="ew")
         self.entry_senha = customtkinter.CTkEntry(self, show="*", corner_radius=25, justify='center')
@@ -225,7 +229,10 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.tela_de_informacao.grab_set()
         self.tela_de_informacao.resizable(width=False, height=False)
         self.tela_de_informacao.overrideredirect(True)
+<<<<<<< HEAD
         self.versao = '0.0.50'
+=======
+>>>>>>> 544f86ee3f06642d711208d3e5366242d200598e
 
         largura_janela = 500
         altura_janela = 180
@@ -240,7 +247,11 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.frame.grid(row=0, column=0, padx=15, pady=15)
 
         self.titulo = customtkinter.CTkLabel(self.tela_de_informacao,
+<<<<<<< HEAD
                                              text=f"Versão: {self.versao}, desenvolvido por Gabriel Aragão",
+=======
+                                             text="Versão: 0.0.48, desenvolvido por Gabriel Aragão",
+>>>>>>> 544f86ee3f06642d711208d3e5366242d200598e
                                              font=("Calibri", 13), fg_color="#2B2B2B")
         self.titulo.grid(row=0, column=0, padx=15, pady=(0, 50))
         self.dados = customtkinter.CTkLabel(self.tela_de_informacao,
@@ -377,7 +388,11 @@ class FramePrincipal(customtkinter.CTkTabview):
                 else:
                     ip = ""
 
+<<<<<<< HEAD
                 if ip and ip.startswith("172.16."):
+=======
+                if ip and ip.startswith("162.78"):
+>>>>>>> 544f86ee3f06642d711208d3e5366242d200598e
                     try:
                         self.frame_lateral.remover_aviso_certificado(ip)
                         arquivo_rdp = self.frame_lateral.criar_arquivo_rdp(ip, usuario)
