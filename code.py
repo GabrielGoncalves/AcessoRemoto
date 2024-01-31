@@ -12,6 +12,7 @@ import atexit
 class FrameLateral(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
+        self.Frame_Superior = None
         self.CriaInterface = None
         self.FrameSuperior = None
 
@@ -27,14 +28,10 @@ class FrameLateral(customtkinter.CTkFrame):
         username = getpass.getuser()
         self.entry_usuario = customtkinter.CTkEntry(self, corner_radius=25, justify="center")
         self.entry_usuario.grid(row=9, column=0, padx=(5, 15), pady=(13, 0), sticky="ew")
-<<<<<<< HEAD
         self.entry_usuario.insert(0, f"{username}@cloud")
-=======
-        self.entry_usuario.insert(0, username)
->>>>>>> 544f86ee3f06642d711208d3e5366242d200598e
         self.label_senha = customtkinter.CTkLabel(self, text="Senha:")
         self.label_senha.grid(row=10, column=0, padx=30, pady=(13, 0), sticky="ew")
-        self.entry_senha = customtkinter.CTkEntry(self, show="*", corner_radius=25, justify='center')
+        self.entry_senha = customtkinter.CTkEntry(self, corner_radius=25, show="*", justify='center')
         self.entry_senha.grid(row=11, column=0, padx=(5, 15), pady=(13, 0), sticky="ew")
         self.button_conectar = customtkinter.CTkButton(self, text="Conectar", command=self.conectar, text_color="white",
                                                        corner_radius=15, fg_color="#E4621B", hover_color="#3E3E63")
@@ -42,13 +39,15 @@ class FrameLateral(customtkinter.CTkFrame):
 
         # Configura o enter para validar a conexão
         self.entry_senha.bind("<Return>", lambda event: self.conectar())
+        self.entry_usuario.bind("<Return>", lambda event: self.conectar())
+        self.entry_ip.bind("<Return>", lambda event: self.conectar())
 
     def conectar(self):
         ip = self.entry_ip.get()
         usuario = self.entry_usuario.get()
-        self.entry_senha.get()
+        senha = self.entry_senha.get()
 
-        if not (ip and usuario and self.entry_senha.get()):
+        if not (ip and usuario and senha):
             self.CriaInterface.mensagem_de_alertas()
 
         else:
@@ -59,8 +58,9 @@ class FrameLateral(customtkinter.CTkFrame):
                 app.lower()
                 self.entry_ip.delete(0, 'end')
                 self.entry_senha.delete(0, 'end')
-                self.entry_senha.insert(0, self.entry_senha.get())
+                self.entry_senha.insert(0, senha)
                 self.entry_senha.focus()
+
             except Exception as e:
                 print(f"Erro ao conectar: {e}")
 
@@ -101,8 +101,8 @@ class FrameSuperior(customtkinter.CTkFrame):
 
         self.variavel_opcao = customtkinter.StringVar(self)
 
-        self.label_seletor_de_tempo = customtkinter.CTkLabel(self, text="Tempo para fazer o login:", width=10, height=15
-                                                             , font=("Calibri", 15))
+        self.label_seletor_de_tempo = customtkinter.CTkLabel(self, text="Tempo para fazer o login:", width=10, height=15,
+                                                             font=("Calibri", 15))
         self.label_seletor_de_tempo.grid(row=0, column=0, padx=(10, 45), pady=(8, 0), sticky="w")
         self.seletor_de_tempo = customtkinter.CTkOptionMenu(self, variable=self.variavel_opcao,
                                                             dropdown_fg_color="#3F5663", width=23, height=20,
@@ -120,7 +120,7 @@ class FrameSuperior(customtkinter.CTkFrame):
 
     def salvar_tempo(self):
         pasta_config_tempo = "C:\\AcessoRemoto\\Dados"
-        arquivo_config_tempo = os.path.join(pasta_config_tempo, "config.json")
+        arquivo_config_tempo = os.path.join(pasta_config_tempo, "tempo.json")
 
         texto = self.variavel_opcao.get()
 
@@ -138,7 +138,7 @@ class FrameSuperior(customtkinter.CTkFrame):
     @staticmethod
     def ler_arquivo_tempo():
         pasta_acesso_remoto = "C:\\AcessoRemoto\\Dados"
-        arquivo_config_tempo = os.path.join(pasta_acesso_remoto, "config.json")
+        arquivo_config_tempo = os.path.join(pasta_acesso_remoto, "tempo.json")
 
         if os.path.exists(arquivo_config_tempo):
             with open(arquivo_config_tempo, "r") as file:
@@ -165,7 +165,8 @@ class FrameSuperior(customtkinter.CTkFrame):
     def sair():
         FrameSuperior.remover_arquivos_rdp()
         pasta_dados = "C:\\AcessoRemoto\\Dados"
-        arquivos_protegidos = ["anotacoes.json", "config.json"]
+        arquivos_protegidos = ["anotacoes.json", "favoritos.json", "tempo.json", "log_erro_de_acesso.txt",
+                               "log_senha.txt"]
 
         for arquivo in os.listdir(pasta_dados):
             if arquivo in arquivos_protegidos:
@@ -177,6 +178,8 @@ class FrameSuperior(customtkinter.CTkFrame):
 class FramePrincipal(customtkinter.CTkTabview):
     def __init__(self, master):
         super().__init__(master)
+        self.Frame_Superior = None
+        self.frame_lateral = None
         self.tela_de_informacao = None
         self.CriaInterface = None
 
@@ -229,10 +232,7 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.tela_de_informacao.grab_set()
         self.tela_de_informacao.resizable(width=False, height=False)
         self.tela_de_informacao.overrideredirect(True)
-<<<<<<< HEAD
-        self.versao = '0.0.50'
-=======
->>>>>>> 544f86ee3f06642d711208d3e5366242d200598e
+        self.versao = '0.0.63'
 
         largura_janela = 500
         altura_janela = 180
@@ -247,11 +247,7 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.frame.grid(row=0, column=0, padx=15, pady=15)
 
         self.titulo = customtkinter.CTkLabel(self.tela_de_informacao,
-<<<<<<< HEAD
                                              text=f"Versão: {self.versao}, desenvolvido por Gabriel Aragão",
-=======
-                                             text="Versão: 0.0.48, desenvolvido por Gabriel Aragão",
->>>>>>> 544f86ee3f06642d711208d3e5366242d200598e
                                              font=("Calibri", 13), fg_color="#2B2B2B")
         self.titulo.grid(row=0, column=0, padx=15, pady=(0, 50))
         self.dados = customtkinter.CTkLabel(self.tela_de_informacao,
@@ -325,7 +321,7 @@ class FramePrincipal(customtkinter.CTkTabview):
 
     def salvar_favoritos(self):
         pasta_favoritos = "C:\\AcessoRemoto\\Dados"
-        arquivo_favoritos = os.path.join(pasta_favoritos, "config.json")
+        arquivo_favoritos = os.path.join(pasta_favoritos, "favoritos.json")
 
         texto1 = self.camp_fav1.get()
         texto2 = self.camp_fav2.get()
@@ -362,7 +358,7 @@ class FramePrincipal(customtkinter.CTkTabview):
     @staticmethod
     def ler_arquivo_favoritos():
         pasta_favoritos = "C:\\AcessoRemoto\\Dados"
-        arquivo_favoritos = os.path.join(pasta_favoritos, "config.json")
+        arquivo_favoritos = os.path.join(pasta_favoritos, "favoritos.json")
 
         if os.path.exists(arquivo_favoritos):
             with open(arquivo_favoritos, "r") as file:
@@ -388,11 +384,7 @@ class FramePrincipal(customtkinter.CTkTabview):
                 else:
                     ip = ""
 
-<<<<<<< HEAD
                 if ip and ip.startswith("172.16."):
-=======
-                if ip and ip.startswith("162.78"):
->>>>>>> 544f86ee3f06642d711208d3e5366242d200598e
                     try:
                         self.frame_lateral.remover_aviso_certificado(ip)
                         arquivo_rdp = self.frame_lateral.criar_arquivo_rdp(ip, usuario)
@@ -404,8 +396,17 @@ class FramePrincipal(customtkinter.CTkTabview):
                         pyautogui.write(senha)
                         pyautogui.press("enter")
 
+                        # log da senha
+                        processo = "Conexão RDP"
+                        informacao_adicional = f"Usuário: {usuario}, IP: {ip}"
+                        self.frame_lateral.registrar_log("Processo concluído com sucesso", processo,
+                                                         informacao_adicional)
+
                     except Exception as e:
                         print(f"Erro ao conectar: {e}")
+                        processo = "Conexão RDP"
+                        informacao_adicional = f"Usuário: {usuario}, IP: {ip}"
+                        self.frame_lateral.registrar_log("Erro ao conectar", processo, informacao_adicional, e)
                 else:
                     self.tela_de_notificacao = customtkinter.CTkToplevel(self)
                     self.tela_de_notificacao.title("Informações")
