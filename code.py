@@ -693,7 +693,7 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.textbox_result.configure(state='normal')
     
         def inclui_codigo():
-            url = 'https://bunker-monitor.alterdatasoftware.com.br/api/backup/view?crm='
+            url = ''
             crm = self.codigo_pesquisa
             codigo = html.escape(crm)
     
