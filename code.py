@@ -9,6 +9,8 @@ import webbrowser
 import atexit
 import requests
 import html
+import secrets
+import string
 from datetime import datetime
 
 
@@ -20,7 +22,7 @@ class FrameLateral(customtkinter.CTkFrame):
         self.FrameSuperior = None
 
         self.label_titulo = customtkinter.CTkLabel(self, text="Acesso Remoto", font=("Calibri Bold", 25),
-                                                   justify="center")
+                                        justify="center")
         self.label_titulo.grid(row=5, column=0, padx=30, pady=(10, 10), sticky="ew")
         self.label_ip = customtkinter.CTkLabel(self, text="IP do Servidor:")
         self.label_ip.grid(row=6, column=0, padx=30, pady=(13, 0), sticky="ew")
@@ -37,9 +39,9 @@ class FrameLateral(customtkinter.CTkFrame):
         self.entry_senha = customtkinter.CTkEntry(self, corner_radius=25, show="*", justify='center')
         self.entry_senha.grid(row=11, column=0, padx=(5, 15), pady=(13, 0), sticky="ew")
         self.button_conectar = customtkinter.CTkButton(self, text="Conectar", command=self.conectar,
-                                                       text_color="white",
-                                                       corner_radius=15, fg_color="#E4621B",
-                                                       hover_color="#3E3E63")
+                                            text_color="white",
+                                            corner_radius=15, fg_color="#E4621B",
+                                            hover_color="#3E3E63")
         self.button_conectar.grid(row=12, column=0, padx=30, pady=(13, 0), sticky="ew")
 
         # Configura o enter para validar a conexão
@@ -132,16 +134,18 @@ class FramePrincipal(customtkinter.CTkTabview):
         # tab favoritos
         self.button_edicao_fav_ip = customtkinter.CTkButton(master=self.tab("Favoritos"), text="Editar IP",
                                                 font=("Calibri Bold", 13), command=self.gerenciar_edicao_ip,
-                                                hover_color="#3E3E63", fg_color="#AA4813", text_color="white",
+                                                hover_color="#3E3E63", fg_color="transparent",
+                                                border_color="#AA4813", border_width=1, text_color="white",
                                                 corner_radius=15, width=50, height=25)
         self.button_edicao_fav_ip.grid(row=0, column=1, padx=(10, 8), pady=10, sticky="e")
         self.button_edicao_fav_button = customtkinter.CTkButton(master=self.tab("Favoritos"),
                                                 text="Editar Descrição",
                                                 font=("Calibri Bold", 13), command=self.gerenciar_edicao_button,
-                                                hover_color="#3E3E63", fg_color="#AA4813", text_color="white",
+                                                hover_color="#3E3E63", fg_color="transparent",
+                                                border_color="#AA4813", border_width=1, text_color="white",
                                                 corner_radius=15, width=50, height=25)
         self.button_edicao_fav_button.grid(row=0, column=1, padx=(0, 85), pady=10, sticky="e")
-        self.button_fav1 = customtkinter.CTkButton(master=self.tab("Favoritos"),
+        self.button_fav1 = customtkinter.CTkButton(master=self.tab("Favoritos"), text="Campo 01",
                                                 width=130, height=30,corner_radius=20,
                                                 command=lambda: self.conectar_favorito(1), 
                                                 fg_color="transparent", 
@@ -150,8 +154,8 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.entry_fav1 = customtkinter.CTkEntry(master=self.tab("Favoritos"), width=130, height=30,
                                                 justify="center")
         self.entry_fav1.grid(row=2, column=1, padx=(10, 5), pady=(0, 5), sticky="w")
-        self.button_fav2 = customtkinter.CTkButton(master=self.tab("Favoritos"),
-                                                width=130, height=30,corner_radius=20, 
+        self.button_fav2 = customtkinter.CTkButton(master=self.tab("Favoritos"),  text="Campo 02",
+                                                width=130, height=30, corner_radius=20, 
                                                 command=lambda: self.conectar_favorito(2),
                                                 fg_color="transparent", 
                                                 border_color="#2B2B2B")
@@ -159,8 +163,8 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.entry_fav2 = customtkinter.CTkEntry(master=self.tab("Favoritos"), width=130, height=30,
                                                 justify="center")
         self.entry_fav2.grid(row=4, column=1, padx=(10, 5), pady=(0, 5), sticky="w")
-        self.button_fav3 = customtkinter.CTkButton(master=self.tab("Favoritos"),
-                                                width=130, height=30,corner_radius=20, 
+        self.button_fav3 = customtkinter.CTkButton(master=self.tab("Favoritos"), text="Campo 03",
+                                                width=130, height=30, corner_radius=20, 
                                                 command=lambda: self.conectar_favorito(3),
                                                 fg_color="transparent",
                                                 border_color="#2B2B2B")
@@ -168,8 +172,8 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.entry_fav3 = customtkinter.CTkEntry(master=self.tab("Favoritos"), width=130, height=30,
                                                 justify="center")
         self.entry_fav3.grid(row=6, column=1, padx=(10, 5), pady=(0, 5), sticky="w")
-        self.button_fav4 = customtkinter.CTkButton(master=self.tab("Favoritos"), width=130, 
-                                                height=30,corner_radius=20, 
+        self.button_fav4 = customtkinter.CTkButton(master=self.tab("Favoritos"), text="Campo 04", 
+                                                width=130, height=30, corner_radius=20, 
                                                 command=lambda: self.conectar_favorito(4),
                                                 fg_color="transparent",
                                                 border_color="#2B2B2B")
@@ -177,8 +181,8 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.entry_fav4 = customtkinter.CTkEntry(master=self.tab("Favoritos"), width=130, height=30,
                                                 justify="center")
         self.entry_fav4.grid(row=8, column=1, padx=(10, 5), pady=(0, 5), sticky="w")
-        self.button_fav5 = customtkinter.CTkButton(master=self.tab("Favoritos"), width=130,
-                                                height=30,corner_radius=20,
+        self.button_fav5 = customtkinter.CTkButton(master=self.tab("Favoritos"), text="Campo 05", 
+                                                width=130, height=30, corner_radius=20,
                                                 command=lambda: self.conectar_favorito(5),
                                                 fg_color="transparent", 
                                                 border_color="#2B2B2B")
@@ -186,8 +190,8 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.entry_fav5 = customtkinter.CTkEntry(master=self.tab("Favoritos"), width=130, height=30, 
                                                 justify="center")
         self.entry_fav5.grid(row=2, column=1, padx=(10, 5), pady=(0, 5), sticky="e")
-        self.button_fav6 = customtkinter.CTkButton(master=self.tab("Favoritos"),
-                                                width=130, height=30,corner_radius=20, 
+        self.button_fav6 = customtkinter.CTkButton(master=self.tab("Favoritos"), text="Campo 06",
+                                                width=130, height=30, corner_radius=20, 
                                                 command=lambda: self.conectar_favorito(6),
                                                 fg_color="transparent", 
                                                 border_color="#2B2B2B")
@@ -195,8 +199,8 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.entry_fav6 = customtkinter.CTkEntry(master=self.tab("Favoritos"), width=130, height=30,
                                                 justify="center")
         self.entry_fav6.grid(row=4, column=1, padx=(10, 5), pady=(0, 5), sticky="e")
-        self.button_fav7 = customtkinter.CTkButton(master=self.tab("Favoritos"),
-                                                width=130, height=30,corner_radius=20, 
+        self.button_fav7 = customtkinter.CTkButton(master=self.tab("Favoritos"), text="Campo 07",
+                                                width=130, height=30, corner_radius=20, 
                                                 command=lambda: self.conectar_favorito(7),
                                                 fg_color="transparent",
                                                 border_color="#2B2B2B")
@@ -204,8 +208,8 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.entry_fav7 = customtkinter.CTkEntry(master=self.tab("Favoritos"), width=130, height=30,
                                                 justify="center")
         self.entry_fav7.grid(row=6, column=1, padx=(10, 5), pady=(0, 5), sticky="e")
-        self.button_fav8 = customtkinter.CTkButton(master=self.tab("Favoritos"), width=130,
-                                                height=30,corner_radius=20, 
+        self.button_fav8 = customtkinter.CTkButton(master=self.tab("Favoritos"), text="Campo 08", 
+                                                width=130, height=30, corner_radius=20, 
                                                 command=lambda: self.conectar_favorito(8), 
                                                 fg_color="transparent",
                                                 border_color="#2B2B2B")
@@ -220,66 +224,71 @@ class FramePrincipal(customtkinter.CTkTabview):
         # tab farm
         self.label_farm_ambiente = customtkinter.CTkLabel(master=self.tab("Farm"), text="Ambiente:")
         self.label_farm_ambiente.grid(row=0, column=1, padx=(10, 0), pady=(20, 0), sticky="w")
-        self.option_conecta_farm_ambiente = customtkinter.CTkOptionMenu(master=self.tab("Farm"), dropdown_fg_color="#3F5663", 
-                                                            width=23, height=20,
-                                                            button_color="#3E3E63", fg_color="#3E3E63",
-                                                            button_hover_color="#3F4A63", values=("Selecione"),
-                                                            variable = self.conexao_ambiente_farm,
-                                                            command=self.exibe_conecta_servidor_farm)
+        self.option_conecta_farm_ambiente = customtkinter.CTkOptionMenu(master=self.tab("Farm"), 
+                                                dropdown_fg_color="#3F5663", 
+                                                width=23, height=20,
+                                                button_color="#3E3E63", fg_color="#3E3E63",
+                                                button_hover_color="#3F4A63", values=("Selecione"),
+                                                variable = self.conexao_ambiente_farm,
+                                                command=self.exibe_conecta_servidor_farm)
         self.option_conecta_farm_ambiente.grid(row=0, column=1, padx=(0, 65), pady=(20, 0))
         self.label_farm_servidor = customtkinter.CTkLabel(master=self.tab("Farm"), text="Servidor:")
         self.label_farm_servidor.grid(row=1, column=1, padx=(10, 0), pady=(0, 0), sticky="w")
-        self.option_conecta_farm_servidor = customtkinter.CTkOptionMenu(master=self.tab("Farm"), dropdown_fg_color="#3F5663", 
-                                                            width=23, height=20,
-                                                            button_color="#3E3E63", fg_color="#3E3E63",
-                                                            button_hover_color="#3F4A63", values=[""],
-                                                            variable = self.conexao_servidor_farm,
-                                                            command=self.exibe_conecta_servidor_farm)
+        self.option_conecta_farm_servidor = customtkinter.CTkOptionMenu(master=self.tab("Farm"),
+                                                dropdown_fg_color="#3F5663", 
+                                                width=23, height=20,
+                                                button_color="#3E3E63", fg_color="#3E3E63",
+                                                button_hover_color="#3F4A63", values=[""],
+                                                variable = self.conexao_servidor_farm,
+                                                command=self.exibe_conecta_servidor_farm)
         self.option_conecta_farm_servidor.grid(row=1, column=1, padx=(0, 75), pady=(0, 0))
         self.button_farm_acesso = customtkinter.CTkButton(master=self.tab("Farm"), text="Conectar",
-                                                        command=self.conecta_ambiente_farm, font=("Calibri Bold", 13),
-                                                            hover_color="#3E3E63", fg_color="#AA4813", text_color="white")
+                                                command=self.conecta_ambiente_farm, font=("Calibri Bold", 13),
+                                                hover_color="#3E3E63", fg_color="transparent",
+                                                border_color="#AA4813", border_width=1, text_color="white")
         self.button_farm_acesso.grid(row=2, column=1, padx=(0, 0), pady=(10, 10))
-        self.label_farm_separador = customtkinter.CTkLabel(master=self.tab("Farm"), text="CADASTRO DE SERVIDORES"
-                                                                            , text_color="gray")
+        self.label_farm_separador = customtkinter.CTkLabel(master=self.tab("Farm"), text="CADASTRO DE SERVIDORES",
+                                                text_color="gray")
         self.label_farm_separador.grid(row=3, column=1, padx=(0, 0), pady=(10, 5))
         self.label_farm_cadambiente = customtkinter.CTkLabel(master=self.tab("Farm"), text="Ambiente:")
         self.label_farm_cadambiente.grid(row=4, column=1, padx=(10, 0), pady=(0, 0),sticky="w")
-        self.option_farm_cadambiente = customtkinter.CTkOptionMenu(master=self.tab("Farm"), dropdown_fg_color="#3F5663", 
-                                                            width=23, height=20,
-                                                            button_color="#3E3E63", fg_color="#3E3E63",
-                                                            button_hover_color="#3F4A63", values=[""],
-                                                            variable = self.resultado_ambiente_farm)
+        self.option_farm_cadambiente = customtkinter.CTkOptionMenu(master=self.tab("Farm"),
+                                                dropdown_fg_color="#3F5663", 
+                                                width=23, height=20,
+                                                button_color="#3E3E63", fg_color="#3E3E63",
+                                                button_hover_color="#3F4A63", values=[""],
+                                                variable = self.resultado_ambiente_farm)
         self.option_farm_cadambiente.grid(row=4, column=1, padx=(0, 10), pady=(0, 0), sticky="e")
         self.label_farm_cadnome = customtkinter.CTkLabel(master=self.tab("Farm"), text="Nome do Servidor:")
         self.label_farm_cadnome.grid(row=5, column=1, padx=(10, 0), pady=(0, 0),sticky="w")
         self.entry_farm_cadnome = customtkinter.CTkEntry(master=self.tab("Farm"), border_color="#2B2B2B", width=200,
-                                                            corner_radius=5)
+                                                corner_radius=5)
         self.entry_farm_cadnome.grid(row=5, column=1, padx=(0, 10), pady=(0, 0), sticky="e")
         self.label_farm_cadip = customtkinter.CTkLabel(master=self.tab("Farm"), text="IP do Servidor:")
         self.label_farm_cadip.grid(row=6, column=1, padx=(10, 0), pady=(0, 0),sticky="w")
         self.entry_farm_cadip = customtkinter.CTkEntry(master=self.tab("Farm"), border_color="#2B2B2B", width=200,
-                                                            corner_radius=5)
+                                                corner_radius=5)
         self.entry_farm_cadip.grid(row=6, column=1, padx=(0, 10), pady=(0, 0), sticky="e")
         self.button_farm_cadastrar = customtkinter.CTkButton(master=self.tab("Farm"), text="Salvar", width=60, height=25,
-                                                            command=self.salva_servidor_farm, font=("Calibri Bold", 13),
-                                                            hover_color="#3E3E63", fg_color="#3E3E63", text_color="white")
+                                                command=self.salva_servidor_farm, font=("Calibri Bold", 13),
+                                                hover_color="#3E3E63", fg_color="#3E3E63", text_color="white")
         self.button_farm_cadastrar.grid(row=7, column=1, padx=(0, 70), pady=(15, 0))
         self.button_farm_apagar = customtkinter.CTkButton(master=self.tab("Farm"), text="Deletar", width=60, height=25,
-                                                            command=self.deletar_servidor_farm, font=("Calibri Bold", 13),
-                                                            hover_color="#3E3E63", fg_color="#3E3E63", text_color="white")
+                                                command=self.deletar_servidor_farm, font=("Calibri Bold", 13),
+                                                hover_color="#3E3E63", fg_color="#3E3E63", text_color="white")
         self.button_farm_apagar.grid(row=7, column=1, padx=(70, 0), pady=(15, 0))
         self.button_farm_lista = customtkinter.CTkButton(master=self.tab("Farm"), text="Listar", width=60, height=25,
-                                                            command=self.listar_servidor_farm, font=("Calibri Bold", 13),
-                                                            hover_color="#3E3E63", fg_color="#3E3E63", text_color="white")
+                                                command=self.listar_servidor_farm, font=("Calibri Bold", 13),
+                                                hover_color="#3E3E63", fg_color="#3E3E63", text_color="white")
         self.button_farm_lista.grid(row=7, column=1, padx=(0, 30), pady=(15, 0), sticky="e")
         self.button_farm_atualiza = customtkinter.CTkButton(master=self.tab("Farm"), text="Atualizar", width=12, height=25,
-                                                            command=self.atualiza_ambiente_farm, font=("Calibri Bold", 13),
-                                                            hover_color="#3E3E63", fg_color="#3E3E63", text_color="white")
+                                                command=self.atualiza_ambiente_farm, font=("Calibri Bold", 13),
+                                                hover_color="#3E3E63", fg_color="#3E3E63", text_color="white")
         self.button_farm_atualiza.grid(row=7, column=1, padx=(30, 0), pady=(15, 0), sticky="w")
         self.button_farm_cadastrar_ambiente = customtkinter.CTkButton(master=self.tab("Farm"), text="Cadastrar Ambiente", 
-                                                            command=self.cria_ambiente_farm, font=("Calibri Bold", 13),
-                                                            hover_color="#3E3E63", fg_color="#AA4813", text_color="white")
+                                                command=self.cria_ambiente_farm, font=("Calibri Bold", 13),
+                                                hover_color="#3E3E63", fg_color="transparent",
+                                                border_color="#AA4813", border_width=1, text_color="white")
         self.button_farm_cadastrar_ambiente.grid(row=8, column=1, padx=(5, 0), pady=(15, 5))
         self.label_resultado_cria_farm = customtkinter.CTkLabel(master=self.tab("Farm"), text="")
         self.label_resultado_cria_farm.grid(row=9, column=1, padx=(0, 0), pady=(5, 15))
@@ -288,17 +297,19 @@ class FramePrincipal(customtkinter.CTkTabview):
 
         # tab bunker
         self.button_entrada_bunker = customtkinter.CTkButton(master=self.tab("Bunker"), text="Buscar", width=20,
-                                                            command=self.busca_bunker, corner_radius=7,
-                                                            hover_color="#3E3E63", fg_color="#AA4813",
-                                                            text_color="white")
+                                                command=self.busca_bunker, corner_radius=7,
+                                                hover_color="#3E3E63", fg_color="transparent",
+                                                border_color="#AA4813", border_width=1,
+                                                text_color="white")
         self.button_entrada_bunker.grid(row=0, column=1, padx=(17, 0), pady=(10, 0), sticky="w")
         self.button_saida_bunker = customtkinter.CTkButton(master=self.tab("Bunker"),text="Limpar", width=20,
-                                                            command=self.limpa_bunker, corner_radius=7,
-                                                            hover_color="#3E3E63", fg_color="#AA4813",
-                                                            text_color="white")
+                                                command=self.limpa_bunker, corner_radius=7,
+                                                hover_color="#3E3E63", fg_color="transparent",
+                                                border_color="#AA4813", border_width=1,
+                                                text_color="white")
         self.button_saida_bunker.grid(row=0, column=1, padx=(75, 0), pady=(10, 0), sticky="w")
         self.entry_bunker = customtkinter.CTkEntry(master=self.tab("Bunker"))
-        self.entry_bunker.grid(row=0, column=1, padx=(0, 10), pady=(10, 0), sticky='e')
+        self.entry_bunker.grid(row=0, column=1, padx=(0, 15), pady=(10, 0), sticky='e')
         self.textbox_result = customtkinter.CTkTextbox(master=self.tab("Bunker"), width=300, height=320)
         self.textbox_result.grid(row=1, column=1, padx=(0, 0), pady=(13, 0))
         self.textbox_result.configure(state='disabled')
@@ -307,21 +318,51 @@ class FramePrincipal(customtkinter.CTkTabview):
 
         # tab configurações
         self.label_seletor_de_tempo = customtkinter.CTkLabel(master=self.tab("Configurações"), text="Tempo do login:", width=10, height=15,
-                                                             font=("Calibri", 16))
-        self.label_seletor_de_tempo.grid(row=0, column=1, padx=(15, 0), pady=(50, 0), sticky="w")
+                                                font=("Calibri", 16))
+        self.label_seletor_de_tempo.grid(row=0, column=1, padx=(5, 0), pady=(50, 0), sticky="w")
         self.seletor_de_tempo = customtkinter.CTkOptionMenu(master=self.tab("Configurações"), variable=self.variavel_opcao,
-                                                            dropdown_fg_color="#3F5663", width=23, height=20,
-                                                            button_color="#3E3E63", fg_color="#3E3E63",
-                                                            button_hover_color="#3F4A63",
-                                                            values=("0.5", "1.0", "1.5", "2.0", "2.5", "3.0", "3.5"))
-        self.seletor_de_tempo.grid(row=0, column=1, padx=(0, 15), pady=(50, 0))
+                                                dropdown_fg_color="#3F5663", width=23, height=20,
+                                                button_color="#3E3E63", fg_color="#3E3E63",
+                                                button_hover_color="#3F4A63",
+                                                values=("0.5", "1.0", "1.5", "2.0", "2.5", "3.0", "3.5"))
+        self.seletor_de_tempo.grid(row=0, column=1, padx=(0, 46), pady=(50, 0))
         self.seletor_de_tempo.configure(command=lambda value: self.atualiza_opcoes(self.variavel_opcao, self.salvar_tempo))
+        self.bottom_gera_senha = customtkinter.CTkButton(master=self.tab("Configurações"), text="Gerar Senha", width=100, height=30,
+                                                font=("Calibri", 16), corner_radius=7,hover_color="#3E3E63", fg_color="transparent",
+                                                border_color="#AA4813", border_width=1, command=self.gerar_senha)
+        self.bottom_gera_senha.grid(row=1, column=1, padx=(5, 0), pady=(10, 0), sticky="w")
+        self.label_resultado_senha = customtkinter.CTkLabel(master=self.tab("Configurações"), text="", fg_color="gray20",
+                                                width=170, height=30, corner_radius=5, font=("Calibri", 15))
+        self.label_resultado_senha.grid(row=1, column=1, padx=(74, 0), pady=(10, 0))
+        self.button_pega_senha = customtkinter.CTkButton(master=self.tab("Configurações"), text="OK", width=30, height=30,
+                                                font=("Calibri", 13), corner_radius=7,hover_color="#3E3E63", fg_color="transparent",
+                                                border_color="#AA4813", border_width=1, command=self.pega_senha)
+        self.button_pega_senha.grid(row=1, column=1, padx=(0, 5), pady=(10, 0), sticky="e")
         self.info_config = customtkinter.CTkButton(master=self.tab("Configurações"), text="Informações da Versão", command=self.informacao, width=20,
-                                            height=25, corner_radius=7, hover_color="#3E3E63", fg_color="#AA4813",
-                                            text_color="white")
-        self.info_config.grid(row=2, column=1, padx=(15, 0), pady=(250, 0))
+                                                height=25, corner_radius=7, hover_color="#3E3E63", fg_color="#AA4813",
+                                                text_color="white")
+        self.info_config.grid(row=2, column=1, padx=(15, 0), pady=(220, 0))
         self.frame_config = customtkinter.CTkFrame(master=self.tab("Configurações"), fg_color="transparent", width=330, height=300)
         self.frame_config.grid(row=9, column=1, padx=0, pady=(0, 0), sticky="ew")
+
+    def gerar_senha(self, tamanho_min=12, tamanho_max=20):
+        tamanho = secrets.randbelow(tamanho_max - tamanho_min + 1) + tamanho_min
+        caracteres_especiais = ['@', '#', '*']
+        primeiro_caractere = secrets.choice(string.ascii_letters + string.digits)
+        caractere_especial = secrets.choice(caracteres_especiais)
+        senha = primeiro_caractere + caractere_especial
+        
+        for _ in range(tamanho - 2):
+            if senha[-1] in string.ascii_letters + string.digits:
+                senha += secrets.choice(string.ascii_letters + ''.join(caracteres_especiais) + string.digits)
+            else:
+                senha += secrets.choice(string.ascii_letters + string.digits)
+        self.label_resultado_senha.configure(text=senha)
+
+    def pega_senha(self):
+        senha = self.label_resultado_senha.cget("text")
+        subprocess.run('echo ' + senha.strip() + '| clip', shell=True)
+        self.label_resultado_senha.configure(text="")
 
     def conecta_ambiente_farm(self):
         global senha
@@ -386,8 +427,8 @@ class FramePrincipal(customtkinter.CTkTabview):
             if os.path.exists(arquivo_path):
                 with open(arquivo_path, 'r') as f:
                     data = json.load(f)
-                valores_servidores = list(data.values())
-                self.option_conecta_farm_servidor.configure(values=valores_servidores)
+                chaves_servidores = list(data.keys())
+                self.option_conecta_farm_servidor.configure(values=chaves_servidores)
             else:
                 print(f"Arquivo correspondente ao ambiente '{ambiente_selecionado}' não encontrado.")
         else:
@@ -410,19 +451,21 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.cria_ambiente.geometry(f"{largura_janela}x{altura_janela}+{pos_x}+{pos_y}")
 
         self.label_nome_ambiente = customtkinter.CTkLabel(self.cria_ambiente,text="Nome do Ambiente:", corner_radius=7,
-                                            fg_color="#2B2B2B", font=("Calibri", 17))
+                                                fg_color="#2B2B2B", font=("Calibri", 17))
         self.label_nome_ambiente.grid(row=0, column=0, padx=(30, 0), pady=(30, 0), sticky="w")
         self.entry_nome_ambiente = customtkinter.CTkEntry(self.cria_ambiente, width=170)
         self.entry_nome_ambiente.grid(row=0, column=0, padx=(0, 30), pady=(30, 0), sticky="e")
         self.button_salvar_ambiente = customtkinter.CTkButton(self.cria_ambiente, text="Salvar",
-                                            corner_radius=7, command=self.salva_ambiente_farm)
+                                                corner_radius=7, command=self.salva_ambiente_farm,
+                                                hover_color="#3E3E63",fg_color="#c75416")
         self.button_salvar_ambiente.grid(row=1, column=0, padx=(55, 0), pady=(15, 0), sticky="w")
         self.button_apagar_ambiente = customtkinter.CTkButton(self.cria_ambiente, text="Apagar",
-                                            corner_radius=7, command=self.apaga_ambiente_farm)
+                                                corner_radius=7, command=self.apaga_ambiente_farm,
+                                                hover_color="#3E3E63",fg_color="#c75416")
         self.button_apagar_ambiente.grid(row=1, column=0, padx=(0, 55), pady=(15, 0), sticky="e")
         self.label_retorno_ambiente = customtkinter.CTkLabel(self.cria_ambiente, text="",width=390, height=130,
-                                            font=("Arial Black", 25), fg_color="gray30",
-                                            corner_radius=5)
+                                                font=("Arial Black", 25), fg_color="gray30",
+                                                corner_radius=5)
         self.label_retorno_ambiente.grid(row=2, column=0, padx=(0, 0), pady=(20, 0))
         return
 
@@ -693,7 +736,7 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.textbox_result.configure(state='normal')
     
         def inclui_codigo():
-            url = ''
+            url = 'https://bunker-monitor.alterdatasoftware.com.br/api/backup/view?crm='
             crm = self.codigo_pesquisa
             codigo = html.escape(crm)
     
@@ -1041,6 +1084,7 @@ class FramePrincipal(customtkinter.CTkTabview):
                                                                     fg_color="#c75416")
                     self.bnt_mensagem_fav.grid(row=1, column=0, padx=15, pady=(0, 10))
 
+
 class CriarInterface(customtkinter.CTk):
     def __init__(self):
         super().__init__()
@@ -1062,7 +1106,7 @@ class CriarInterface(customtkinter.CTk):
         self.sidebar_frameP.CriaInterface = self
         self.sidebar_frameP.frame_lateral = self.sidebar_frameL
         self.sidebar_frameP.configure(segmented_button_selected_color="#AA4813",
-                                      segmented_button_selected_hover_color="#3E3E63")
+                            segmented_button_selected_hover_color="#3E3E63")
         self.sidebar_frameP.grid(row=1, column=1, padx=(5, 15), pady=(0, 15), sticky="nswe")
         self.sidebar_frameL.Frame_Principal = self.sidebar_frameP
 
@@ -1093,11 +1137,11 @@ class CriarInterface(customtkinter.CTk):
         self.tela_de_alerta.geometry(f"{largura_janela}x{altura_janela}+{pos_x}+{pos_y}")
 
         self.mensagem = customtkinter.CTkLabel(self.tela_de_alerta, text="Revise os dados digitados",
-                                               font=("Calibri", 20),
-                                               justify="center")
+                                    font=("Calibri", 20),
+                                    justify="center")
         self.mensagem.grid(row=0, column=0, padx=15, pady=15)
         self.but_ok = customtkinter.CTkButton(self.tela_de_alerta, text="OK", command=self.tela_de_alerta.destroy,
-                                              corner_radius=15)
+                                    corner_radius=15, fg_color="#AA4813", hover_color="#3E3E63")
         self.but_ok.grid(row=1, column=0, padx=0, pady=0)
         return
 
