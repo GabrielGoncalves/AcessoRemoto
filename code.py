@@ -315,6 +315,7 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.textbox_result.configure(state='disabled')
         self.tab_bunker = customtkinter.CTkFrame(master=self.tab("Bunker"), fg_color="transparent", width=330, height=300)
         self.tab_bunker.grid(row=9, column=1, padx=0, pady=(5, 0), sticky="ew")
+        self.entry_bunker.bind("<Return>", lambda event: self.busca_bunker())
 
         # tab configurações
         self.label_seletor_de_tempo = customtkinter.CTkLabel(master=self.tab("Configurações"), text="Tempo do login:", width=10, height=15,
