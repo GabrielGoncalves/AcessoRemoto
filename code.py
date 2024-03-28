@@ -367,27 +367,38 @@ class FramePrincipal(customtkinter.CTkTabview):
     def conecta_ambiente_farm(self):
         global senha
         ambiente = self.option_conecta_farm_ambiente.get()
-        ip = self.option_conecta_farm_servidor.get()
+        id_servidor = self.option_conecta_farm_servidor.get()
     
         if self.frame_lateral:
             usuario = self.frame_lateral.entry_usuario.get()
-            senha = self.frame_lateral.entry_senha.get() 
+            senha = self.frame_lateral.entry_senha.get()
     
-            if not(usuario and senha and ambiente and ip):
+            if not (usuario and senha and ambiente and id_servidor):
                 self.CriaInterface.mensagem_de_alertas()
                 return
     
-            if ip and ip.startswith("172.16."):
+            ip_de_conexao = None
+            arquivo_path = os.path.join("C:\\AcessoRemoto\\Dados\\farm", f"{ambiente}.json")
+    
+            if os.path.exists(arquivo_path):
+                with open(arquivo_path, 'r') as f:
+                    data = json.load(f)
+                
+                for servidor, id in data.items():
+                    if servidor == id_servidor:
+                        ip_de_conexao = id
+                        break
+    
+            if ip_de_conexao and ip_de_conexao.startswith("172.16."):
                 try:
-                    self.frame_lateral.remover_aviso_certificado(ip)
-                    arquivo_rdp = self.frame_lateral.criar_arquivo_rdp(ip, usuario)
+                    self.frame_lateral.remover_aviso_certificado(ip_de_conexao)
+                    arquivo_rdp = self.frame_lateral.criar_arquivo_rdp(ip_de_conexao, usuario)
                     subprocess.Popen(['mstsc', arquivo_rdp])
                     app.lower()
                     tempo_rdp = self.exibir_tempo()
                     sleep(float(tempo_rdp))
                     pyautogui.write(senha)
                     pyautogui.press("enter")
-    
                 except Exception as e:
                     print(f"Erro ao conectar: {e}")
             else:
@@ -399,14 +410,14 @@ class FramePrincipal(customtkinter.CTkTabview):
                 self.tela_de_notificacao.overrideredirect(True)
                 largura_janela = 280
                 altura_janela = 110
-                # ajuste para aparecer no centro da tela principal
+                # Ajuste para aparecer no centro da tela principal
                 largura_tela = self.tela_de_notificacao.winfo_screenwidth()
                 altura_tela = self.tela_de_notificacao.winfo_screenheight()
                 pos_x = (largura_tela // 2) - (largura_janela // 2)
                 pos_y = (altura_tela // 2) - (altura_janela // 2)
                 self.tela_de_notificacao.geometry(f"{largura_janela}x{altura_janela}+{pos_x}+{pos_y}")
                 self.mensagem_fav = customtkinter.CTkLabel(self.tela_de_notificacao,
-                                                           text="Favorito não configurado corretamente",
+                                                           text="Farm não configurado corretamente",
                                                            font=("Calibri", 16))
                 self.mensagem_fav.grid(row=0, column=0, padx=15, pady=20)
                 self.bnt_mensagem_fav = customtkinter.CTkButton(self.tela_de_notificacao, text="OK",
@@ -736,7 +747,7 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.textbox_result.configure(state='normal')
     
         def inclui_codigo():
-            url = ''
+            url = 'https://bunker-monitor.alterdatasoftware.com.br/api/backup/view?crm='
             crm = self.codigo_pesquisa
             codigo = html.escape(crm)
     
