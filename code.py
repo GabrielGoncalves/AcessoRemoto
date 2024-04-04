@@ -21,8 +21,8 @@ class FrameLateral(customtkinter.CTkFrame):
         self.CriaInterface = None
         self.FrameSuperior = None
 
-        self.label_titulo = customtkinter.CTkLabel(self, text="Acesso Remoto", font=("Calibri Bold", 25),
-                                        justify="center")
+        self.label_titulo = customtkinter.CTkLabel(self, text="Acesso Remoto",
+                                    font=("Calibri Bold", 25), justify="center")
         self.label_titulo.grid(row=5, column=0, padx=30, pady=(10, 10), sticky="ew")
         self.label_ip = customtkinter.CTkLabel(self, text="IP do Servidor:")
         self.label_ip.grid(row=6, column=0, padx=30, pady=(13, 0), sticky="ew")
@@ -33,15 +33,16 @@ class FrameLateral(customtkinter.CTkFrame):
         username = getpass.getuser()
         self.entry_usuario = customtkinter.CTkEntry(self, corner_radius=25, justify="center")
         self.entry_usuario.grid(row=9, column=0, padx=(5, 15), pady=(13, 0), sticky="ew")
-        self.entry_usuario.insert(0, f"{username}@cloud")
         self.label_senha = customtkinter.CTkLabel(self, text="Senha:")
         self.label_senha.grid(row=10, column=0, padx=30, pady=(13, 0), sticky="ew")
-        self.entry_senha = customtkinter.CTkEntry(self, corner_radius=25, show="*", justify='center')
+        self.entry_senha = customtkinter.CTkEntry(self, corner_radius=25,
+                                    show="*", justify='center')
         self.entry_senha.grid(row=11, column=0, padx=(5, 15), pady=(13, 0), sticky="ew")
-        self.button_conectar = customtkinter.CTkButton(self, text="Conectar", command=self.conectar,
-                                            text_color="white",
-                                            corner_radius=15, fg_color="#E4621B",
-                                            hover_color="#3E3E63")
+        self.button_conectar = customtkinter.CTkButton(self, text="Conectar",
+                                    command=self.conectar,
+                                    text_color="white",
+                                    corner_radius=15, fg_color="#E4621B",
+                                    hover_color="#3E3E63")
         self.button_conectar.grid(row=12, column=0, padx=30, pady=(13, 0), sticky="ew")
 
         # Configura o enter para validar a conexão
@@ -122,13 +123,13 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.tela_de_informacao = None
         self.CriaInterface = None
         self.variavel_opcao = customtkinter.StringVar(self)
-        self.resultado_ambiente_farm = customtkinter.StringVar(self)
-        self.conexao_ambiente_farm = customtkinter.StringVar(self)
-        self.conexao_servidor_farm = customtkinter.StringVar(self)
+        self.resultado_ambiente_Servidores = customtkinter.StringVar(self)
+        self.conexao_ambiente_Servidores = customtkinter.StringVar(self)
+        self.conexao_servidor_Servidores = customtkinter.StringVar(self)
 
         self.add("Favoritos")
-        self.add("Farm")
-        self.add("Bunker")
+        self.add("Servidores")
+        self.add("API")
         self.add("Configurações")
 
         # tab favoritos
@@ -147,24 +148,24 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.button_edicao_fav_button.grid(row=0, column=1, padx=(0, 85), pady=10, sticky="e")
         self.button_fav1 = customtkinter.CTkButton(master=self.tab("Favoritos"), text="Campo 01",
                                                 width=130, height=30,corner_radius=20,
-                                                command=lambda: self.conectar_favorito(1), 
-                                                fg_color="transparent", 
+                                                command=lambda: self.conectar_favorito(1),
+                                                fg_color="transparent",
                                                 border_color="#2B2B2B")
         self.button_fav1.grid(row=1, column=1, padx=(10, 5), pady=(5, 5), sticky="w")
         self.entry_fav1 = customtkinter.CTkEntry(master=self.tab("Favoritos"), width=130, height=30,
                                                 justify="center")
         self.entry_fav1.grid(row=2, column=1, padx=(10, 5), pady=(0, 5), sticky="w")
         self.button_fav2 = customtkinter.CTkButton(master=self.tab("Favoritos"),  text="Campo 02",
-                                                width=130, height=30, corner_radius=20, 
+                                                width=130, height=30, corner_radius=20,
                                                 command=lambda: self.conectar_favorito(2),
-                                                fg_color="transparent", 
+                                                fg_color="transparent",
                                                 border_color="#2B2B2B")
         self.button_fav2.grid(row=3, column=1, padx=(10, 5), pady=(10, 0), sticky="w")
         self.entry_fav2 = customtkinter.CTkEntry(master=self.tab("Favoritos"), width=130, height=30,
                                                 justify="center")
         self.entry_fav2.grid(row=4, column=1, padx=(10, 5), pady=(0, 5), sticky="w")
         self.button_fav3 = customtkinter.CTkButton(master=self.tab("Favoritos"), text="Campo 03",
-                                                width=130, height=30, corner_radius=20, 
+                                                width=130, height=30, corner_radius=20,
                                                 command=lambda: self.conectar_favorito(3),
                                                 fg_color="transparent",
                                                 border_color="#2B2B2B")
@@ -172,8 +173,8 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.entry_fav3 = customtkinter.CTkEntry(master=self.tab("Favoritos"), width=130, height=30,
                                                 justify="center")
         self.entry_fav3.grid(row=6, column=1, padx=(10, 5), pady=(0, 5), sticky="w")
-        self.button_fav4 = customtkinter.CTkButton(master=self.tab("Favoritos"), text="Campo 04", 
-                                                width=130, height=30, corner_radius=20, 
+        self.button_fav4 = customtkinter.CTkButton(master=self.tab("Favoritos"), text="Campo 04",
+                                                width=130, height=30, corner_radius=20,
                                                 command=lambda: self.conectar_favorito(4),
                                                 fg_color="transparent",
                                                 border_color="#2B2B2B")
@@ -181,26 +182,26 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.entry_fav4 = customtkinter.CTkEntry(master=self.tab("Favoritos"), width=130, height=30,
                                                 justify="center")
         self.entry_fav4.grid(row=8, column=1, padx=(10, 5), pady=(0, 5), sticky="w")
-        self.button_fav5 = customtkinter.CTkButton(master=self.tab("Favoritos"), text="Campo 05", 
+        self.button_fav5 = customtkinter.CTkButton(master=self.tab("Favoritos"), text="Campo 05",
                                                 width=130, height=30, corner_radius=20,
                                                 command=lambda: self.conectar_favorito(5),
-                                                fg_color="transparent", 
+                                                fg_color="transparent",
                                                 border_color="#2B2B2B")
         self.button_fav5.grid(row=1, column=1, padx=(10, 5), pady=(5, 5), sticky="e")
-        self.entry_fav5 = customtkinter.CTkEntry(master=self.tab("Favoritos"), width=130, height=30, 
+        self.entry_fav5 = customtkinter.CTkEntry(master=self.tab("Favoritos"), width=130, height=30,
                                                 justify="center")
         self.entry_fav5.grid(row=2, column=1, padx=(10, 5), pady=(0, 5), sticky="e")
         self.button_fav6 = customtkinter.CTkButton(master=self.tab("Favoritos"), text="Campo 06",
-                                                width=130, height=30, corner_radius=20, 
+                                                width=130, height=30, corner_radius=20,
                                                 command=lambda: self.conectar_favorito(6),
-                                                fg_color="transparent", 
+                                                fg_color="transparent",
                                                 border_color="#2B2B2B")
         self.button_fav6.grid(row=3, column=1, padx=(10, 5), pady=(10, 0), sticky="e")
         self.entry_fav6 = customtkinter.CTkEntry(master=self.tab("Favoritos"), width=130, height=30,
                                                 justify="center")
         self.entry_fav6.grid(row=4, column=1, padx=(10, 5), pady=(0, 5), sticky="e")
         self.button_fav7 = customtkinter.CTkButton(master=self.tab("Favoritos"), text="Campo 07",
-                                                width=130, height=30, corner_radius=20, 
+                                                width=130, height=30, corner_radius=20,
                                                 command=lambda: self.conectar_favorito(7),
                                                 fg_color="transparent",
                                                 border_color="#2B2B2B")
@@ -208,114 +209,114 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.entry_fav7 = customtkinter.CTkEntry(master=self.tab("Favoritos"), width=130, height=30,
                                                 justify="center")
         self.entry_fav7.grid(row=6, column=1, padx=(10, 5), pady=(0, 5), sticky="e")
-        self.button_fav8 = customtkinter.CTkButton(master=self.tab("Favoritos"), text="Campo 08", 
-                                                width=130, height=30, corner_radius=20, 
-                                                command=lambda: self.conectar_favorito(8), 
+        self.button_fav8 = customtkinter.CTkButton(master=self.tab("Favoritos"), text="Campo 08",
+                                                width=130, height=30, corner_radius=20,
+                                                command=lambda: self.conectar_favorito(8),
                                                 fg_color="transparent",
                                                 border_color="#2B2B2B")
         self.button_fav8.grid(row=7, column=1, padx=(10, 5), pady=(10, 0), sticky="e")
-        self.entry_fav8 = customtkinter.CTkEntry(master=self.tab("Favoritos"), width=130, height=30, 
+        self.entry_fav8 = customtkinter.CTkEntry(master=self.tab("Favoritos"), width=130, height=30,
                                                 justify="center")
         self.entry_fav8.grid(row=8, column=1, padx=(10, 5), pady=(0, 5), sticky="e")
         self.frame_fav = customtkinter.CTkFrame(master=self.tab("Favoritos"), fg_color="transparent",
                                                 width=330, height=330)
         self.frame_fav.grid(row=90, column=1, padx=0, pady=(5, 0), sticky="ew")
 
-        # tab farm
-        self.label_farm_ambiente = customtkinter.CTkLabel(master=self.tab("Farm"), text="Ambiente:")
-        self.label_farm_ambiente.grid(row=0, column=1, padx=(10, 0), pady=(20, 0), sticky="w")
-        self.option_conecta_farm_ambiente = customtkinter.CTkOptionMenu(master=self.tab("Farm"), 
-                                                dropdown_fg_color="#3F5663", 
+        # tab Servidores
+        self.label_Servidores_ambiente = customtkinter.CTkLabel(master=self.tab("Servidores"), text="Ambiente:")
+        self.label_Servidores_ambiente.grid(row=0, column=1, padx=(10, 0), pady=(20, 0), sticky="w")
+        self.option_conecta_Servidores_ambiente = customtkinter.CTkOptionMenu(master=self.tab("Servidores"),
+                                                dropdown_fg_color="#3F5663",
                                                 width=23, height=20,
                                                 button_color="#3E3E63", fg_color="#3E3E63",
                                                 button_hover_color="#3F4A63", values=("Selecione"),
-                                                variable = self.conexao_ambiente_farm,
-                                                command=self.exibe_conecta_servidor_farm)
-        self.option_conecta_farm_ambiente.grid(row=0, column=1, padx=(0, 65), pady=(20, 0))
-        self.label_farm_servidor = customtkinter.CTkLabel(master=self.tab("Farm"), text="Servidor:")
-        self.label_farm_servidor.grid(row=1, column=1, padx=(10, 0), pady=(0, 0), sticky="w")
-        self.option_conecta_farm_servidor = customtkinter.CTkOptionMenu(master=self.tab("Farm"),
-                                                dropdown_fg_color="#3F5663", 
+                                                variable = self.conexao_ambiente_Servidores,
+                                                command=self.exibe_conecta_servidor_Servidores)
+        self.option_conecta_Servidores_ambiente.grid(row=0, column=1, padx=(0, 65), pady=(20, 0))
+        self.label_Servidores_servidor = customtkinter.CTkLabel(master=self.tab("Servidores"), text="Servidor:")
+        self.label_Servidores_servidor.grid(row=1, column=1, padx=(10, 0), pady=(0, 0), sticky="w")
+        self.option_conecta_Servidores_servidor = customtkinter.CTkOptionMenu(master=self.tab("Servidores"),
+                                                dropdown_fg_color="#3F5663",
                                                 width=23, height=20,
                                                 button_color="#3E3E63", fg_color="#3E3E63",
                                                 button_hover_color="#3F4A63", values=[""],
-                                                variable = self.conexao_servidor_farm,
-                                                command=self.exibe_conecta_servidor_farm)
-        self.option_conecta_farm_servidor.grid(row=1, column=1, padx=(0, 75), pady=(0, 0))
-        self.button_farm_acesso = customtkinter.CTkButton(master=self.tab("Farm"), text="Conectar",
-                                                command=self.conecta_ambiente_farm, font=("Calibri Bold", 13),
+                                                variable = self.conexao_servidor_Servidores,
+                                                command=self.exibe_conecta_servidor_Servidores)
+        self.option_conecta_Servidores_servidor.grid(row=1, column=1, padx=(0, 75), pady=(0, 0))
+        self.button_Servidores_acesso = customtkinter.CTkButton(master=self.tab("Servidores"), text="Conectar",
+                                                command=self.conecta_ambiente_Servidores, font=("Calibri Bold", 13),
                                                 hover_color="#3E3E63", fg_color="transparent",
                                                 border_color="#AA4813", border_width=1, text_color="white")
-        self.button_farm_acesso.grid(row=2, column=1, padx=(0, 0), pady=(10, 10))
-        self.label_farm_separador = customtkinter.CTkLabel(master=self.tab("Farm"), text="CADASTRO DE SERVIDORES",
+        self.button_Servidores_acesso.grid(row=2, column=1, padx=(0, 0), pady=(10, 10))
+        self.label_Servidores_separador = customtkinter.CTkLabel(master=self.tab("Servidores"), text="CADASTRO DE SERVIDORES",
                                                 text_color="gray")
-        self.label_farm_separador.grid(row=3, column=1, padx=(0, 0), pady=(10, 5))
-        self.label_farm_cadambiente = customtkinter.CTkLabel(master=self.tab("Farm"), text="Ambiente:")
-        self.label_farm_cadambiente.grid(row=4, column=1, padx=(10, 0), pady=(0, 0),sticky="w")
-        self.option_farm_cadambiente = customtkinter.CTkOptionMenu(master=self.tab("Farm"),
-                                                dropdown_fg_color="#3F5663", 
+        self.label_Servidores_separador.grid(row=3, column=1, padx=(0, 0), pady=(10, 5))
+        self.label_Servidores_cadambiente = customtkinter.CTkLabel(master=self.tab("Servidores"), text="Ambiente:")
+        self.label_Servidores_cadambiente.grid(row=4, column=1, padx=(10, 0), pady=(0, 0),sticky="w")
+        self.option_Servidores_cadambiente = customtkinter.CTkOptionMenu(master=self.tab("Servidores"),
+                                                dropdown_fg_color="#3F5663",
                                                 width=23, height=20,
                                                 button_color="#3E3E63", fg_color="#3E3E63",
                                                 button_hover_color="#3F4A63", values=[""],
-                                                variable = self.resultado_ambiente_farm)
-        self.option_farm_cadambiente.grid(row=4, column=1, padx=(0, 10), pady=(0, 0), sticky="e")
-        self.label_farm_cadnome = customtkinter.CTkLabel(master=self.tab("Farm"), text="Nome do Servidor:")
-        self.label_farm_cadnome.grid(row=5, column=1, padx=(10, 0), pady=(0, 0),sticky="w")
-        self.entry_farm_cadnome = customtkinter.CTkEntry(master=self.tab("Farm"), border_color="#2B2B2B", width=200,
+                                                variable = self.resultado_ambiente_Servidores)
+        self.option_Servidores_cadambiente.grid(row=4, column=1, padx=(0, 10), pady=(0, 0), sticky="e")
+        self.label_Servidores_cadnome = customtkinter.CTkLabel(master=self.tab("Servidores"), text="Nome do Servidor:")
+        self.label_Servidores_cadnome.grid(row=5, column=1, padx=(10, 0), pady=(0, 0),sticky="w")
+        self.entry_Servidores_cadnome = customtkinter.CTkEntry(master=self.tab("Servidores"), border_color="#2B2B2B", width=200,
                                                 corner_radius=5)
-        self.entry_farm_cadnome.grid(row=5, column=1, padx=(0, 10), pady=(0, 0), sticky="e")
-        self.label_farm_cadip = customtkinter.CTkLabel(master=self.tab("Farm"), text="IP do Servidor:")
-        self.label_farm_cadip.grid(row=6, column=1, padx=(10, 0), pady=(0, 0),sticky="w")
-        self.entry_farm_cadip = customtkinter.CTkEntry(master=self.tab("Farm"), border_color="#2B2B2B", width=200,
+        self.entry_Servidores_cadnome.grid(row=5, column=1, padx=(0, 10), pady=(0, 0), sticky="e")
+        self.label_Servidores_cadip = customtkinter.CTkLabel(master=self.tab("Servidores"), text="IP do Servidor:")
+        self.label_Servidores_cadip.grid(row=6, column=1, padx=(10, 0), pady=(0, 0),sticky="w")
+        self.entry_Servidores_cadip = customtkinter.CTkEntry(master=self.tab("Servidores"), border_color="#2B2B2B", width=200,
                                                 corner_radius=5)
-        self.entry_farm_cadip.grid(row=6, column=1, padx=(0, 10), pady=(0, 0), sticky="e")
-        self.button_farm_cadastrar = customtkinter.CTkButton(master=self.tab("Farm"), text="Salvar", width=60, height=25,
-                                                command=self.salva_servidor_farm, font=("Calibri Bold", 13),
+        self.entry_Servidores_cadip.grid(row=6, column=1, padx=(0, 10), pady=(0, 0), sticky="e")
+        self.button_Servidores_cadastrar = customtkinter.CTkButton(master=self.tab("Servidores"), text="Salvar", width=60, height=25,
+                                                command=self.salva_servidor_Servidores, font=("Calibri Bold", 13),
                                                 hover_color="#3E3E63", fg_color="#3E3E63", text_color="white")
-        self.button_farm_cadastrar.grid(row=7, column=1, padx=(0, 70), pady=(15, 0))
-        self.button_farm_apagar = customtkinter.CTkButton(master=self.tab("Farm"), text="Deletar", width=60, height=25,
-                                                command=self.deletar_servidor_farm, font=("Calibri Bold", 13),
+        self.button_Servidores_cadastrar.grid(row=7, column=1, padx=(0, 70), pady=(15, 0))
+        self.button_Servidores_apagar = customtkinter.CTkButton(master=self.tab("Servidores"), text="Deletar", width=60, height=25,
+                                                command=self.deletar_servidor_Servidores, font=("Calibri Bold", 13),
                                                 hover_color="#3E3E63", fg_color="#3E3E63", text_color="white")
-        self.button_farm_apagar.grid(row=7, column=1, padx=(70, 0), pady=(15, 0))
-        self.button_farm_lista = customtkinter.CTkButton(master=self.tab("Farm"), text="Listar", width=60, height=25,
-                                                command=self.listar_servidor_farm, font=("Calibri Bold", 13),
+        self.button_Servidores_apagar.grid(row=7, column=1, padx=(70, 0), pady=(15, 0))
+        self.button_Servidores_lista = customtkinter.CTkButton(master=self.tab("Servidores"), text="Listar", width=60, height=25,
+                                                command=self.listar_servidor_Servidores, font=("Calibri Bold", 13),
                                                 hover_color="#3E3E63", fg_color="#3E3E63", text_color="white")
-        self.button_farm_lista.grid(row=7, column=1, padx=(0, 30), pady=(15, 0), sticky="e")
-        self.button_farm_atualiza = customtkinter.CTkButton(master=self.tab("Farm"), text="Atualizar", width=12, height=25,
-                                                command=self.atualiza_ambiente_farm, font=("Calibri Bold", 13),
+        self.button_Servidores_lista.grid(row=7, column=1, padx=(0, 30), pady=(15, 0), sticky="e")
+        self.button_Servidores_atualiza = customtkinter.CTkButton(master=self.tab("Servidores"), text="Atualizar", width=12, height=25,
+                                                command=self.atualiza_ambiente_Servidores, font=("Calibri Bold", 13),
                                                 hover_color="#3E3E63", fg_color="#3E3E63", text_color="white")
-        self.button_farm_atualiza.grid(row=7, column=1, padx=(30, 0), pady=(15, 0), sticky="w")
-        self.button_farm_cadastrar_ambiente = customtkinter.CTkButton(master=self.tab("Farm"), text="Cadastrar Ambiente", 
-                                                command=self.cria_ambiente_farm, font=("Calibri Bold", 13),
+        self.button_Servidores_atualiza.grid(row=7, column=1, padx=(30, 0), pady=(15, 0), sticky="w")
+        self.button_Servidores_cadastrar_ambiente = customtkinter.CTkButton(master=self.tab("Servidores"), text="Cadastrar Ambiente",
+                                                command=self.cria_ambiente_Servidores, font=("Calibri Bold", 13),
                                                 hover_color="#3E3E63", fg_color="transparent",
                                                 border_color="#AA4813", border_width=1, text_color="white")
-        self.button_farm_cadastrar_ambiente.grid(row=8, column=1, padx=(5, 0), pady=(15, 5))
-        self.label_resultado_cria_farm = customtkinter.CTkLabel(master=self.tab("Farm"), text="")
-        self.label_resultado_cria_farm.grid(row=9, column=1, padx=(0, 0), pady=(5, 15))
-        self.frame_farm = customtkinter.CTkFrame(master=self.tab("Farm"), fg_color="transparent", width=330, height=300)
-        self.frame_farm.grid(row=10, column=1, padx=0, pady=(5, 0), sticky="ew")
+        self.button_Servidores_cadastrar_ambiente.grid(row=8, column=1, padx=(5, 0), pady=(15, 5))
+        self.label_resultado_cria_Servidores = customtkinter.CTkLabel(master=self.tab("Servidores"), text="")
+        self.label_resultado_cria_Servidores.grid(row=9, column=1, padx=(0, 0), pady=(5, 15))
+        self.frame_Servidores = customtkinter.CTkFrame(master=self.tab("Servidores"), fg_color="transparent", width=330, height=300)
+        self.frame_Servidores.grid(row=10, column=1, padx=0, pady=(5, 0), sticky="ew")
 
-        # tab bunker
-        self.button_entrada_bunker = customtkinter.CTkButton(master=self.tab("Bunker"), text="Buscar", width=20,
-                                                command=self.busca_bunker, corner_radius=7,
+        # tab API
+        self.button_entrada_API = customtkinter.CTkButton(master=self.tab("API"), text="Buscar", width=20,
+                                                command=self.busca_API, corner_radius=7,
                                                 hover_color="#3E3E63", fg_color="transparent",
                                                 border_color="#AA4813", border_width=1,
                                                 text_color="white")
-        self.button_entrada_bunker.grid(row=0, column=1, padx=(17, 0), pady=(10, 0), sticky="w")
-        self.button_saida_bunker = customtkinter.CTkButton(master=self.tab("Bunker"),text="Limpar", width=20,
-                                                command=self.limpa_bunker, corner_radius=7,
+        self.button_entrada_API.grid(row=0, column=1, padx=(17, 0), pady=(10, 0), sticky="w")
+        self.button_saida_API = customtkinter.CTkButton(master=self.tab("API"),text="Limpar", width=20,
+                                                command=self.limpa_API, corner_radius=7,
                                                 hover_color="#3E3E63", fg_color="transparent",
                                                 border_color="#AA4813", border_width=1,
                                                 text_color="white")
-        self.button_saida_bunker.grid(row=0, column=1, padx=(75, 0), pady=(10, 0), sticky="w")
-        self.entry_bunker = customtkinter.CTkEntry(master=self.tab("Bunker"))
-        self.entry_bunker.grid(row=0, column=1, padx=(0, 15), pady=(10, 0), sticky='e')
-        self.textbox_result = customtkinter.CTkTextbox(master=self.tab("Bunker"), width=300, height=320)
+        self.button_saida_API.grid(row=0, column=1, padx=(75, 0), pady=(10, 0), sticky="w")
+        self.entry_API = customtkinter.CTkEntry(master=self.tab("API"))
+        self.entry_API.grid(row=0, column=1, padx=(0, 15), pady=(10, 0), sticky='e')
+        self.textbox_result = customtkinter.CTkTextbox(master=self.tab("API"), width=300, height=320)
         self.textbox_result.grid(row=1, column=1, padx=(0, 0), pady=(13, 0))
         self.textbox_result.configure(state='disabled')
-        self.tab_bunker = customtkinter.CTkFrame(master=self.tab("Bunker"), fg_color="transparent", width=330, height=300)
-        self.tab_bunker.grid(row=9, column=1, padx=0, pady=(5, 0), sticky="ew")
-        self.entry_bunker.bind("<Return>", lambda event: self.busca_bunker())
+        self.tab_API = customtkinter.CTkFrame(master=self.tab("API"), fg_color="transparent", width=330, height=300)
+        self.tab_API.grid(row=9, column=1, padx=0, pady=(5, 0), sticky="ew")
+        self.entry_API.bind("<Return>", lambda event: self.busca_API())
 
         # tab configurações
         self.label_seletor_de_tempo = customtkinter.CTkLabel(master=self.tab("Configurações"), text="Tempo do login:", width=10, height=15,
@@ -352,7 +353,7 @@ class FramePrincipal(customtkinter.CTkTabview):
         primeiro_caractere = secrets.choice(string.ascii_letters + string.digits)
         caractere_especial = secrets.choice(caracteres_especiais)
         senha = primeiro_caractere + caractere_especial
-        
+
         for _ in range(tamanho - 2):
             if senha[-1] in string.ascii_letters + string.digits:
                 senha += secrets.choice(string.ascii_letters + ''.join(caracteres_especiais) + string.digits)
@@ -365,32 +366,32 @@ class FramePrincipal(customtkinter.CTkTabview):
         subprocess.run('echo ' + senha.strip() + '| clip', shell=True)
         self.label_resultado_senha.configure(text="")
 
-    def conecta_ambiente_farm(self):
+    def conecta_ambiente_Servidores(self):
         global senha
-        ambiente = self.option_conecta_farm_ambiente.get()
-        id_servidor = self.option_conecta_farm_servidor.get()
-    
+        ambiente = self.option_conecta_Servidores_ambiente.get()
+        id_servidor = self.option_conecta_Servidores_servidor.get()
+
         if self.frame_lateral:
             usuario = self.frame_lateral.entry_usuario.get()
             senha = self.frame_lateral.entry_senha.get()
-    
+
             if not (usuario and senha and ambiente and id_servidor):
                 self.CriaInterface.mensagem_de_alertas()
                 return
-    
+
             ip_de_conexao = None
-            arquivo_path = os.path.join("C:\\AcessoRemoto\\Dados\\farm", f"{ambiente}.json")
-    
+            arquivo_path = os.path.join("C:\\AcessoRemoto\\Dados\\Servidores", f"{ambiente}.json")
+
             if os.path.exists(arquivo_path):
                 with open(arquivo_path, 'r') as f:
                     data = json.load(f)
-                
+
                 for servidor, id in data.items():
                     if servidor == id_servidor:
                         ip_de_conexao = id
                         break
-    
-            if ip_de_conexao and ip_de_conexao.startswith("172.16."):
+
+            if ip_de_conexao and ip_de_conexao.startswith(""): # regra de validação para o padrão de IP
                 try:
                     self.frame_lateral.remover_aviso_certificado(ip_de_conexao)
                     arquivo_rdp = self.frame_lateral.criar_arquivo_rdp(ip_de_conexao, usuario)
@@ -418,7 +419,7 @@ class FramePrincipal(customtkinter.CTkTabview):
                 pos_y = (altura_tela // 2) - (altura_janela // 2)
                 self.tela_de_notificacao.geometry(f"{largura_janela}x{altura_janela}+{pos_x}+{pos_y}")
                 self.mensagem_fav = customtkinter.CTkLabel(self.tela_de_notificacao,
-                                                           text="Farm não configurado corretamente",
+                                                           text="Servidores não configurado corretamente",
                                                            font=("Calibri", 16))
                 self.mensagem_fav.grid(row=0, column=0, padx=15, pady=20)
                 self.bnt_mensagem_fav = customtkinter.CTkButton(self.tela_de_notificacao, text="OK",
@@ -427,28 +428,28 @@ class FramePrincipal(customtkinter.CTkTabview):
                                                                 fg_color="#c75416")
                 self.bnt_mensagem_fav.grid(row=1, column=0, padx=15, pady=(0, 10))
 
-    def exibe_conecta_ambiente_farm(self):
-        valores = self.ler_ambiente_farm()
-        self.option_conecta_farm_ambiente.configure(values=valores)
+    def exibe_conecta_ambiente_Servidores(self):
+        valores = self.ler_ambiente_Servidores()
+        self.option_conecta_Servidores_ambiente.configure(values=valores)
 
-    def exibe_conecta_servidor_farm(self, event):
-        self.option_conecta_farm_servidor.configure(values=[""])
-        ambiente_selecionado = self.option_conecta_farm_ambiente.get()
+    def exibe_conecta_servidor_Servidores(self, event):
+        self.option_conecta_Servidores_servidor.configure(values=[""])
+        ambiente_selecionado = self.option_conecta_Servidores_ambiente.get()
         if ambiente_selecionado:
-            arquivo_path = f"C:\\AcessoRemoto\\Dados\\farm\\{ambiente_selecionado}.json"
+            arquivo_path = f"C:\\AcessoRemoto\\Dados\\Servidores\\{ambiente_selecionado}.json"
             if os.path.exists(arquivo_path):
                 with open(arquivo_path, 'r') as f:
                     data = json.load(f)
                 chaves_servidores = list(data.keys())
-                self.option_conecta_farm_servidor.configure(values=chaves_servidores)
+                self.option_conecta_Servidores_servidor.configure(values=chaves_servidores)
             else:
                 print(f"Arquivo correspondente ao ambiente '{ambiente_selecionado}' não encontrado.")
         else:
             print("Nenhum ambiente selecionado.")
 
-    def cria_ambiente_farm(self):
+    def cria_ambiente_Servidores(self):
         self.cria_ambiente = customtkinter.CTkToplevel(self)
-        self.cria_ambiente.title("Cadastro de Ambientes do Farm")
+        self.cria_ambiente.title("Cadastro de Ambientes do Servidores")
         self.cria_ambiente.focus_set()
         self.cria_ambiente.grab_set()
         self.cria_ambiente.resizable(width=False, height=False)
@@ -468,11 +469,11 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.entry_nome_ambiente = customtkinter.CTkEntry(self.cria_ambiente, width=170)
         self.entry_nome_ambiente.grid(row=0, column=0, padx=(0, 30), pady=(30, 0), sticky="e")
         self.button_salvar_ambiente = customtkinter.CTkButton(self.cria_ambiente, text="Salvar",
-                                                corner_radius=7, command=self.salva_ambiente_farm,
+                                                corner_radius=7, command=self.salva_ambiente_Servidores,
                                                 hover_color="#3E3E63",fg_color="#c75416")
         self.button_salvar_ambiente.grid(row=1, column=0, padx=(55, 0), pady=(15, 0), sticky="w")
         self.button_apagar_ambiente = customtkinter.CTkButton(self.cria_ambiente, text="Apagar",
-                                                corner_radius=7, command=self.apaga_ambiente_farm,
+                                                corner_radius=7, command=self.apaga_ambiente_Servidores,
                                                 hover_color="#3E3E63",fg_color="#c75416")
         self.button_apagar_ambiente.grid(row=1, column=0, padx=(0, 55), pady=(15, 0), sticky="e")
         self.label_retorno_ambiente = customtkinter.CTkLabel(self.cria_ambiente, text="",width=390, height=130,
@@ -481,14 +482,14 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.label_retorno_ambiente.grid(row=2, column=0, padx=(0, 0), pady=(20, 0))
         return
 
-    def salva_ambiente_farm(self):
+    def salva_ambiente_Servidores(self):
         codigo = self.entry_nome_ambiente.get()
-        pasta_salva_ambiente = "C:\\AcessoRemoto\\Dados\\farm"
+        pasta_salva_ambiente = "C:\\AcessoRemoto\\Dados\\Servidores"
         arquivo_salva_ambiente = os.path.join(pasta_salva_ambiente, f"{codigo}.json")
-        
+
         retorno = ""
         cor_texto = ""
-        
+
         try:
             if os.path.exists(arquivo_salva_ambiente):
                 retorno = "Ambiente já criado."
@@ -505,14 +506,14 @@ class FramePrincipal(customtkinter.CTkTabview):
             cor_texto = "#c70c12"
         self.label_retorno_ambiente.configure(text=retorno, text_color=cor_texto)
 
-    def apaga_ambiente_farm(self):
+    def apaga_ambiente_Servidores(self):
         codigo = self.entry_nome_ambiente.get()
-        pasta_salva_ambiente = "C:\\AcessoRemoto\\Dados\\farm"
+        pasta_salva_ambiente = "C:\\AcessoRemoto\\Dados\\Servidores"
         arquivo_apaga_ambiente = os.path.join(pasta_salva_ambiente, f"{codigo}.json")
-        
+
         retorno = ""
         cor_texto = ""
-        
+
         try:
             if os.path.exists(arquivo_apaga_ambiente):
                 os.remove(arquivo_apaga_ambiente)
@@ -525,98 +526,98 @@ class FramePrincipal(customtkinter.CTkTabview):
             print(f"Erro ao remover ambiente: {e}")
             retorno = "Erro ao remover ambiente."
             cor_texto = "#c70c12"
-        
+
         self.label_retorno_ambiente.configure(text=retorno, text_color=cor_texto)
 
     @staticmethod
-    def ler_ambiente_farm():
-        pasta_farm = "C:\\AcessoRemoto\\Dados\\farm"
+    def ler_ambiente_Servidores():
+        pasta_Servidores = "C:\\AcessoRemoto\\Dados\\Servidores"
         nomes_arquivos = []
 
-        if os.path.exists(pasta_farm):
-            arquivos = os.listdir(pasta_farm)
+        if os.path.exists(pasta_Servidores):
+            arquivos = os.listdir(pasta_Servidores)
             for arquivo in arquivos:
                 if arquivo.endswith(".json"):
                     nomes_arquivos.append(arquivo[:-5])  # Remove a extensão .json
         return nomes_arquivos
 
-    def exibe_ambiente_farm(self):
-        valores = self.ler_ambiente_farm()
-        self.option_farm_cadambiente.configure(values=valores)
+    def exibe_ambiente_Servidores(self):
+        valores = self.ler_ambiente_Servidores()
+        self.option_Servidores_cadambiente.configure(values=valores)
 
-    def salva_servidor_farm(self):
-        ambiente = self.resultado_ambiente_farm.get()
-        nome = self.entry_farm_cadnome.get()
-        ip = self.entry_farm_cadip.get()
-    
-        nomes_arquivos = self.ler_ambiente_farm()
+    def salva_servidor_Servidores(self):
+        ambiente = self.resultado_ambiente_Servidores.get()
+        nome = self.entry_Servidores_cadnome.get()
+        ip = self.entry_Servidores_cadip.get()
+
+        nomes_arquivos = self.ler_ambiente_Servidores()
         if ambiente in nomes_arquivos:
-            arquivo_path = os.path.join("C:\\AcessoRemoto\\Dados\\farm", f"{ambiente}.json")
-    
+            arquivo_path = os.path.join("C:\\AcessoRemoto\\Dados\\Servidores", f"{ambiente}.json")
+
             if os.path.exists(arquivo_path) and os.path.getsize(arquivo_path) > 0:
                 with open(arquivo_path, 'r') as f:
                     data = json.load(f)
             else:
                 data = {}
-    
+
             if nome in data.values() or ip in data.values():
-                self.label_resultado_cria_farm.configure(text=f"O nome '{nome}' ou o IP '{ip}' já existem no arquivo.")
+                self.label_resultado_cria_Servidores.configure(text=f"O nome '{nome}' ou o IP '{ip}' já existem no arquivo.")
                 return
-    
+
             data[nome] = ip
-    
+
             with open(arquivo_path, 'w') as f:
                 json.dump(data, f)
-            self.entry_farm_cadip.delete(0, "end")
-            self.entry_farm_cadip.focus()
-            self.label_resultado_cria_farm.configure(text=f"Servidor {nome} salvo com sucesso.")
+            self.entry_Servidores_cadip.delete(0, "end")
+            self.entry_Servidores_cadip.focus()
+            self.label_resultado_cria_Servidores.configure(text=f"Servidor {nome} salvo com sucesso.")
         else:
-            self.entry_farm_cadnome.delete(0, "end")
-            self.entry_farm_cadip.delete(0, "end")
-            self.entry_farm_cadnome.focus()
-            self.label_resultado_cria_farm.configure(text=f"Arquivo do ambiente '{ambiente}' não encontrado.")
-    
-    def deletar_servidor_farm(self):
-        ambiente = self.resultado_ambiente_farm.get()
-        nome = self.entry_farm_cadnome.get()
-        ip = self.entry_farm_cadip.get()
-    
-        nomes_arquivos = self.ler_ambiente_farm()
+            self.entry_Servidores_cadnome.delete(0, "end")
+            self.entry_Servidores_cadip.delete(0, "end")
+            self.entry_Servidores_cadnome.focus()
+            self.label_resultado_cria_Servidores.configure(text=f"Arquivo do ambiente '{ambiente}' não encontrado.")
+
+    def deletar_servidor_Servidores(self):
+        ambiente = self.resultado_ambiente_Servidores.get()
+        nome = self.entry_Servidores_cadnome.get()
+        ip = self.entry_Servidores_cadip.get()
+
+        nomes_arquivos = self.ler_ambiente_Servidores()
         if ambiente in nomes_arquivos:
-            arquivo_path = os.path.join("C:\\AcessoRemoto\\Dados\\farm", f"{ambiente}.json")
-    
+            arquivo_path = os.path.join("C:\\AcessoRemoto\\Dados\\Servidores", f"{ambiente}.json")
+
             if os.path.exists(arquivo_path) and os.path.getsize(arquivo_path) > 0:
                 with open(arquivo_path, 'r') as f:
                     data = json.load(f)
             else:
-                self.label_resultado_cria_farm.configure(text=f"Arquivo correspondente ao ambiente '{ambiente}' está vazio.")
+                self.label_resultado_cria_Servidores.configure(text=f"Arquivo correspondente ao ambiente '{ambiente}' está vazio.")
                 return
-    
+
             if nome not in data or data[nome] != ip:
-                self.label_resultado_cria_farm.configure(text=f"O nome '{nome}' ou o IP '{ip}' não existem no arquivo.")
+                self.label_resultado_cria_Servidores.configure(text=f"O nome '{nome}' ou o IP '{ip}' não existem no arquivo.")
                 return
-    
+
             del data[nome]
-    
+
             with open(arquivo_path, 'w') as f:
                 json.dump(data, f)
 
-            self.entry_farm_cadnome.delete(0, "end")
-            self.entry_farm_cadip.delete(0, "end")
-            self.entry_farm_cadnome.focus()
-            self.label_resultado_cria_farm.configure(text=f"Servidor {nome} deletado com sucesso.")
+            self.entry_Servidores_cadnome.delete(0, "end")
+            self.entry_Servidores_cadip.delete(0, "end")
+            self.entry_Servidores_cadnome.focus()
+            self.label_resultado_cria_Servidores.configure(text=f"Servidor {nome} deletado com sucesso.")
         else:
-            self.label_resultado_cria_farm.configure(text=f"Arquivo correspondente ao ambiente '{ambiente}' não encontrado.")
+            self.label_resultado_cria_Servidores.configure(text=f"Arquivo correspondente ao ambiente '{ambiente}' não encontrado.")
 
-    def listar_servidor_farm(self):
-        diretorio = "C:\\AcessoRemoto\\Dados\\farm"
+    def listar_servidor_Servidores(self):
+        diretorio = "C:\\AcessoRemoto\\Dados\\Servidores"
         # Lista para armazenar todas as informações dos servidores
         informacoes_servidores = []
         try:
             for arquivo in os.listdir(diretorio):
                 if arquivo.endswith(".json"):
                     arquivo_path = os.path.join(diretorio, arquivo)
-                    
+
                     with open(arquivo_path, 'r') as f:
                         try:
                             data = json.load(f)
@@ -626,29 +627,29 @@ class FramePrincipal(customtkinter.CTkTabview):
                     informacoes_servidores.append(f"Informações do arquivo: {arquivo}\n")
                     for nome, ip in data.items():
                         informacoes_servidores.append(f"Nome: {nome}, IP: {ip}\n")
-            
+
             if not informacoes_servidores:
-                self.label_resultado_cria_farm.configure(text_color="#ff8b26")
-                self.label_resultado_cria_farm.configure(text="Não foram encontrados arquivos no diretório.")
+                self.label_resultado_cria_Servidores.configure(text_color="#ff8b26")
+                self.label_resultado_cria_Servidores.configure(text="Não foram encontrados arquivos no diretório.")
                 return
-                
-            output_path = os.path.join(os.path.expanduser('~'), "Desktop", "todos_os_farms.txt")
+
+            output_path = os.path.join(os.path.expanduser('~'), "Desktop", "todos_os_Servidoress.txt")
             with open(output_path, 'w') as output_file:
                 output_file.writelines(informacoes_servidores)
-            
-            self.label_resultado_cria_farm.configure(text_color="#42f551")
-            self.label_resultado_cria_farm.configure(text="Arquivo 'todos_os_farms.txt' criado na área de trabalho.")
-            
-        except Exception as e:
-            self.label_resultado_cria_farm.configure(text_color="#c70c12")
-            self.label_resultado_cria_farm.configure(text=f"Ocorreu um erro ao criar o arquivo: {str(e)}")
 
-    def atualiza_ambiente_farm(self, event=None):
+            self.label_resultado_cria_Servidores.configure(text_color="#42f551")
+            self.label_resultado_cria_Servidores.configure(text="Arquivo 'todos_os_Servidoress.txt' criado na área de trabalho.")
+
+        except Exception as e:
+            self.label_resultado_cria_Servidores.configure(text_color="#c70c12")
+            self.label_resultado_cria_Servidores.configure(text=f"Ocorreu um erro ao criar o arquivo: {str(e)}")
+
+    def atualiza_ambiente_Servidores(self, event=None):
         # ajusta a lista de ambientes e limpa o label do cadastro
-        self.option_farm_cadambiente.configure(values=[])
-        self.exibe_ambiente_farm()
-        self.exibe_conecta_ambiente_farm()
-        self.label_resultado_cria_farm.configure(text="")
+        self.option_Servidores_cadambiente.configure(values=[])
+        self.exibe_ambiente_Servidores()
+        self.exibe_conecta_ambiente_Servidores()
+        self.label_resultado_cria_Servidores.configure(text="")
 
     @staticmethod
     def atualiza_opcoes(variavel_opcao, salvar_tempo):
@@ -735,56 +736,56 @@ class FramePrincipal(customtkinter.CTkTabview):
                                               corner_radius=15)
         self.but_ok.grid(row=3, column=0, padx=0, pady=0)
 
-        return    
+        return
 
-    def limpa_bunker(self):
+    def limpa_API(self):
         self.textbox_result.configure(state="normal")
         self.textbox_result.delete("0.0", "end")
-        self.entry_bunker.delete(0, "end")
+        self.entry_API.delete(0, "end")
         self.textbox_result.configure(state="disabled")
 
-    def busca_bunker(self):
-        self.codigo_pesquisa = self.entry_bunker.get()
+    def busca_API(self):
+        self.codigo_pesquisa = self.entry_API.get()
         self.textbox_result.configure(state='normal')
-    
+
         def inclui_codigo():
-            url = 'https://bunker-monitor.alterdatasoftware.com.br/api/backup/view?crm='
+            url = '' # inclui a url da API
             crm = self.codigo_pesquisa
             codigo = html.escape(crm)
-    
+
             return codigo, url
-    
+
         def validar_codigo(codigo):
             if not codigo.isdigit():
                 return False
-    
+
             codigo = codigo.replace(" ", "")
-    
+
             if len(codigo) == 0:
                 return False
-    
+
             return True
-    
+
         def gerar_visualizacao(codigo, url):
             resultado = ""
             if validar_codigo(codigo):
                 api = url + codigo
                 response = requests.get(api)
-    
+
                 if response.status_code == 200:
                     data = response.json()
                     for item in data:
                         # Conversão dos dados
                         date_backup = datetime.strptime(item['dateBackup'], '%Y-%m-%dT%H:%M:%S.%fZ')
                         date_upload = datetime.strptime(item['dateUpload'], '%Y-%m-%dT%H:%M:%S.%fZ')
-    
+
                         # Conversão para o formato pt-BR
                         date_backup_br = date_backup.strftime('%d/%m/%Y %H:%M:%S')
                         date_upload_br = date_upload.strftime('%d/%m/%Y %H:%M:%S')
-    
+
                         # Sanitiza a saída antes de exibir
                         basename = html.escape(item['basename'])
-    
+
                         resultado += f"Nome do arquivo: {basename}\n"
                         resultado += f"Data do backup: {date_backup_br}\n"
                         resultado += f"Data do upload: {date_upload_br}\n"
@@ -793,7 +794,7 @@ class FramePrincipal(customtkinter.CTkTabview):
                     resultado = f"Erro ao consultar a API. Código de status: {response.status_code}"
             else:
                 resultado = "Código inválido. Verifique o código digitado"
-    
+
             return resultado
 
         codigo, url = inclui_codigo()
@@ -821,11 +822,11 @@ class FramePrincipal(customtkinter.CTkTabview):
         campos = ["Campo 1", "Campo 2", "Campo 3", "Campo 4", "Campo 5", "Campo 6", "Campo 7", "Campo 8"]
         posicoes = [(0, 0), (2, 0), (4, 0), (6, 0), (0, 0), (2, 0), (4, 0), (6, 0)]
         sticky_posicoes = ["w", "w", "w", "w", "e", "e", "e", "e"]
-        
+
         for i in range(8):
             label = customtkinter.CTkLabel(self.frame_edit_button, text=campos[i], width=200, justify="center")
             label.grid(row=posicoes[i][0], column=posicoes[i][1], padx=15, pady=(15, 5), sticky=sticky_posicoes[i])
-            
+
             entry = customtkinter.CTkEntry(self.frame_edit_button, width=200)
             entry.grid(row=posicoes[i][0] + 1, column=posicoes[i][1], padx=15, pady=5, sticky=sticky_posicoes[i])
             setattr(self, f'entry_edit_button{i+1}', entry)
@@ -854,7 +855,7 @@ class FramePrincipal(customtkinter.CTkTabview):
         self.button_fav7.configure(text=self.valor_edit_button7)
         self.button_fav8.configure(text=self.valor_edit_button8)
 
-        self.salvar_button_fav()        
+        self.salvar_button_fav()
         self.frame_edit_button.destroy()
 
     @staticmethod
@@ -882,13 +883,13 @@ class FramePrincipal(customtkinter.CTkTabview):
     def salvar_button_fav(self):
         pasta_favoritos = "C:\\AcessoRemoto\\Dados"
         arquivo_favoritos = os.path.join(pasta_favoritos, "favoritos.json")
-    
+
         # Lendo o conteúdo atual do arquivo JSON, se existir
         dados_existentes = {}
         if os.path.exists(arquivo_favoritos):
             with open(arquivo_favoritos, "r") as file:
                 dados_existentes = json.load(file)
-    
+
         # Obtendo os novos dados dos botões
         novos_dados = {
             "button_fav1": self.button_fav1.cget("text"),
@@ -900,10 +901,10 @@ class FramePrincipal(customtkinter.CTkTabview):
             "button_fav7": self.button_fav7.cget("text"),
             "button_fav8": self.button_fav8.cget("text")
         }
-    
+
         # Mesclando os dados existentes com os novos dados
         dados_completos = {**dados_existentes, **novos_dados}
-    
+
         # Escrevendo os dados combinados de volta no arquivo JSON
         with open(arquivo_favoritos, "w") as file:
             json.dump(dados_completos, file)
@@ -969,7 +970,7 @@ class FramePrincipal(customtkinter.CTkTabview):
 
         with open(arquivo_favoritos, "w") as file:
             json.dump(dados, file)
-    
+
     @staticmethod
     def exibir_favoritos(self):
         dados_favoritos = self.ler_arquivo_favoritos()
@@ -1014,7 +1015,7 @@ class FramePrincipal(customtkinter.CTkTabview):
                 self.entry_fav8.delete(0, "end")
                 self.entry_fav8.insert(0, dados_favoritos["fav8"])
                 self.entry_fav8.configure(state="disabled")
-    
+
     @staticmethod
     def ler_arquivo_favoritos():
         pasta_favoritos = "C:\\AcessoRemoto\\Dados"
@@ -1054,7 +1055,7 @@ class FramePrincipal(customtkinter.CTkTabview):
                 else:
                     ip = ""
 
-                if ip and ip.startswith("172.16."):
+                if ip and ip.startswith("."): # regra de validação para o padrão de IP
                     try:
                         self.frame_lateral.remover_aviso_certificado(ip)
                         arquivo_rdp = self.frame_lateral.criar_arquivo_rdp(ip, usuario)
@@ -1127,8 +1128,8 @@ class CriarInterface(customtkinter.CTk):
         FramePrincipal.exibir_favoritos(self.sidebar_frameP)
         FramePrincipal.exibir_button_favoritos(self.sidebar_frameP)
         FramePrincipal.exibir_tempo(self.sidebar_frameP)
-        FramePrincipal.exibe_ambiente_farm(self.sidebar_frameP)
-        FramePrincipal.exibe_conecta_ambiente_farm(self.sidebar_frameP)
+        FramePrincipal.exibe_ambiente_Servidores(self.sidebar_frameP)
+        FramePrincipal.exibe_conecta_ambiente_Servidores(self.sidebar_frameP)
 
     def mensagem_de_alertas(self):
         self.tela_de_alerta = customtkinter.CTkToplevel(self)
@@ -1160,9 +1161,9 @@ class CriarInterface(customtkinter.CTk):
     @staticmethod
     def criar_pastas():
         pasta_acesso_remoto = "C:\\AcessoRemoto\\Dados"
-        pasta_farm = "C:\\AcessoRemoto\\Dados\\farm"
+        pasta_Servidores = "C:\\AcessoRemoto\\Dados\\Servidores"
 
-        paths =[pasta_acesso_remoto, pasta_farm]
+        paths =[pasta_acesso_remoto, pasta_Servidores]
         for path in paths:
             if not os.path.exists(path):
                 os.makedirs(path)
