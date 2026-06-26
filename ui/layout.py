@@ -11,7 +11,8 @@ class AppTheme:
         # Catálogo centralizado de temas criativos do sistema
         paletas = {
             "cyberpunk": {
-                "surface": "#1a1a2e",              
+                "surface": "#1a1a2e",   
+                "surface_container": "#242438",           
                 "secondary_container": "#222235",  
                 "primary": "#00d2ff",              
                 "on_primary": ft.Colors.BLACK,     
@@ -115,6 +116,7 @@ class AppTheme:
         return ft.Theme(
             color_scheme=ft.ColorScheme(
                 surface=c["surface"],
+                surface_container=c["surface_container"],
                 secondary_container=c["secondary_container"],
                 primary=c["primary"],
                 on_primary=c["on_primary"],

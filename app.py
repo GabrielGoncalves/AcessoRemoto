@@ -20,6 +20,9 @@ class MainApplication:
         self.db = DatabaseManager()
 
         self.page.theme = AppTheme.get_theme("cyberpunk")
+        self.page.bgcolor = self.page.theme.color_scheme.surface_container
+        self.page.update()
+        #self.page.bgcolor = "#161623"
 
         self.view_dashboard = DashboardView(self.db, on_connect_action=self.disparar_rdp)
         self.view_favorites = ViewFavoritos(self.db)
