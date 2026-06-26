@@ -4,6 +4,7 @@ import ssl
 from database.db_manager import DatabaseManager
 from core.rdp_engine import RDPAngine
 from ui.views.view_dashboard import DashboardView
+from ui.views.view_favorites import ViewFavoritos
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -58,38 +59,9 @@ class MainApplication:
         if index == 0:
             self.view_container.content = DashboardView(self.db, on_connect_action=self.disparar_rdp)
         elif index == 1:
-            self.view_container.content = self._criar_view_favoritos()
+            # Aponta para a classe correta do arquivo view_favorites.py
+            self.view_container.content = ViewFavoritos(self.db)
         self.page.update()
-
-    def _criar_view_favoritos(self):
-        lv_favs = ft.ListView(expand=True, spacing=10)
-        favs = self.db.listar_ambientes()
-        
-        for id_, ip, user, data_favoritado in favs:
-            lv_favs.controls.append(
-                ft.Container(
-                    content=ft.Row([
-                        ft.Icon(ft.Icons.STAR, color="yellow"),
-                        ft.Column([
-                            ft.Text(f"IP: {ip}", weight="bold"),
-                            ft.Text(f"Usuário: {user}", size=12, color=ft.Colors.GREY_400),
-                            ft.Text(f"Data de criação: {data_favoritado}")
-                        ])
-                    ]),
-                    bgcolor="#161623", padding=15, border_radius=10
-                )
-            )
-            
-        if not favs:
-            lv_favs.controls.append(ft.Text("Nenhuma conexão favoritada ainda.", color=ft.Colors.GREY_500, italic=True))
-
-        return ft.Container(
-            content=ft.Column([
-                ft.Text("Suas Conexões Favoritas", size=22, weight="bold"),
-                ft.Divider(color=ft.Colors.GREY_800),
-                lv_favs
-            ]), padding=20, expand=True
-        )
 
     def disparar_rdp(self, ip, user, senha):
         self.page.snack_bar = ft.SnackBar(ft.Text(f"Abrindo RDP para {ip}..."), bgcolor="green")
