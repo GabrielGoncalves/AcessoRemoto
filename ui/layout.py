@@ -22,6 +22,7 @@ class AppTheme:
             },
             "neon_tokyo": {  # Vibe Synthwave, com roxo profundo e rosa choque
                 "surface": "#0f0f1b",
+                "surface_container": "#242438",
                 "surface_variant": "#1a1a2e",
                 "secondary_container": "#252540",
                 "primary": "#ff2a6d",              # Rosa Neon
@@ -32,6 +33,7 @@ class AppTheme:
             },
             "floresta_boreal": {  # Tons de verde escuro e esmeralda, muito relaxante
                 "surface": "#0d1a15",
+                "surface_container": "#242438",
                 "surface_variant": "#162a22",
                 "secondary_container": "#1f3b2f",
                 "primary": "#2ecc71",              # Verde Esmeralda
@@ -42,6 +44,7 @@ class AppTheme:
             },
             "cafe_expresso": {  # Tons amadeirados e quentes (sépia escuro)
                 "surface": "#1c1714",
+                "surface_container": "#242438",
                 "surface_variant": "#2b231f",
                 "secondary_container": "#3e322c",
                 "primary": "#d4a373",              # Cor de Latte/Caramelo
@@ -52,6 +55,7 @@ class AppTheme:
             },
             "dracula_dev": {  # Baseado no famoso tema Drácula de editores de código
                 "surface": "#282a36",
+                "surface_container": "#242438",
                 "surface_variant": "#343746",
                 "secondary_container": "#44475a",
                 "primary": "#bd93f9",              # Roxo suave
@@ -66,6 +70,7 @@ class AppTheme:
             # ==========================================
             "gelo_claro": {  # O claro tradicional, muito profissional
                 "surface": "#f4f5f7",
+                "surface_container": "#242438",
                 "surface_variant": "#ffffff",
                 "secondary_container": "#e2e8f0",
                 "primary": "#0077b6",              # Azul corporativo
@@ -76,6 +81,7 @@ class AppTheme:
             },
             "creme_de_baunilha": {  # Um tema claro aquecido, estilo páginas de livro antigo
                 "surface": "#fdf6e3",              # Bege clarinho
+                "surface_container": "#242438",
                 "surface_variant": "#eee8d5",
                 "secondary_container": "#e1dabb",
                 "primary": "#b58900",              # Mostarda
@@ -90,6 +96,7 @@ class AppTheme:
             # ==========================================
             "cereja_doce": {  # Tons de vinho e vermelho
                 "surface": "#2b1219",
+                "surface_container": "#242438",
                 "surface_variant": "#3d1c28",
                 "secondary_container": "#532537",
                 "primary": "#ff4d6d",
@@ -100,6 +107,7 @@ class AppTheme:
             },
             "outono_fazenda": {  # Tons de laranja e terra
                 "surface": "#2e1c10",
+                "surface_container": "#242438",
                 "surface_variant": "#422918",
                 "secondary_container": "#5c3921",
                 "primary": "#f77f00",

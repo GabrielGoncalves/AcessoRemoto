@@ -19,7 +19,7 @@ class MainApplication:
         self.page.window.height = 750
         self.db = DatabaseManager()
 
-        self.page.theme = AppTheme.get_theme("cyberpunk")
+        self.page.theme = AppTheme.get_theme("floresta_boreal")
         self.page.bgcolor = self.page.theme.color_scheme.surface_container
         self.page.update()
         #self.page.bgcolor = "#161623"
