@@ -6,6 +6,7 @@ from core.rdp_engine import RDPAngine
 from ui.views.view_dashboard import DashboardView
 from ui.views.view_favorites import ViewFavoritos
 from ui.views.view_environments import ViewEnvironments
+from ui.views.view_settings import ViewSettings
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -22,13 +23,13 @@ class MainApplication:
 
         # MELHORIA: Instanciamos as Views uma única vez no construtor para manter o estado dos campos fixos
         self.view_dashboard = DashboardView(self.db, on_connect_action=self.disparar_rdp)
-        self.view_favoritos = ViewFavoritos(self.db)
+        self.view_favorites = ViewFavoritos(self.db)
         self.view_environments = ViewEnvironments(
             db=self.db, 
             on_connect_action=self.disparar_rdp,
             on_redirect_action=self.redirecionar_para_dashboard  # Injeta a função de redirecionar
         )
-
+        self.view_settings = ViewSettings(self.db)
         self.view_container = ft.Container(expand=True)
         
         self.nav_rail = ft.NavigationRail(
@@ -42,7 +43,7 @@ class MainApplication:
                 ft.NavigationRailDestination(icon=ft.Icons.FOLDER_OUTLINED, selected_icon=ft.Icons.FOLDER, label="Ambientes"),
                 ft.NavigationRailDestination(icon=ft.Icons.ACCOUNT_TREE_OUTLINED, selected_icon=ft.Icons.ACCOUNT_TREE, label="API"),
                 ft.NavigationRailDestination(icon=ft.CupertinoIcons.GEAR, selected_icon=ft.CupertinoIcons.GEAR_SOLID, label="Configurações"),
-                ft.NavigationRailDestination(icon=ft.Icons.INFO_OUTLINE, selected_icon=ft.Icons.INFO, label="API")
+                ft.NavigationRailDestination(icon=ft.Icons.INFO_OUTLINE, selected_icon=ft.Icons.INFO, label="Informações")
             ]
         )
         self.nav_rail.on_change = self._nav_changed
@@ -67,9 +68,11 @@ class MainApplication:
         if index == 0:
             self.view_container.content = self.view_dashboard
         elif index == 1:
-            self.view_container.content = self.view_favoritos
+            self.view_container.content = self.view_favorites
         elif index == 2:
             self.view_container.content = self.view_environments
+        elif index == 4:
+            self.view_container.content = self.view_settings
         self.page.update()
 
     def redirecionar_para_dashboard(self, ip, user):
