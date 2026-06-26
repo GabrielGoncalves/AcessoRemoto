@@ -192,3 +192,14 @@ class DashboardView(ft.Container):
         self.update()
         
         self.on_connect_action(ip, user, senha)
+
+    async def preencher_form_externo(self, ip, user):
+        """Método público chamado ao redirecionar acessos de outras telas"""
+        self.txt_ip.value = ip
+        self.txt_user.value = user
+        self.txt_pass.value = ""  # Limpa a senha anterior por segurança
+        self.lv_sugestoes_fav.visible = False  # Garante que a lista de busca inline suma
+        
+        # Joga o foco direto na caixinha da senha
+        await self.txt_pass.focus()
+        self.update()

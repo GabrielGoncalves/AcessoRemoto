@@ -96,7 +96,7 @@ class DatabaseManager:
     def get_conexoes_por_ambiente(self, ambiente_id):
         with self._get_connection() as conn:
             return conn.cursor().execute("""
-                SELECT ca.id, ca.ip, ca.usuario, 
+                SELECT ca.id, ca.nome_exibicao, ca.ip, ca.usuario, 
                        (SELECT COUNT(*) FROM favoritos f WHERE f.ip = ca.ip AND f.usuario = ca.usuario) as seguro_fav
                 FROM conexoes_ambientes ca 
                 WHERE ca.ambiente_id = ?;

@@ -5,11 +5,9 @@ from database.db_manager import DatabaseManager
 from core.rdp_engine import RDPAngine
 from ui.views.view_dashboard import DashboardView
 from ui.views.view_favorites import ViewFavoritos
+from ui.views.view_environments import ViewEnvironments
 
 ssl._create_default_https_context = ssl._create_unverified_context
-
-db = DatabaseManager()
-dashboard = DashboardView(db=db, on_connect_action=RDPAngine.executar)
 
 class MainApplication:
     def __init__(self, page: ft.Page):
@@ -21,6 +19,15 @@ class MainApplication:
         self.page.window.height = 650
 
         self.db = DatabaseManager()
+
+        # MELHORIA: Instanciamos as Views uma única vez no construtor para manter o estado dos campos fixos
+        self.view_dashboard = DashboardView(self.db, on_connect_action=self.disparar_rdp)
+        self.view_favoritos = ViewFavoritos(self.db)
+        self.view_environments = ViewEnvironments(
+            db=self.db, 
+            on_connect_action=self.disparar_rdp,
+            on_redirect_action=self.redirecionar_para_dashboard  # Injeta a função de redirecionar
+        )
 
         self.view_container = ft.Container(expand=True)
         
@@ -56,11 +63,22 @@ class MainApplication:
         self._carregar_view(int(e.data))
 
     def _carregar_view(self, index):
+        # Apenas alteramos o ponteiro do container para a instância existente (preserva dados digitados)
         if index == 0:
-            self.view_container.content = DashboardView(self.db, on_connect_action=self.disparar_rdp)
+            self.view_container.content = self.view_dashboard
         elif index == 1:
-            # Aponta para a classe correta do arquivo view_favorites.py
-            self.view_container.content = ViewFavoritos(self.db)
+            self.view_container.content = self.view_favoritos
+        elif index == 2:
+            self.view_container.content = self.view_environments
+        self.page.update()
+
+    def redirecionar_para_dashboard(self, ip, user):
+        """Muda visualmente para a aba Dashboard e injeta os dados do servidor selecionado de forma assíncrona"""
+        self.nav_rail.selected_index = 0
+        self.view_container.content = self.view_dashboard
+        
+        # Executa de forma segura a tarefa assíncrona de preenchimento e foco na senha do Dashboard
+        self.page.run_task(self.view_dashboard.preencher_form_externo, ip, user)
         self.page.update()
 
     def disparar_rdp(self, ip, user, senha):
