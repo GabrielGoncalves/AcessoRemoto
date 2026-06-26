@@ -7,6 +7,7 @@ from ui.views.view_dashboard import DashboardView
 from ui.views.view_favorites import ViewFavoritos
 from ui.views.view_environments import ViewEnvironments
 from ui.views.view_settings import ViewSettings
+from ui.layout import AppTheme
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
@@ -14,14 +15,12 @@ class MainApplication:
     def __init__(self, page: ft.Page):
         self.page = page
         self.page.title = "Remote Craft"
-        self.page.theme_mode = ft.ThemeMode.DARK
-        self.page.bgcolor = "#1a1a2e"
         self.page.window.width = 900
-        self.page.window.height = 650
-
+        self.page.window.height = 750
         self.db = DatabaseManager()
 
-        # MELHORIA: Instanciamos as Views uma única vez no construtor para manter o estado dos campos fixos
+        self.page.theme = AppTheme.get_theme("cyberpunk")
+
         self.view_dashboard = DashboardView(self.db, on_connect_action=self.disparar_rdp)
         self.view_favorites = ViewFavoritos(self.db)
         self.view_environments = ViewEnvironments(
@@ -36,7 +35,6 @@ class MainApplication:
             selected_index=0,
             label_type=ft.NavigationRailLabelType.ALL,
             min_width=100,
-            bgcolor="#161623",
             destinations=[
                 ft.NavigationRailDestination(icon=ft.Icons.DASHBOARD_OUTLINED, selected_icon=ft.Icons.DASHBOARD, label="Dashboard"),
                 ft.NavigationRailDestination(icon=ft.Icons.STAR_BORDER, selected_icon=ft.Icons.STAR, label="Favoritos"),

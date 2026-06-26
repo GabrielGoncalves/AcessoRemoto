@@ -24,8 +24,7 @@ class ViewFavoritos(ft.Container):
                     "Novo Favorito",
                     icon=ft.Icons.ADD,
                     on_click=self.abrir_modal_cadastro,
-                    bgcolor="#4e54c8",
-                    color="white"
+                    bgcolor="ft.Colors.SECONDARY"
                 )
             ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
             ft.Divider(color=ft.Colors.GREY_800),
@@ -57,7 +56,7 @@ class ViewFavoritos(ft.Container):
                         on_click=lambda e, fid=id_: self.excluir_favorito(fid)
                     )
                 ),
-                bgcolor="#222235",
+                bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
                 border_radius=8
             )
             self.lista_favoritos.controls.append(linha)

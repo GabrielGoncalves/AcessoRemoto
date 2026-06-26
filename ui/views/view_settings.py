@@ -59,7 +59,7 @@ class ViewSettings(ft.Container):
                             ft.Switch(label="Ativar 'Senha de Sessão' (Manter na memória RAM até fechar o app)", value=True),
                             ft.Switch(label="Iniciar o RemoteCraft junto com a inicialização do Sistema O.S.", value=False),
                         ]), padding=15
-                    ), bgcolor="#161623"
+                    ), bgcolor=ft.Colors.SURFACE
                 ),
                 ft.Card(
                     content=ft.Container(
@@ -68,13 +68,13 @@ class ViewSettings(ft.Container):
                             ft.Text("Gere senhas robustas otimizadas para ambientes RDP, SSH e APIs.", size=12, color=ft.Colors.GREY_400),
                             ft.Divider(color=ft.Colors.GREY_800),
                             ft.Row([
-                                ft.TextField(label="Senha Gerada", read_only=True, expand=True, border_color="#4e54c8"),
-                                ft.IconButton(ft.Icons.REFRESH, tooltip="Gerar Nova", icon_color="#00d2ff"),
+                                ft.TextField(label="Senha Gerada", read_only=True, expand=True, border_color="ft.Colors.SECONDARY"),
+                                ft.IconButton(ft.Icons.REFRESH, tooltip="Gerar Nova", icon_color="ft.Colors.PRIMARY"),
                                 ft.IconButton(ft.Icons.COPY, tooltip="Copiar", icon_color="green"),
                             ]),
                             ft.Slider(min=8, max=32, divisions=24, label="Comprimento: {value} caracteres", value=16),
                         ]), padding=15
-                    ), bgcolor="#161623"
+                    ), bgcolor=ft.Colors.SURFACE
                 )
             ], spacing=15), padding=15
         )
@@ -92,7 +92,7 @@ class ViewSettings(ft.Container):
                             ft.IconButton(ft.Icons.ADD, icon_color="green")
                         ]),
                         ft.ListView(expand=True, spacing=5) # Aqui listaremos os usuários cadastrados
-                    ]), expand=1, bgcolor="#161623", padding=15, border_radius=8
+                    ]), expand=1, bgcolor=ft.Colors.SURFACE, padding=15, border_radius=8
                 ),
                 # Sub-coluna: Cadastro Rápido de Domínios
                 ft.Container(
@@ -104,7 +104,7 @@ class ViewSettings(ft.Container):
                             ft.IconButton(ft.Icons.ADD, icon_color="green")
                         ]),
                         ft.ListView(expand=True, spacing=5) # Aqui listaremos os domínios cadastrados
-                    ]), expand=1, bgcolor="#161623", padding=15, border_radius=8
+                    ]), expand=1, bgcolor=ft.Colors.SURFACE, padding=15, border_radius=8
                 )
             ], spacing=15), padding=15
         )
@@ -119,13 +119,13 @@ class ViewSettings(ft.Container):
                             ft.Text("Importe, exporte ou agende rotinas para proteger seus dados locais.", size=12, color=ft.Colors.GREY_400),
                             ft.Divider(color=ft.Colors.GREY_800),
                             ft.Row([
-                                ft.ElevatedButton("Importar JSON/CSV", icon=ft.Icons.UPLOAD_FILE, bgcolor="#4e54c8", color="white"),
-                                ft.ElevatedButton("Exportar Dados", icon=ft.Icons.DOWNLOAD, bgcolor="#222235", color="white"),
+                                ft.ElevatedButton("Importar JSON/CSV", icon=ft.Icons.UPLOAD_FILE, bgcolor="ft.Colors.SECONDARY"),
+                                ft.ElevatedButton("Exportar Dados", icon=ft.Icons.DOWNLOAD, bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
                             ], spacing=15),
                             ft.Divider(color=ft.Colors.GREY_800),
                             ft.Switch(label="Ativar Rotina Automática de Backup Diário", value=False),
                         ]), padding=15
-                    ), bgcolor="#161623"
+                    ), bgcolor=ft.Colors.SURFACE
                 ),
                 ft.Card(
                     content=ft.Container(
@@ -139,16 +139,16 @@ class ViewSettings(ft.Container):
                                     ft.dropdown.Option("dark", "Modo Escuro (Cyberpunk Blue)"),
                                     ft.dropdown.Option("light", "Modo Claro (Tradicional)"),
                                 ],
-                                border_color="#4e54c8"
+                                border_color="ft.Colors.SECONDARY"
                             )
                         ]), padding=15
-                    ), bgcolor="#161623"
+                    ), bgcolor=ft.Colors.SURFACE
                 )
             ], spacing=15), padding=15
         )
 
     def _criar_aba_avancado(self):
-        txt_api_endpoint = ft.TextField(label="Custom API Endpoint URL", border_color="#4e54c8", disabled=True, value="https://api.remotecraft.internal/v1")
+        txt_api_endpoint = ft.TextField(label="Custom API Endpoint URL", border_color="ft.Colors.SECONDARY", disabled=True, value="https://api.remotecraft.internal/v1")
         
         def toggle_dev_mode(e):
             txt_api_endpoint.disabled = not e.control.value
@@ -166,11 +166,11 @@ class ViewSettings(ft.Container):
                             ft.Divider(color=ft.Colors.GREY_800),
                             txt_api_endpoint,
                             ft.Row([
-                                ft.ElevatedButton("Testar Endpoint", icon=ft.Icons.NETWORK_CHECK, bgcolor="green", color="white"),
-                                ft.ElevatedButton("Resetar Padrões", icon=ft.Icons.RESTORE, bgcolor=ft.Colors.RED_400, color="white"),
+                                ft.ElevatedButton("Testar Endpoint", icon=ft.Icons.NETWORK_CHECK, bgcolor="green"),
+                                ft.ElevatedButton("Resetar Padrões", icon=ft.Icons.RESTORE, bgcolor=ft.Colors.RED_400),
                             ], spacing=15)
                         ]), padding=15
-                    ), bgcolor="#161623"
+                    ), bgcolor=ft.Colors.SURFACE
                 )
             ], spacing=15), padding=15
         )

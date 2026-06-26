@@ -1,5 +1,7 @@
 import flet as ft
 from database.db_manager import DatabaseManager
+from ui.components.inputs import ModernTextField
+from ui.components.custom_buttons import PrimaryButton
 
 class DashboardView(ft.Container):
     def __init__(self, db: DatabaseManager, on_connect_action):
@@ -8,25 +10,27 @@ class DashboardView(ft.Container):
         self.on_connect_action = on_connect_action
         self.expand = True
         
-        # O campo de IP agora faz o papel de Busca (on_change) e Transição (on_submit)
         self.txt_ip = ft.TextField(
-            label="IP, Hostname ou Favorito", 
-            border_color="#4e54c8", 
+            label="IP / Hostname", 
             autofocus=True, 
             prefix_icon=ft.Icons.SEARCH,
             on_change=self._pesquisar_favorito_inline,
             on_submit=self._focar_user
         )
         
-        # Container de sugestões com altura limitada que começa invisível
-        self.lv_sugestoes_fav = ft.ListView(height=120, spacing=5, visible=False)
+        self.txt_user = ft.TextField(
+            label="Usuário", 
+            on_submit=self._focar_senha)
         
-        self.txt_user = ft.TextField(label="Usuário", border_color="#4e54c8", on_submit=self._focar_senha)
-        self.txt_pass = ft.TextField(label="Senha", password=True, can_reveal_password=True, border_color="#4e54c8", on_submit=self._btn_conectar_clicked)
+        self.txt_pass = ft.TextField(
+            label="Senha", 
+            password=True, 
+            can_reveal_password=True, 
+            on_submit=self._btn_conectar_clicked)
         
+        self.lv_sugestoes_fav = ft.ListView(height=80, spacing=5, visible=False)
         self.chk_favorito = ft.Checkbox(label="Marcar como Favorito", value=False)
         self.lv_historico = ft.ListView(expand=True, spacing=10)
-
         self.build_ui()
 
     def build_ui(self):
@@ -35,31 +39,28 @@ class DashboardView(ft.Container):
                 ft.Row([ft.Text("Acesso Rápido", size=18, weight=ft.FontWeight.BOLD)]),
                 
                 self.txt_ip,
-                self.lv_sugestoes_fav, # Fica logo abaixo do IP
+                self.lv_sugestoes_fav,
                 self.txt_user,
                 self.txt_pass,
                 self.chk_favorito,
                 ft.Divider(height=10, color=ft.Colors.TRANSPARENT),
                 
-                ft.ElevatedButton(
-                    content=ft.Row([
-                        ft.Icon(ft.Icons.PLAY_ARROW),
-                        ft.Text("Conectar")
-                    ], alignment=ft.MainAxisAlignment.CENTER),
-                    color="white", 
-                    bgcolor="#00d2ff",
+                PrimaryButton(
+                    text="Conectar",
+                    icon_name=ft.Icons.PLAY_ARROW,
                     on_click=self._btn_conectar_clicked
                 )
+                
             ], spacing=12),
-            padding=20, bgcolor="#161623", border_radius=12, expand=1
+            padding=20, bgcolor=ft.Colors.SURFACE, border_radius=12, expand=1
         )
 
         col_historico = ft.Container(
             content=ft.Column([
-                ft.Row([ft.Icon(ft.Icons.HISTORY, color="#00d2ff"), ft.Text("Conexões Recentes", size=18, weight=ft.FontWeight.BOLD)]),
+                ft.Row([ft.Icon(ft.Icons.HISTORY, color=ft.Colors.PRIMARY), ft.Text("Conexões Recentes", size=18, weight=ft.FontWeight.BOLD)]),
                 self.lv_historico
             ]),
-            padding=20, bgcolor="#161623", border_radius=12, expand=1
+            padding=20, bgcolor=ft.Colors.SURFACE, border_radius=12, expand=1
         )
 
         self.content = ft.Row([col_form, col_historico], spacing=15, expand=True)
@@ -67,7 +68,6 @@ class DashboardView(ft.Container):
     def did_mount(self):
         self._atualizar_lista_historico()
 
-    # --- Lógica Unificada: Busca no próprio campo de IP ---
     def _pesquisar_favorito_inline(self, e):
         texto = e.data.strip().lower()
         
@@ -96,7 +96,7 @@ class DashboardView(ft.Container):
                                 ft.Text(f"{ip} | {user}", size=11, color=ft.Colors.GREY_400)
                             ], spacing=2, expand=True)
                         ]),
-                        bgcolor="#222235",
+                        bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
                         padding=8,
                         border_radius=6,
                         data={"ip": ip, "user": user},
@@ -104,7 +104,6 @@ class DashboardView(ft.Container):
                     )
                 )
         else:
-            # Se não achou favorito, esconde a lista (usuário está digitando um IP novo)
             self.lv_sugestoes_fav.visible = False
             
         self.update()
@@ -121,9 +120,7 @@ class DashboardView(ft.Container):
         await self.txt_pass.focus()
         self.update()
 
-    # --- Funções de transição de foco ---
     async def _focar_user(self, e):
-        # Esconde a lista caso o usuário dê enter no meio de uma busca
         self.lv_sugestoes_fav.visible = False 
         self.update()
         await self.txt_user.focus()
@@ -131,7 +128,6 @@ class DashboardView(ft.Container):
     async def _focar_senha(self, e):
         await self.txt_pass.focus()
 
-    # --- Lógica do histórico ---
     def _atualizar_lista_historico(self):
         self.lv_historico.controls.clear()
         historico = self.db.listar_historico(limite=10)
@@ -142,10 +138,10 @@ class DashboardView(ft.Container):
             self.lv_historico.controls.append(
                 ft.Container(
                     content=ft.Row([
-                        ft.Icon(ft.Icons.MONITOR, color=ft.Colors.YELLOW_700 if is_fav else "#00d2ff"),
+                        ft.Icon(ft.Icons.MONITOR, color=ft.Colors.YELLOW_700 if is_fav else ft.Colors.PRIMARY),
                         ft.Column([
                             ft.Text(f"IP: {ip}", weight=ft.FontWeight.BOLD),
-                            ft.Text(f"User: {user}", size=12, color=ft.Colors.GREY_400)
+                            ft.Text(f"User: {user}", size=12, color=ft.Colors.ON_SURFACE_VARIANT)
                         ], expand=True),
                         ft.IconButton(
                             icon=ft.Icons.ARROW_FORWARD,
@@ -155,7 +151,8 @@ class DashboardView(ft.Container):
                             on_click=self._preencher_form
                         )
                     ]),
-                    bgcolor="#222235", padding=10, border_radius=8
+                    bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
+                    padding=10, border_radius=8
                 )
             )
         self.update()
@@ -165,7 +162,7 @@ class DashboardView(ft.Container):
         self.txt_ip.value = dados["ip"]
         self.txt_user.value = dados["user"]
         self.txt_pass.value = ""
-        self.lv_sugestoes_fav.visible = False # Garante que a lista feche
+        self.lv_sugestoes_fav.visible = False
         await self.txt_pass.focus()
         self.update()
 
@@ -197,9 +194,8 @@ class DashboardView(ft.Container):
         """Método público chamado ao redirecionar acessos de outras telas"""
         self.txt_ip.value = ip
         self.txt_user.value = user
-        self.txt_pass.value = ""  # Limpa a senha anterior por segurança
-        self.lv_sugestoes_fav.visible = False  # Garante que a lista de busca inline suma
+        self.txt_pass.value = "" 
+        self.lv_sugestoes_fav.visible = False
         
-        # Joga o foco direto na caixinha da senha
         await self.txt_pass.focus()
         self.update()

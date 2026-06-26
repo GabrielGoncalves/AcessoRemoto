@@ -30,13 +30,13 @@ class ViewEnvironments(ft.Container):
             content=ft.Column([
                 ft.Row([
                     ft.Text("Ambientes", size=20, weight=ft.FontWeight.BOLD),
-                    ft.IconButton(ft.Icons.ADD, icon_color="#00d2ff", tooltip="Novo Ambiente", on_click=self.abrir_modal_ambiente)
+                    ft.IconButton(ft.Icons.ADD, icon_color="ft.Colors.PRIMARY", tooltip="Novo Ambiente", on_click=self.abrir_modal_ambiente)
                 ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                 ft.Divider(color=ft.Colors.GREY_800),
                 self.lv_ambientes
             ], expand=True),
             expand=1,
-            bgcolor="#161623",
+            bgcolor=ft.Colors.SURFACE,
             padding=15,
             border_radius=12
         )
@@ -45,7 +45,7 @@ class ViewEnvironments(ft.Container):
         col_detail = ft.Container(
             content=self.col_detalhes,
             expand=2,
-            bgcolor="#161623",
+            bgcolor=ft.Colors.SURFACE,
             padding=15,
             border_radius=12
         )
@@ -71,7 +71,7 @@ class ViewEnvironments(ft.Container):
             self.lv_ambientes.controls.append(
                 ft.Container(
                     content=ft.Row([
-                        ft.Icon(ft.Icons.FOLDER, color="#4e54c8" if not is_selected else "#00d2ff"),
+                        ft.Icon(ft.Icons.FOLDER, color="ft.Colors.SECONDARY" if not is_selected else "ft.Colors.PRIMARY"),
                         ft.Text(nome, weight=ft.FontWeight.BOLD if is_selected else ft.FontWeight.NORMAL, expand=True),
                         ft.IconButton(
                             ft.Icons.DELETE_OUTLINE, 
@@ -81,7 +81,7 @@ class ViewEnvironments(ft.Container):
                             on_click=lambda e, aid=id_: self.excluir_ambiente(aid)
                         )
                     ]),
-                    bgcolor="#222235" if is_selected else "transparent",
+                    bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST if is_selected else "transparent",
                     padding=10,
                     border_radius=8,
                     on_click=lambda e, aid=id_, anome=nome: self.selecionar_ambiente(aid, anome)
@@ -113,7 +113,7 @@ class ViewEnvironments(ft.Container):
             self.lv_conexoes.controls.append(
                 ft.Container(
                     content=ft.Row([
-                        ft.Icon(ft.Icons.MONITOR, color=ft.Colors.YELLOW_700 if is_fav else "#00d2ff"),
+                        ft.Icon(ft.Icons.MONITOR, color=ft.Colors.YELLOW_700 if is_fav else "ft.Colors.PRIMARY"),
                         ft.Column([
                             ft.Text(nome_exibicao, weight=ft.FontWeight.BOLD),
                             ft.Text(f"IP: {ip} | User: {user}", size=12, color=ft.Colors.GREY_400)
@@ -126,7 +126,7 @@ class ViewEnvironments(ft.Container):
                             on_click=self._disparar_conexao_rdp
                         )
                     ]),
-                    bgcolor="#222235",
+                    bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
                     padding=12,
                     border_radius=8
                 )
@@ -152,8 +152,7 @@ class ViewEnvironments(ft.Container):
                     ft.ElevatedButton(
                         "Vincular Acesso",
                         icon=ft.Icons.ADD,
-                        bgcolor="#4e54c8",
-                        color="white",
+                        bgcolor="ft.Colors.SECONDARY",
                         on_click=self.abrir_modal_conexao
                     )
                 ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
