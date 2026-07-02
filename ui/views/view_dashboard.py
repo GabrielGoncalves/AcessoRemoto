@@ -108,6 +108,7 @@ class DashboardView(ft.Container):
             
         self.update()
 
+    # CORREÇÃO: Função assíncrona com await para evitar o RuntimeWarning
     async def _carregar_favorito_selecionado(self, e):
         dados = e.control.data
         self.txt_ip.value = dados["ip"]
@@ -120,13 +121,15 @@ class DashboardView(ft.Container):
         await self.txt_pass.focus()
         self.update()
 
+    # CORREÇÃO: Função assíncrona com await para evitar o RuntimeWarning
     async def _focar_user(self, e):
         self.lv_sugestoes_fav.visible = False 
         self.update()
         await self.txt_user.focus()
 
+    # CORREÇÃO: Adicionado o await necessário
     async def _focar_senha(self, e):
-        await self.txt_pass.focus()
+         await self.txt_pass.focus()
 
     def _atualizar_lista_historico(self):
         self.lv_historico.controls.clear()
@@ -145,7 +148,7 @@ class DashboardView(ft.Container):
                         ], expand=True),
                         ft.IconButton(
                             icon=ft.Icons.ARROW_FORWARD,
-                            icon_color="green",
+                            icon_color=ft.Colors.PRIMARY,
                             tooltip="Preencher dados",
                             data={"ip": ip, "user": user}, 
                             on_click=self._preencher_form
@@ -166,8 +169,13 @@ class DashboardView(ft.Container):
         await self.txt_pass.focus()
         self.update()
 
-    # --- Ação principal ---
+
+    # ==========================================
+    # LÓGICA DE CONEXÃO E SEGURANÇA (LEMBRAR SENHA)
+    # ==========================================
+
     async def _btn_conectar_clicked(self, e):
+        """Valida os campos de preenchimento e dispara a conexão diretamente."""
         if not self.txt_ip.value:
             await self.txt_ip.focus()
             return
@@ -179,6 +187,11 @@ class DashboardView(ft.Container):
         user = self.txt_user.value.strip()
         senha = self.txt_pass.value
 
+        self._disparar_conexao_rdp(ip, user, senha)
+
+
+    def _disparar_conexao_rdp(self, ip, user, senha):
+        """Aplica a regra de reter ou limpar a senha e invoca o RDP."""
         if self.chk_favorito.value:
             self.db.adicionar_favorito(ip, ip, user)
             
@@ -186,9 +199,19 @@ class DashboardView(ft.Container):
         self._atualizar_lista_historico()
         
         self.lv_sugestoes_fav.visible = False
+        
+        # VERIFICAÇÃO DA FLAG:
+        # Se a flag for "0" (Inativa), limpamos o campo de texto por segurança.
+        # Se for "1" (Ativa), mantemos o conteúdo intacto na caixa.
+        lembrar_senha = self.db.obter_configuracao("exigir_senha_sessao", "0")
+        if lembrar_senha == "0":
+            self.txt_pass.value = ""
+            
         self.update()
         
+        # Dispara o método main do app.py que fará a mágica acontecer no SO
         self.on_connect_action(ip, user, senha)
+
 
     async def preencher_form_externo(self, ip, user):
         """Método público chamado ao redirecionar acessos de outras telas"""
