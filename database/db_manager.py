@@ -10,12 +10,48 @@ class DatabaseManager:
         return sqlite3.connect(DB_NAME, check_same_thread=False)
 
     def _init_db(self):
-        """Cria as tabelas relacionais se elas não existirem"""
+        """Cria as tabelas relacionais e limpa esquemas obsoletos"""
         with self._get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute("PRAGMA foreign_keys = ON;")
             
-            # Tabela de Ambientes (Grupos)
+            # ==========================================
+            # 1. LIMPEZA DE TABELAS ANTIGAS (MIGRAÇÃO)
+            # ==========================================
+            cursor.execute("DROP TABLE IF EXISTS config_perfil;")
+            cursor.execute("DROP TABLE IF EXISTS config_tempo;")
+            cursor.execute("DROP TABLE IF EXISTS config_sistema;")
+            
+            # ==========================================
+            # 2. CONFIGURAÇÕES GERAIS (CHAVE-VALOR)
+            # ==========================================
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS configuracoes (
+                    chave TEXT PRIMARY KEY,
+                    valor TEXT
+                );
+            """)
+
+            # ==========================================
+            # 3. IDENTIDADES (ENTIDADES ESTRUTURADAS)
+            # ==========================================
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS usuarios_recorrentes (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    nome TEXT NOT NULL UNIQUE
+                );
+            """)
+            
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS dominios_corporativos (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    dominio TEXT NOT NULL UNIQUE
+                );
+            """)
+            
+            # ==========================================
+            # 4. AMBIENTES E CONEXÕES (ORIGINAIS MANTIDAS)
+            # ==========================================
             cursor.execute("""
                 CREATE TABLE IF NOT EXISTS ambientes (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -54,19 +90,87 @@ class DatabaseManager:
                 );
             """)
             
-            cursor.execute("CREATE TABLE IF NOT EXISTS config_perfil (id INTEGER PRIMARY KEY, nome_perfil TEXT, resolucao TEXT, tela_cheia INTEGER);")
-            cursor.execute("CREATE TABLE IF NOT EXISTS config_tempo (id INTEGER PRIMARY KEY, timeout_segundos INTEGER, keep_alive INTEGER);")
-            cursor.execute("CREATE TABLE IF NOT EXISTS config_sistema (id INTEGER PRIMARY KEY, tema_escuro INTEGER);")
             conn.commit()
             
-        # Agora o método existe!
         self._seed_initial_data()
 
     def _seed_initial_data(self):
-        """Método para popular dados iniciais se necessário (Evita o AttributeError)"""
-        pass # Você pode colocar inserts de configurações padrão aqui se quiser
+        """Popula os dados padrões da aplicação na primeira execução"""
+        with self._get_connection() as conn:
+            # Garante que o sistema inicie com o tema cyberpunk se for a primeira vez
+            conn.cursor().execute("INSERT OR IGNORE INTO configuracoes (chave, valor) VALUES ('tema', 'cyberpunk');")
+            conn.commit()
 
-    # --- AMBIENTES E CONEXÕES ---
+
+    # ==========================================
+    # MÉTODOS DE CONFIGURAÇÕES (CHAVE-VALOR)
+    # ==========================================
+    def obter_configuracao(self, chave, valor_padrao=None):
+        """Método genérico para buscar qualquer configuração (Tema, Timeout, Flag de Senha)"""
+        with self._get_connection() as conn:
+            res = conn.cursor().execute("SELECT valor FROM configuracoes WHERE chave = ?", (chave,)).fetchone()
+            return res[0] if res else valor_padrao
+
+    def salvar_configuracao(self, chave, valor):
+        """Método genérico para salvar qualquer configuração no formato chave-valor"""
+        with self._get_connection() as conn:
+            conn.cursor().execute("""
+                INSERT OR REPLACE INTO configuracoes (chave, valor)
+                VALUES (?, ?)
+            """, (chave, str(valor)))
+            conn.commit()
+
+    # Atalhos semânticos para o Tema (usados no app.py e view_settings.py)
+    def obter_tema(self) -> str:
+        return self.obter_configuracao("tema", "cyberpunk")
+
+    def salvar_tema(self, nome_tema: str):
+        self.salvar_configuracao("tema", nome_tema)
+
+
+    # ==========================================
+    # MÉTODOS DE IDENTIDADES
+    # ==========================================
+    def adicionar_usuario(self, nome: str) -> bool:
+        try:
+            with self._get_connection() as conn:
+                conn.cursor().execute("INSERT INTO usuarios_recorrentes (nome) VALUES (?);", (nome,))
+                conn.commit()
+                return True
+        except sqlite3.IntegrityError:
+            return False
+
+    def listar_usuarios(self):
+        with self._get_connection() as conn:
+            return conn.cursor().execute("SELECT id, nome FROM usuarios_recorrentes ORDER BY nome;").fetchall()
+
+    def excluir_usuario(self, user_id: int):
+        with self._get_connection() as conn:
+            conn.cursor().execute("DELETE FROM usuarios_recorrentes WHERE id = ?;", (user_id,))
+            conn.commit()
+
+    def adicionar_dominio(self, dominio: str) -> bool:
+        try:
+            with self._get_connection() as conn:
+                conn.cursor().execute("INSERT INTO dominios_corporativos (dominio) VALUES (?);", (dominio,))
+                conn.commit()
+                return True
+        except sqlite3.IntegrityError:
+            return False
+
+    def listar_dominios(self):
+        with self._get_connection() as conn:
+            return conn.cursor().execute("SELECT id, dominio FROM dominios_corporativos ORDER BY dominio;").fetchall()
+
+    def excluir_dominio(self, dom_id: int):
+        with self._get_connection() as conn:
+            conn.cursor().execute("DELETE FROM dominios_corporativos WHERE id = ?;", (dom_id,))
+            conn.commit()
+
+
+    # ==========================================
+    # MÉTODOS: AMBIENTES E CONEXÕES (MANTIDOS)
+    # ==========================================
     def adicionar_ambiente(self, nome):
         try:
             with self._get_connection() as conn: 
@@ -102,7 +206,10 @@ class DatabaseManager:
                 WHERE ca.ambiente_id = ?;
             """, (ambiente_id,)).fetchall()
 
-    # --- FAVORITOS ---
+
+    # ==========================================
+    # MÉTODOS: FAVORITOS (MANTIDOS)
+    # ==========================================
     def adicionar_favorito(self, nome, ip, usuario):
         with self._get_connection() as conn: 
             conn.cursor().execute("""
@@ -126,7 +233,10 @@ class DatabaseManager:
             conn.cursor().execute("DELETE FROM favoritos WHERE id = ?;", (fav_id,))
             conn.commit()
 
-    # --- HISTÓRICO ---
+
+    # ==========================================
+    # MÉTODOS: HISTÓRICO (MANTIDOS)
+    # ==========================================
     def registrar_historico(self, nome, ip, usuario):
         with self._get_connection() as conn: 
             cursor = conn.cursor()
@@ -137,7 +247,7 @@ class DatabaseManager:
             conn.commit()
 
     def listar_historico(self, limite=10):
-        with self._get_connection() as conn: # Usando _get_connection correto
+        with self._get_connection() as conn:
             return conn.cursor().execute("""
                 SELECT h.id, h.nome_exibicao, h.ip, h.usuario,
                        (SELECT COUNT(*) FROM favoritos f WHERE f.ip = h.ip AND f.usuario = h.usuario) as e_favorito
