@@ -19,7 +19,8 @@ class MainApplication:
         self.page.window.height = 750
         self.db = DatabaseManager()
 
-        self.page.theme = AppTheme.get_theme("cyberpunk")
+        tema_salvo = self.db.obter_tema()
+        self.page.theme = AppTheme.get_theme(tema_salvo)
         self.page.bgcolor = self.page.theme.color_scheme.surface_container
         self.page.update()
         #self.page.bgcolor = "#161623"
@@ -29,7 +30,7 @@ class MainApplication:
         self.view_environments = ViewEnvironments(
             db=self.db, 
             on_connect_action=self.disparar_rdp,
-            on_redirect_action=self.redirecionar_para_dashboard  # Injeta a função de redirecionar
+            on_redirect_action=self.redirecionar_para_dashboard
         )
         self.view_settings = ViewSettings(self.db)
         self.view_container = ft.Container(expand=True)
@@ -65,7 +66,6 @@ class MainApplication:
         self._carregar_view(int(e.data))
 
     def _carregar_view(self, index):
-        # Apenas alteramos o ponteiro do container para a instância existente (preserva dados digitados)
         if index == 0:
             self.view_container.content = self.view_dashboard
         elif index == 1:
@@ -81,7 +81,6 @@ class MainApplication:
         self.nav_rail.selected_index = 0
         self.view_container.content = self.view_dashboard
         
-        # Executa de forma segura a tarefa assíncrona de preenchimento e foco na senha do Dashboard
         self.page.run_task(self.view_dashboard.preencher_form_externo, ip, user)
         self.page.update()
 

@@ -2,15 +2,14 @@ import flet as ft
 
 class AppTheme:
     """
-    Centraliza a engine de temas do RemoteCraft.
-    Para adicionar um novo tema, basta registrar sua paleta de cores no catálogo.
+    Centralizador da engine de temas.
+    Para adicionar um novo tema, basta registrar sua paleta de cores no catálogo e criar o dropdown no view_settings.
     """
     
     @staticmethod
     def get_theme(nome_tema: str) -> ft.Theme:
-        # Catálogo centralizado de temas criativos do sistema
         paletas = {
-            "cyberpunk": {
+            "cyberpunk": {  # Tema padrão tons de azul 
                 "surface": "#1a1a2e",   
                 "surface_container": "#242438",           
                 "secondary_container": "#222235",  
@@ -20,25 +19,25 @@ class AppTheme:
                 "on_surface": ft.Colors.WHITE,     
                 "on_surface_variant": "#e2e8f0"    
             },
-            "neon_tokyo": {  # Vibe Synthwave, com roxo profundo e rosa choque
+            "neon_tokyo": {  # Roxo profundo e rosa choque
                 "surface": "#0f0f1b",
                 "surface_container": "#252540",
                 "surface_variant": "#1a1a2e",
                 "secondary_container": "#252540",
-                "primary": "#ff2a6d",              # Rosa Neon
+                "primary": "#ff2a6d",
                 "on_primary": ft.Colors.WHITE,
-                "secondary": "#05d9e8",            # Ciano
+                "secondary": "#05d9e8",
                 "on_surface": ft.Colors.WHITE,
                 "on_surface_variant": "#d1d1e0"
             },
-            "floresta_boreal": {  # Tons de verde escuro e esmeralda, muito relaxante
+            "floresta_boreal": {  # Tons de verde escuro e esmeralda
                 "surface": "#0d1a15",
                 "surface_container": "#1f3b2f",
                 "surface_variant": "#162a22",
                 "secondary_container": "#1f3b2f",
-                "primary": "#2ecc71",              # Verde Esmeralda
+                "primary": "#2ecc71",
                 "on_primary": ft.Colors.BLACK,
-                "secondary": "#f1c40f",            # Amarelo Sol
+                "secondary": "#f1c40f",
                 "on_surface": ft.Colors.WHITE,
                 "on_surface_variant": "#b3d4c6"
             },
@@ -47,20 +46,20 @@ class AppTheme:
                 "surface_container": "#3e322c",
                 "surface_variant": "#2b231f",
                 "secondary_container": "#3e322c",
-                "primary": "#d4a373",              # Cor de Latte/Caramelo
+                "primary": "#d4a373",
                 "on_primary": ft.Colors.BLACK,
                 "secondary": "#e9edc9",
                 "on_surface": ft.Colors.WHITE,
                 "on_surface_variant": "#d1c7c3"
             },
-            "dracula_dev": {  # Baseado no famoso tema Drácula de editores de código
+            "dracula_dev": {  # Tema Drácula padrão
                 "surface": "#282a36",
                 "surface_container": "#44475a",
                 "surface_variant": "#343746",
                 "secondary_container": "#44475a",
-                "primary": "#bd93f9",              # Roxo suave
+                "primary": "#bd93f9",
                 "on_primary": ft.Colors.BLACK,
-                "secondary": "#ff79c6",            # Rosa pastel
+                "secondary": "#ff79c6",        
                 "on_surface": "#f8f8f2",
                 "on_surface_variant": "#6272a4"
             },
@@ -68,25 +67,25 @@ class AppTheme:
             # ==========================================
             # TEMAS CLAROS (LIGHT MODE)
             # ==========================================
-            "gelo_claro": {  # O claro tradicional, muito profissional
+            "gelo_claro": {  # O claro tradicional
                 "surface": "#f4f5f7",
                 "surface_container": "#e2e8f0",
                 "surface_variant": "#ffffff",
                 "secondary_container": "#e2e8f0",
-                "primary": "#0077b6",              # Azul corporativo
+                "primary": "#0077b6",
                 "on_primary": ft.Colors.WHITE,
                 "secondary": "#bdbdbd",
                 "on_surface": ft.Colors.BLACK,
                 "on_surface_variant": "#555555"
             },
             "creme_de_baunilha": {  # Um tema claro aquecido, estilo páginas de livro antigo
-                "surface": "#fdf6e3",              # Bege clarinho
+                "surface": "#fdf6e3",
                 "surface_container": "#e1dabb",
                 "surface_variant": "#eee8d5",
                 "secondary_container": "#e1dabb",
-                "primary": "#b58900",              # Mostarda
+                "primary": "#b58900",          
                 "on_primary": ft.Colors.WHITE,
-                "secondary": "#cb4b16",            # Laranja queimado
+                "secondary": "#cb4b16", 
                 "on_surface": "#073642",
                 "on_surface_variant": "#586e75"
             },
@@ -118,7 +117,7 @@ class AppTheme:
             }
         }
         
-        # Fallback de segurança: se o tema não existir, carrega o cyberpunk original
+        # Fallback de segurança: se o tema não existir, carrega o cyberpunk
         c = paletas.get(nome_tema.lower().strip(), paletas["cyberpunk"])
         
         return ft.Theme(

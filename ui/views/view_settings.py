@@ -110,39 +110,61 @@ class ViewSettings(ft.Container):
         )
 
     def _criar_aba_dados(self):
+        from ui.layout import AppTheme
+        tema_atual = self.db.obter_tema()
+        def alterar_tema(e):
+            novo_tema = e.control.value
+            self.page.theme = AppTheme.get_theme(novo_tema)
+            self.page.bgcolor = self.page.theme.color_scheme.surface_container
+            self.page.update()
+            self.db.salvar_tema(novo_tema)
+
         return ft.Container(
             content=ft.ListView([
+                
+                # Card 1: Sincronização e Cópias de Segurança
                 ft.Card(
                     content=ft.Container(
                         content=ft.Column([
                             ft.Text("Sincronização e Cópias de Segurança", size=16, weight=ft.FontWeight.BOLD),
-                            ft.Text("Importe, exporte ou agende rotinas para proteger seus dados locais.", size=12, color=ft.Colors.GREY_400),
-                            ft.Divider(color=ft.Colors.GREY_800),
+                            ft.Text("Importe, exporte ou agende rotinas para proteger seus dados locais.", size=12, color=ft.Colors.ON_SURFACE_VARIANT),
+                            ft.Divider(color=ft.Colors.SECONDARY),
                             ft.Row([
-                                ft.ElevatedButton("Importar JSON/CSV", icon=ft.Icons.UPLOAD_FILE, bgcolor="ft.Colors.SECONDARY"),
-                                ft.ElevatedButton("Exportar Dados", icon=ft.Icons.DOWNLOAD, bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST),
+                                # CORREÇÃO: Aspas de ft.Colors removidas
+                                ft.ElevatedButton("Importar JSON/CSV", icon=ft.Icons.UPLOAD_FILE, bgcolor=ft.Colors.SECONDARY),
+                                ft.ElevatedButton("Exportar Dados", icon=ft.Icons.DOWNLOAD, bgcolor=ft.Colors.SECONDARY_CONTAINER),
                             ], spacing=15),
-                            ft.Divider(color=ft.Colors.GREY_800),
+                            ft.Divider(color=ft.Colors.SECONDARY),
                             ft.Switch(label="Ativar Rotina Automática de Backup Diário", value=False),
                         ]), padding=15
-                    ), bgcolor=ft.Colors.SURFACE
+                    ), bgcolor=ft.Colors.SURFACE_CONTAINER
                 ),
+                
+                # Card 2: Personalização Visual
                 ft.Card(
                     content=ft.Container(
                         content=ft.Column([
                             ft.Text("Personalização Visual", size=16, weight=ft.FontWeight.BOLD),
-                            ft.Divider(color=ft.Colors.GREY_800),
+                            ft.Divider(color=ft.Colors.SECONDARY),
                             ft.Dropdown(
                                 label="Tema do Aplicativo",
-                                value="dark",
+                                value=tema_atual,       
+                                on_select=alterar_tema, 
                                 options=[
-                                    ft.dropdown.Option("dark", "Modo Escuro (Cyberpunk Blue)"),
-                                    ft.dropdown.Option("light", "Modo Claro (Tradicional)"),
+                                    ft.dropdown.Option("cyberpunk", "Cyberpunk"),
+                                    ft.dropdown.Option("neon_tokyo", "Neon Tokyo"),
+                                    ft.dropdown.Option("floresta_boreal", "Floresta Boreal"),
+                                    ft.dropdown.Option("cafe_expresso", "Café Expresso"),
+                                    ft.dropdown.Option("dracula_dev", "Dracula Dev"),
+                                    ft.dropdown.Option("gelo_claro", "Gelo Claro"),
+                                    ft.dropdown.Option("creme_de_baunilha", "Creme de Baunilha"),
+                                    ft.dropdown.Option("cereja_doce", "Cereja Doce"),
+                                    ft.dropdown.Option("outono_fazenda", "Outono de Fazenda"),
                                 ],
-                                border_color="ft.Colors.SECONDARY"
+                                border_color=ft.Colors.SECONDARY
                             )
                         ]), padding=15
-                    ), bgcolor=ft.Colors.SURFACE
+                    ), bgcolor=ft.Colors.SURFACE_CONTAINER
                 )
             ], spacing=15), padding=15
         )
