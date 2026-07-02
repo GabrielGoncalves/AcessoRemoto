@@ -178,10 +178,10 @@ class ViewEnvironments(ft.Container):
         self.carregar_ambientes()
         self.atualizar_painel_detalhes()
 
-    def _disparar_conexao_rdp(self, e):
+    async def _disparar_conexao_rdp(self, e):
         dados = e.control.data
         if self.on_redirect_action:
             # Em vez de abrir o RDP direto sem senha, joga para o Dashboard preenchendo os dados
-            self.on_redirect_action(dados["ip"], dados["user"])
+            await self.on_redirect_action(dados["ip"], dados["user"])
         else:
             self.on_connect_action(dados["ip"], dados["user"], "")

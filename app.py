@@ -76,13 +76,16 @@ class MainApplication:
             self.view_container.content = self.view_settings
         self.page.update()
 
-    def redirecionar_para_dashboard(self, ip, user):
+    async def redirecionar_para_dashboard(self, ip, user):
         """Muda visualmente para a aba Dashboard e injeta os dados do servidor selecionado de forma assíncrona"""
-        self.nav_rail.selected_index = 0
-        self.view_container.content = self.view_dashboard
+        conectou_direto = await self.view_dashboard.preencher_form_externo(ip, user)
         
-        self.page.run_task(self.view_dashboard.preencher_form_externo, ip, user)
-        self.page.update()
+        if not conectou_direto:
+            self.nav_rail.selected_index = 0
+            self.view_container.content = self.view_dashboard
+            self.page.update()
+            
+            await self.view_dashboard.txt_pass.focus()
 
     def disparar_rdp(self, ip, user, senha):
         self.page.snack_bar = ft.SnackBar(ft.Text(f"Abrindo RDP para {ip}..."), bgcolor="green")

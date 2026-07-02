@@ -214,11 +214,23 @@ class DashboardView(ft.Container):
 
 
     async def preencher_form_externo(self, ip, user):
-        """Método público chamado ao redirecionar acessos de outras telas"""
-        self.txt_ip.value = ip
-        self.txt_user.value = user
-        self.txt_pass.value = "" 
-        self.lv_sugestoes_fav.visible = False
+        """Verifica a flag e decide se conecta direto ou se exige a senha."""
+        lembra_senha = self.db.obter_configuracao("exigir_senha_sessao", "0")
         
-        await self.txt_pass.focus()
-        self.update()
+        if lembra_senha == "1" and self.txt_pass.value: 
+            self.txt_ip.value = ip
+            self.txt_user.value = user
+            self.lv_sugestoes_fav.visible = False
+            self.update()
+            
+            self._disparar_conexao_rdp(ip, user, self.txt_pass.value)
+            return True
+            
+        else: 
+            self.txt_ip.value = ip
+            self.txt_user.value = user
+            self.txt_pass.value = "" 
+            self.lv_sugestoes_fav.visible = False
+            self.update()
+            
+            return False
