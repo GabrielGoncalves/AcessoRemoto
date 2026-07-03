@@ -97,7 +97,6 @@ class DatabaseManager:
     def _seed_initial_data(self):
         """Popula os dados padrões da aplicação na primeira execução"""
         with self._get_connection() as conn:
-            # Garante que o sistema inicie com o tema cyberpunk se for a primeira vez
             conn.cursor().execute("INSERT OR IGNORE INTO configuracoes (chave, valor) VALUES ('tema', 'cyberpunk');")
             conn.commit()
 
@@ -106,13 +105,11 @@ class DatabaseManager:
     # MÉTODOS DE CONFIGURAÇÕES (CHAVE-VALOR)
     # ==========================================
     def obter_configuracao(self, chave, valor_padrao=None):
-        """Método genérico para buscar qualquer configuração (Tema, Timeout, Flag de Senha)"""
         with self._get_connection() as conn:
             res = conn.cursor().execute("SELECT valor FROM configuracoes WHERE chave = ?", (chave,)).fetchone()
             return res[0] if res else valor_padrao
 
     def salvar_configuracao(self, chave, valor):
-        """Método genérico para salvar qualquer configuração no formato chave-valor"""
         with self._get_connection() as conn:
             conn.cursor().execute("""
                 INSERT OR REPLACE INTO configuracoes (chave, valor)
@@ -120,7 +117,6 @@ class DatabaseManager:
             """, (chave, str(valor)))
             conn.commit()
 
-    # Atalhos semânticos para o Tema (usados no app.py e view_settings.py)
     def obter_tema(self) -> str:
         return self.obter_configuracao("tema", "cyberpunk")
 
@@ -169,7 +165,7 @@ class DatabaseManager:
 
 
     # ==========================================
-    # MÉTODOS: AMBIENTES E CONEXÕES (MANTIDOS)
+    # MÉTODOS: AMBIENTES E CONEXÕES
     # ==========================================
     def adicionar_ambiente(self, nome):
         try:
@@ -208,7 +204,7 @@ class DatabaseManager:
 
 
     # ==========================================
-    # MÉTODOS: FAVORITOS (MANTIDOS)
+    # MÉTODOS: FAVORITOS
     # ==========================================
     def adicionar_favorito(self, nome, ip, usuario):
         with self._get_connection() as conn: 
@@ -235,7 +231,7 @@ class DatabaseManager:
 
 
     # ==========================================
-    # MÉTODOS: HISTÓRICO (MANTIDOS)
+    # MÉTODOS: HISTÓRICO (REFATORADO)
     # ==========================================
     def registrar_historico(self, nome, ip, usuario):
         with self._get_connection() as conn: 
@@ -250,7 +246,8 @@ class DatabaseManager:
         with self._get_connection() as conn:
             return conn.cursor().execute("""
                 SELECT h.id, h.nome_exibicao, h.ip, h.usuario,
-                       (SELECT COUNT(*) FROM favoritos f WHERE f.ip = h.ip AND f.usuario = h.usuario) as e_favorito
+                       (SELECT COUNT(*) FROM favoritos f WHERE f.ip = h.ip AND f.usuario = h.usuario) as e_favorito,
+                       strftime('%d/%m/%Y às %H:%M', h.ultima_conexao) as ultima_conexao
                 FROM conexoes_historico h
                 ORDER BY h.ultima_conexao DESC LIMIT ?;
             """, (limite,)).fetchall()

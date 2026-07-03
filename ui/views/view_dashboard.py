@@ -222,16 +222,22 @@ class DashboardView(ft.Container):
         self.lv_historico.controls.clear()
         historico = self.db.listar_historico(limite=10)
         
-        for id_, nome_exibicao, ip, user, e_favorito in historico:
-            is_fav = bool(e_favorito)
+        for item in historico:
+            ip = item[2]
+            user = item[3]
+            is_fav = bool(item[4])
+            data_hora = item[5]
+            
             self.lv_historico.controls.append(
                 ft.Container(
                     content=ft.Row([
                         ft.Icon(ft.Icons.MONITOR, color=ft.Colors.YELLOW_700 if is_fav else ft.Colors.PRIMARY),
                         ft.Column([
-                            ft.Text(f"IP: {ip}", weight=ft.FontWeight.BOLD),
-                            ft.Text(f"User: {user}", size=12, color=ft.Colors.ON_SURFACE_VARIANT)
-                        ], expand=True),
+                            ft.Text(f"{ip}", weight=ft.FontWeight.BOLD),
+                            ft.Text(f"{user}", size=12, color=ft.Colors.ON_SURFACE_VARIANT),
+                            ft.Text(f"Conectado em: {data_hora}", size=11, color=ft.Colors.PRIMARY, italic=True)
+                        ], expand=True, spacing=1),
+                        
                         ft.IconButton(
                             icon=ft.Icons.ARROW_FORWARD,
                             icon_color=ft.Colors.PRIMARY,
@@ -241,7 +247,8 @@ class DashboardView(ft.Container):
                         )
                     ]),
                     bgcolor=ft.Colors.SECONDARY_CONTAINER,
-                    padding=10, border_radius=8
+                    padding=10, 
+                    border_radius=8
                 )
             )
         self.update()
