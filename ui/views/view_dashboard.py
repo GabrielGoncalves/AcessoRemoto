@@ -26,7 +26,7 @@ class DashboardView(ft.Container):
         
         self.txt_user = ft.TextField(
             label="Usuário", 
-            suffix=self.menu_identidades, 
+            suffix_icon=self.menu_identidades, 
             on_submit=self._focar_senha
         )
         
@@ -37,7 +37,6 @@ class DashboardView(ft.Container):
             on_submit=self._btn_conectar_clicked
         )
         
-        # CORREÇÃO 1: Margens e Paddings simplificados (sem uso de .only())
         self.lv_sugestoes_fav = ft.ListView(spacing=5)
         self.container_sugestoes = ft.Container(
             content=self.lv_sugestoes_fav,
@@ -54,20 +53,18 @@ class DashboardView(ft.Container):
         self.build_ui()
 
     def build_ui(self):
-        # CORREÇÃO 2: Agrupando o IP e a Gaveta com spacing=0 para que fiquem colados naturalmente!
         grupo_pesquisa_colada = ft.Column(
             controls=[
                 self.txt_ip,
                 self.container_sugestoes
             ],
-            spacing=0 # Sem espaço entre o campo de texto e o menu
+            spacing=0
         )
 
         col_form = ft.Container(
             content=ft.Column([
                 ft.Row([ft.Text("Acesso Rápido", size=18, weight=ft.FontWeight.BOLD)]),
                 
-                # Inserindo o grupo recém criado no lugar do antigo txt_ip
                 grupo_pesquisa_colada,
                 
                 self.txt_user,
