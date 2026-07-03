@@ -9,11 +9,9 @@ class ViewSettings(ft.Container):
         self.db = db
         self.expand = True
         self.padding = 20
-        
         self.build_ui()
 
     def build_ui(self):
-        # Implementação moderna utilizando TabBar e TabBarView separados
         tabs_controller = ft.Tabs(
             length=4,
             expand=True,
@@ -47,17 +45,11 @@ class ViewSettings(ft.Container):
             tabs_controller
         ], expand=True)
     
-    # ==========================================
-    # ABA 1: SESSÃO & SEGURANÇA
-    # ==========================================
     def _criar_aba_seguranca(self):
-        
-        # --- Lógica da Flag de Segurança ---
         def alternar_flag_seguranca(e):
             valor_salvar = "1" if e.control.value else "0"
             self.db.salvar_configuracao("exigir_senha_sessao", valor_salvar)
             
-            # Padrão tradicional (Compatível com sua versão)
             self.page.snack_bar = ft.SnackBar(
                 content=ft.Text("Configuração de segurança updated!"),
                 bgcolor=ft.Colors.SECONDARY
@@ -68,7 +60,6 @@ class ViewSettings(ft.Container):
         flag_atual = self.db.obter_configuracao("exigir_senha_sessao", "0")
         estado_switch = True if flag_atual == "1" else False
 
-        # --- Lógica do Gerador de Senhas RDP ---
         txt_senha_gerada = ft.TextField(
             label="Senha Forte Gerada",
             read_only=True,
@@ -91,8 +82,6 @@ class ViewSettings(ft.Container):
         def copiar_senha_clipboard(e):
             if txt_senha_gerada.value:
                 self.page.set_clipboard(txt_senha_gerada.value)
-                
-                # Padrão tradicional (Compatível com sua versão)
                 self.page.snack_bar = ft.SnackBar(
                     content=ft.Text("Senha copiada para a área de transferência!"),
                     bgcolor=ft.Colors.GREEN_700
@@ -102,7 +91,6 @@ class ViewSettings(ft.Container):
 
         return ft.Container(
             content=ft.ListView([
-                # Card 1: Controle de Sessão
                 ft.Card(
                     content=ft.Container(
                         content=ft.Column([
@@ -116,7 +104,6 @@ class ViewSettings(ft.Container):
                                 size=12, color=ft.Colors.ON_SURFACE_VARIANT
                             ),
                             ft.Divider(height=10, color=ft.Colors.TRANSPARENT),
-                            
                             ft.Switch(
                                 label="Lembrar senha da sessão após conectar (Desative para limpar o campo por segurança)",
                                 value=estado_switch,
@@ -127,7 +114,6 @@ class ViewSettings(ft.Container):
                     ), bgcolor=ft.Colors.SURFACE_CONTAINER
                 ),
 
-                # Card 2: Gerador de Senhas Fortes
                 ft.Card(
                     content=ft.Container(
                         content=ft.Column([
@@ -137,20 +123,17 @@ class ViewSettings(ft.Container):
                             ]),
                             ft.Divider(color=ft.Colors.SECONDARY),
                             ft.Text("Gere senhas randômicas de alta complexidade para usar nos seus servidores remotos.", size=12, color=ft.Colors.ON_SURFACE_VARIANT),
-                            
                             ft.Text("Comprimento da Senha:", size=13, weight=ft.FontWeight.W_500),
                             slider_comprimento,
-                            
                             ft.Row([
                                 txt_senha_gerada,
                                 ft.IconButton(
                                     icon=ft.Icons.COPY,
                                     icon_color=ft.Colors.PRIMARY,
                                     tooltip="Copiar Senha",
-                                    on_click=copiar_senha_clipboard # <-- CORRIGIDO AQUI
+                                    on_click=copiar_senha_clipboard
                                 )
                             ], spacing=10),
-                            
                             ft.ElevatedButton(
                                 "Gerar Nova Senha",
                                 icon=ft.Icons.REFRESH,
@@ -164,38 +147,134 @@ class ViewSettings(ft.Container):
             ], spacing=15), padding=15
         )
 
-    # ==========================================
-    # ABA 2: IDENTIDADES (UI BASE)
-    # ==========================================
     def _criar_aba_identidades(self):
-        return ft.Container(
-            content=ft.Row([
-                ft.Container(
-                    content=ft.Column([
-                        ft.Text("Usuários Recorrentes", size=16, weight=ft.FontWeight.BOLD),
-                        ft.Row([
-                            ft.TextField(label="Novo Usuário", expand=True, text_size=14, border_color=ft.Colors.SECONDARY),
-                            ft.IconButton(ft.Icons.ADD, icon_color=ft.Colors.PRIMARY)
-                        ]),
-                        ft.ListView(expand=True, spacing=5) 
-                    ]), expand=1, bgcolor=ft.Colors.SURFACE_CONTAINER, padding=15, border_radius=8
-                ),
-                ft.Container(
-                    content=ft.Column([
-                        ft.Text("Domínios Corporativos", size=16, weight=ft.FontWeight.BOLD),
-                        ft.Row([
-                            ft.TextField(label="Novo Domínio (ex: empresa.local)", expand=True, text_size=14, border_color=ft.Colors.SECONDARY),
-                            ft.IconButton(ft.Icons.ADD, icon_color=ft.Colors.PRIMARY)
-                        ]),
-                        ft.ListView(expand=True, spacing=5) 
-                    ]), expand=1, bgcolor=ft.Colors.SURFACE_CONTAINER, padding=15, border_radius=8
+        txt_novo_user = ft.TextField(label="Novo Usuário", expand=True, text_size=14, border_color=ft.Colors.SECONDARY)
+        txt_novo_dom = ft.TextField(label="Novo Domínio (ex: empresa.local)", expand=True, text_size=14, border_color=ft.Colors.SECONDARY)
+        lv_users = ft.ListView(expand=True, spacing=5)
+        lv_dominios = ft.ListView(expand=True, spacing=5)
+
+        def atualizar_lista_usuarios():
+            lv_users.controls.clear()
+            for id_, nome in self.db.listar_usuarios():
+                lv_users.controls.append(
+                    ft.Row([
+                        ft.Icon(ft.Icons.PERSON_OUTLINE, size=18, color=ft.Colors.ON_SURFACE_VARIANT),
+                        ft.Text(nome, expand=True, size=13),
+                        ft.IconButton(
+                            ft.Icons.DELETE_OUTLINE, icon_color=ft.Colors.ERROR, icon_size=16,
+                            on_click=lambda e, uid=id_: remover_usuario(uid)
+                        )
+                    ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
                 )
+            try:
+                lv_users.update()
+            except Exception:
+                pass
+
+        def atualizar_lista_dominios():
+            lv_dominios.controls.clear()
+            for id_, dom in self.db.listar_dominios():
+                lv_dominios.controls.append(
+                    ft.Row([
+                        ft.Icon(ft.Icons.DOMAIN_OUTLINED, size=18, color=ft.Colors.ON_SURFACE_VARIANT),
+                        ft.Text(dom, expand=True, size=13),
+                        ft.IconButton(
+                            ft.Icons.DELETE_OUTLINE, icon_color=ft.Colors.ERROR, icon_size=16,
+                            on_click=lambda e, did=id_: remover_dominio(did)
+                        )
+                    ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
+                )
+            try:
+                lv_dominios.update()
+            except Exception:
+                pass
+
+        def salvar_usuario(e):
+            nome = txt_novo_user.value.strip()
+            if nome and self.db.adicionar_usuario(nome):
+                txt_novo_user.value = ""
+                txt_novo_user.update()
+                atualizar_lista_usuarios()
+
+        def remover_usuario(uid):
+            self.db.excluir_usuario(uid)
+            atualizar_lista_usuarios()
+
+        def salvar_dominio(e):
+            dominio = txt_novo_dom.value.strip()
+            if dominio and self.db.adicionar_dominio(dominio):
+                txt_novo_dom.value = ""
+                txt_novo_dom.update()
+                atualizar_lista_dominios()
+
+        def remover_dominio(did):
+            self.db.excluir_dominio(did)
+            atualizar_lista_dominios()
+
+        def alternar_flag_user_padrao(e):
+            self.db.salvar_configuracao("usar_usuario_padrao", "1" if e.control.value else "0")
+
+        def alternar_flag_dominio_padrao(e):
+            self.db.salvar_configuracao("usar_dominio_padrao", "1" if e.control.value else "0")
+            
+        def atualizar_texto_user_padrao(e):
+            self.db.salvar_configuracao("usuario_padrao_texto", e.control.value.strip())
+
+        def atualizar_texto_dominio_padrao(e):
+            self.db.salvar_configuracao("dominio_padrao_texto", e.control.value.strip())
+
+        flag_user = self.db.obter_configuracao("usar_usuario_padrao", "0") == "1"
+        flag_dom = self.db.obter_configuracao("usar_dominio_padrao", "0") == "1"
+        val_user_padrao = self.db.obter_configuracao("usuario_padrao_texto", "")
+        val_dom_padrao = self.db.obter_configuracao("dominio_padrao_texto", "")
+
+        atualizar_lista_usuarios()
+        atualizar_lista_dominios()
+
+        return ft.Container(
+            content=ft.Column([
+                ft.Card(
+                    content=ft.Container(
+                        content=ft.Column([
+                            ft.Text("Configurações de Identidade Inicial (Boot)", size=14, weight=ft.FontWeight.BOLD),
+                            ft.Divider(color=ft.Colors.SECONDARY, height=5),
+                            ft.Row([
+                                ft.Column([
+                                    ft.Switch(label="Iniciar com Usuário Padrão", value=flag_user, on_change=alternar_flag_user_padrao, active_color=ft.Colors.PRIMARY),
+                                    # CORREÇÃO: Associado à função correta 'atualizar_texto_user_padrao'
+                                    ft.TextField(label="Definir Usuário Padrão", value=val_user_padrao, on_change=atualizar_texto_user_padrao, width=250, border_color=ft.Colors.SECONDARY)
+                                ], spacing=5),
+                                ft.VerticalDivider(width=20),
+                                ft.Column([
+                                    ft.Switch(label="Iniciar com Domínio Padrão", value=flag_dom, on_change=alternar_flag_dominio_padrao, active_color=ft.Colors.PRIMARY),
+                                    ft.TextField(label="Definir Domínio Padrão", value=val_dom_padrao, on_change=atualizar_texto_dominio_padrao, width=250, border_color=ft.Colors.SECONDARY)
+                                ], spacing=5),
+                            ], alignment=ft.MainAxisAlignment.START, spacing=30)
+                        ]), padding=12
+                    ), bgcolor=ft.Colors.SURFACE_CONTAINER
+                ),
+                
+                ft.Row([
+                    ft.Container(
+                        content=ft.Column([
+                            ft.Text("Usuários Recorrentes", size=15, weight=ft.FontWeight.BOLD),
+                            ft.Row([txt_novo_user, ft.IconButton(ft.Icons.ADD, icon_color=ft.Colors.PRIMARY, on_click=salvar_usuario)]),
+                            ft.Divider(color=ft.Colors.SECONDARY, height=5),
+                            lv_users 
+                        ]), expand=1, bgcolor=ft.Colors.SURFACE_CONTAINER, padding=12, border_radius=8
+                    ),
+                    ft.Container(
+                        content=ft.Column([
+                            ft.Text("Domínios Corporativos", size=15, weight=ft.FontWeight.BOLD),
+                            ft.Row([txt_novo_dom, ft.IconButton(ft.Icons.ADD, icon_color=ft.Colors.PRIMARY, on_click=salvar_dominio)]),
+                            ft.Divider(color=ft.Colors.SECONDARY, height=5),
+                            lv_dominios 
+                        ]), expand=1, bgcolor=ft.Colors.SURFACE_CONTAINER, padding=12, border_radius=8
+                    )
+                ], spacing=15, expand=True)
             ], spacing=15), padding=15
         )
 
-    # ==========================================
-    # ABA 3: DADOS & BACKUP
-    # ==========================================
     def _criar_aba_dados(self):
         from ui.layout import AppTheme
         tema_atual = self.db.obter_tema()
@@ -224,16 +303,13 @@ class ViewSettings(ft.Container):
                         ]), padding=15
                     ), bgcolor=ft.Colors.SURFACE_CONTAINER
                 ),
-                
                 ft.Card(
                     content=ft.Container(
                         content=ft.Column([
                             ft.Text("Personalização Visual", size=16, weight=ft.FontWeight.BOLD),
                             ft.Divider(color=ft.Colors.SECONDARY),
                             ft.Dropdown(
-                                label="Tema do Aplicativo",
-                                value=tema_atual,       
-                                on_select=alterar_tema, 
+                                label="Tema do Aplicativo", value=tema_atual, on_select=alterar_tema, 
                                 options=[
                                     ft.dropdown.Option("cyberpunk", "Cyberpunk"),
                                     ft.dropdown.Option("neon_tokyo", "Neon Tokyo"),
@@ -253,17 +329,10 @@ class ViewSettings(ft.Container):
             ], spacing=15), padding=15
         )
 
-    # ==========================================
-    # ABA 4: AVANÇADO
-    # ==========================================
     def _criar_aba_avancado(self):
         txt_api_endpoint = ft.TextField(
-            label="Custom API Endpoint URL", 
-            border_color=ft.Colors.SECONDARY, 
-            disabled=True, 
-            value="https://api.remotecraft.internal/v1"
+            label="Custom API Endpoint URL", border_color=ft.Colors.SECONDARY, disabled=True, value="https://api.remotecraft.internal/v1"
         )
-        
         def toggle_dev_mode(e):
             txt_api_endpoint.disabled = not e.control.value
             self.update()
@@ -273,17 +342,12 @@ class ViewSettings(ft.Container):
                 ft.Card(
                     content=ft.Container(
                         content=ft.Column([
-                            ft.Row([
-                                ft.Icon(ft.Icons.WARNING, color=ft.Colors.ERROR),
-                                ft.Text("Modo Desenvolvedor", size=16, weight=ft.FontWeight.BOLD)
-                            ]),
+                            ft.Row([ft.Icon(ft.Icons.WARNING, color=ft.Colors.ERROR), ft.Text("Modo Desenvolvedor", size=16, weight=ft.FontWeight.BOLD)]),
                             ft.Text("Permite a manipulação avançada de requisições, testes de latência e injeção de rotas customizadas de API.", size=12, color=ft.Colors.ON_SURFACE_VARIANT),
                             ft.Divider(color=ft.Colors.SECONDARY),
-                            
                             ft.Switch(label="Ativar Recursos de Desenvolvedor Avançado", value=False, on_change=toggle_dev_mode, active_color=ft.Colors.PRIMARY),
                             ft.Divider(color=ft.Colors.SECONDARY),
                             txt_api_endpoint,
-                            
                             ft.Row([
                                 ft.ElevatedButton("Testar Endpoint", icon=ft.Icons.NETWORK_CHECK, bgcolor=ft.Colors.PRIMARY, color=ft.Colors.ON_PRIMARY),
                                 ft.ElevatedButton("Resetar Padrões", icon=ft.Icons.RESTORE, bgcolor=ft.Colors.ERROR, color=ft.Colors.ON_PRIMARY),
