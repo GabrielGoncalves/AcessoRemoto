@@ -241,7 +241,6 @@ class ViewSettings(ft.Container):
                             ft.Row([
                                 ft.Column([
                                     ft.Switch(label="Iniciar com Usuário Padrão", value=flag_user, on_change=alternar_flag_user_padrao, active_color=ft.Colors.PRIMARY),
-                                    # CORREÇÃO: Associado à função correta 'atualizar_texto_user_padrao'
                                     ft.TextField(label="Definir Usuário Padrão", value=val_user_padrao, on_change=atualizar_texto_user_padrao, width=250, border_color=ft.Colors.SECONDARY)
                                 ], spacing=5),
                                 ft.VerticalDivider(width=20),

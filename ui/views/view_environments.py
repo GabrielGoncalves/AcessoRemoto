@@ -29,7 +29,6 @@ class ViewEnvironments(ft.Container):
             content=ft.Column([
                 ft.Row([
                     ft.Text("Ambientes", size=20, weight=ft.FontWeight.BOLD),
-                    # CORRIGIDO: Removidas as aspas da cor
                     ft.IconButton(ft.Icons.ADD, icon_color=ft.Colors.PRIMARY, tooltip="Novo Ambiente", on_click=self.abrir_modal_ambiente)
                 ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                 ft.Divider(color=ft.Colors.GREY_800),
@@ -70,7 +69,6 @@ class ViewEnvironments(ft.Container):
             self.lv_ambientes.controls.append(
                 ft.Container(
                     content=ft.Row([
-                        # CORRIGIDO: Removidas as aspas das cores
                         ft.Icon(ft.Icons.FOLDER, color=ft.Colors.SECONDARY if not is_selected else ft.Colors.PRIMARY),
                         ft.Text(nome, weight=ft.FontWeight.BOLD if is_selected else ft.FontWeight.NORMAL, expand=True),
                         ft.IconButton(
@@ -81,7 +79,6 @@ class ViewEnvironments(ft.Container):
                             on_click=lambda e, aid=id_: self.excluir_ambiente(aid)
                         )
                     ]),
-                    # CORREÇÃO DE COR DINÂMICA: Fundo usa SECONDARY_CONTAINER quando selecionado
                     bgcolor=ft.Colors.SECONDARY_CONTAINER if is_selected else "transparent",
                     padding=10,
                     border_radius=8,
@@ -114,7 +111,6 @@ class ViewEnvironments(ft.Container):
             self.lv_conexoes.controls.append(
                 ft.Container(
                     content=ft.Row([
-                        # CORRIGIDO: Removidas as aspas
                         ft.Icon(ft.Icons.MONITOR, color=ft.Colors.YELLOW_700 if is_fav else ft.Colors.PRIMARY),
                         ft.Column([
                             ft.Text(nome_exibicao, weight=ft.FontWeight.BOLD),
@@ -122,13 +118,12 @@ class ViewEnvironments(ft.Container):
                         ], expand=True, spacing=2),
                         ft.IconButton(
                             icon=ft.Icons.PLAY_ARROW,
-                            icon_color=ft.Colors.PRIMARY, # Subistituído "green" para acompanhar o tema
+                            icon_color=ft.Colors.PRIMARY,
                             tooltip="Conectar via RDP",
                             data={"ip": ip, "user": user},
                             on_click=self._disparar_conexao_rdp
                         )
                     ]),
-                    # CORREÇÃO DE COR DINÂMICA: Fundo dos acessos usa SECONDARY_CONTAINER
                     bgcolor=ft.Colors.SECONDARY_CONTAINER,
                     padding=12,
                     border_radius=8
@@ -153,7 +148,6 @@ class ViewEnvironments(ft.Container):
                     ft.ElevatedButton(
                         "Vincular Acesso",
                         icon=ft.Icons.ADD,
-                        # CORRIGIDO: Removidas as aspas
                         bgcolor=ft.Colors.SECONDARY,
                         color=ft.Colors.ON_SECONDARY,
                         on_click=self.abrir_modal_conexao
