@@ -8,7 +8,7 @@ class ViewEnvironments(ft.Container):
         super().__init__()
         self.db = db
         self.on_connect_action = on_connect_action
-        self.on_redirect_action = on_redirect_action  # Guarda a referência do redirecionador
+        self.on_redirect_action = on_redirect_action  
         self.expand = True
         self.padding = 20
         
@@ -25,12 +25,12 @@ class ViewEnvironments(ft.Container):
         self.build_ui()
 
     def build_ui(self):
-        # Lado Esquerdo: Lista de Ambientes (Proporção 1)
         col_master = ft.Container(
             content=ft.Column([
                 ft.Row([
                     ft.Text("Ambientes", size=20, weight=ft.FontWeight.BOLD),
-                    ft.IconButton(ft.Icons.ADD, icon_color="ft.Colors.PRIMARY", tooltip="Novo Ambiente", on_click=self.abrir_modal_ambiente)
+                    # CORRIGIDO: Removidas as aspas da cor
+                    ft.IconButton(ft.Icons.ADD, icon_color=ft.Colors.PRIMARY, tooltip="Novo Ambiente", on_click=self.abrir_modal_ambiente)
                 ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                 ft.Divider(color=ft.Colors.GREY_800),
                 self.lv_ambientes
@@ -41,7 +41,6 @@ class ViewEnvironments(ft.Container):
             border_radius=12
         )
         
-        # Lado Direito: Lista de Conexões (Proporção 2)
         col_detail = ft.Container(
             content=self.col_detalhes,
             expand=2,
@@ -71,17 +70,19 @@ class ViewEnvironments(ft.Container):
             self.lv_ambientes.controls.append(
                 ft.Container(
                     content=ft.Row([
-                        ft.Icon(ft.Icons.FOLDER, color="ft.Colors.SECONDARY" if not is_selected else "ft.Colors.PRIMARY"),
+                        # CORRIGIDO: Removidas as aspas das cores
+                        ft.Icon(ft.Icons.FOLDER, color=ft.Colors.SECONDARY if not is_selected else ft.Colors.PRIMARY),
                         ft.Text(nome, weight=ft.FontWeight.BOLD if is_selected else ft.FontWeight.NORMAL, expand=True),
                         ft.IconButton(
                             ft.Icons.DELETE_OUTLINE, 
-                            icon_color=ft.Colors.RED_400, 
+                            icon_color=ft.Colors.ERROR, 
                             icon_size=18,
                             tooltip="Excluir Ambiente",
                             on_click=lambda e, aid=id_: self.excluir_ambiente(aid)
                         )
                     ]),
-                    bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST if is_selected else "transparent",
+                    # CORREÇÃO DE COR DINÂMICA: Fundo usa SECONDARY_CONTAINER quando selecionado
+                    bgcolor=ft.Colors.SECONDARY_CONTAINER if is_selected else "transparent",
                     padding=10,
                     border_radius=8,
                     on_click=lambda e, aid=id_, anome=nome: self.selecionar_ambiente(aid, anome)
@@ -92,7 +93,7 @@ class ViewEnvironments(ft.Container):
     def selecionar_ambiente(self, ambiente_id, nome_ambiente):
         self.ambiente_selecionado_id = ambiente_id
         self.ambiente_selecionado_nome = nome_ambiente
-        self.carregar_ambientes() # Recarrega para aplicar o destaque visual de seleção
+        self.carregar_ambientes() 
         self.carregar_conexoes()
         self.atualizar_painel_detalhes()
 
@@ -113,20 +114,22 @@ class ViewEnvironments(ft.Container):
             self.lv_conexoes.controls.append(
                 ft.Container(
                     content=ft.Row([
-                        ft.Icon(ft.Icons.MONITOR, color=ft.Colors.YELLOW_700 if is_fav else "ft.Colors.PRIMARY"),
+                        # CORRIGIDO: Removidas as aspas
+                        ft.Icon(ft.Icons.MONITOR, color=ft.Colors.YELLOW_700 if is_fav else ft.Colors.PRIMARY),
                         ft.Column([
                             ft.Text(nome_exibicao, weight=ft.FontWeight.BOLD),
-                            ft.Text(f"IP: {ip} | User: {user}", size=12, color=ft.Colors.GREY_400)
+                            ft.Text(f"IP: {ip} | User: {user}", size=12, color=ft.Colors.ON_SURFACE_VARIANT)
                         ], expand=True, spacing=2),
                         ft.IconButton(
                             icon=ft.Icons.PLAY_ARROW,
-                            icon_color="green",
+                            icon_color=ft.Colors.PRIMARY, # Subistituído "green" para acompanhar o tema
                             tooltip="Conectar via RDP",
                             data={"ip": ip, "user": user},
                             on_click=self._disparar_conexao_rdp
                         )
                     ]),
-                    bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
+                    # CORREÇÃO DE COR DINÂMICA: Fundo dos acessos usa SECONDARY_CONTAINER
+                    bgcolor=ft.Colors.SECONDARY_CONTAINER,
                     padding=12,
                     border_radius=8
                 )
@@ -136,23 +139,23 @@ class ViewEnvironments(ft.Container):
     def atualizar_painel_detalhes(self):
         self.col_detalhes.controls.clear()
         
-        # Caso nenhum ambiente esteja selecionado, mostra um placeholder elegante
         if not self.ambiente_selecionado_id:
             self.col_detalhes.controls.append(
                 ft.Column([
-                    ft.Icon(ft.Icons.CHEVRON_LEFT, size=40, color=ft.Colors.GREY_600),
-                    ft.Text("Selecione um ambiente ao lado para gerenciar os acessos", color=ft.Colors.GREY_500, italic=True)
+                    ft.Icon(ft.Icons.CHEVRON_LEFT, size=40, color=ft.Colors.ON_SURFACE_VARIANT),
+                    ft.Text("Selecione um ambiente ao lado para gerenciar os acessos", color=ft.Colors.ON_SURFACE_VARIANT, italic=True)
                 ], alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER, expand=True)
             )
         else:
-            # Painel com as conexões do ambiente ativo
             self.col_detalhes.controls.append(
                 ft.Row([
                     ft.Text(f"Acessos: {self.ambiente_selecionado_nome}", size=20, weight=ft.FontWeight.BOLD),
                     ft.ElevatedButton(
                         "Vincular Acesso",
                         icon=ft.Icons.ADD,
-                        bgcolor="ft.Colors.SECONDARY",
+                        # CORRIGIDO: Removidas as aspas
+                        bgcolor=ft.Colors.SECONDARY,
+                        color=ft.Colors.ON_SECONDARY,
                         on_click=self.abrir_modal_conexao
                     )
                 ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
@@ -181,7 +184,6 @@ class ViewEnvironments(ft.Container):
     async def _disparar_conexao_rdp(self, e):
         dados = e.control.data
         if self.on_redirect_action:
-            # Em vez de abrir o RDP direto sem senha, joga para o Dashboard preenchendo os dados
             await self.on_redirect_action(dados["ip"], dados["user"])
         else:
             self.on_connect_action(dados["ip"], dados["user"], "")

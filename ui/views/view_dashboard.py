@@ -40,7 +40,7 @@ class DashboardView(ft.Container):
         self.lv_sugestoes_fav = ft.ListView(spacing=5)
         self.container_sugestoes = ft.Container(
             content=self.lv_sugestoes_fav,
-            bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
+            bgcolor=ft.Colors.SURFACE_CONTAINER_HIGH,
             border_radius=8,
             padding=5,
             height=120,
@@ -188,8 +188,8 @@ class DashboardView(ft.Container):
                                 ft.Text(f"{ip} | {user}", size=11, color=ft.Colors.GREY_400)
                             ], spacing=2, expand=True)
                         ]),
-                        bgcolor=ft.Colors.SURFACE_CONTAINER,
-                        padding=8, border_radius=6, # CORREÇÃO 3: Removido o 'margin.only' daqui também!
+                        bgcolor=ft.Colors.SURFACE,
+                        padding=8, border_radius=6,
                         data={"ip": ip, "user": user},
                         on_click=self._carregar_favorito_selecionado
                     )
@@ -240,7 +240,7 @@ class DashboardView(ft.Container):
                             on_click=self._preencher_form
                         )
                     ]),
-                    bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST,
+                    bgcolor=ft.Colors.SECONDARY_CONTAINER,
                     padding=10, border_radius=8
                 )
             )
