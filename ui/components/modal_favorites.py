@@ -9,7 +9,6 @@ class ModalNovoFavorito(ft.AlertDialog):
         
         self.txt_nome = ft.TextField(label="Nome de Exibição", autofocus=True, border_color=ft.Colors.SECONDARY)
         self.txt_ip = ft.TextField(label="IP / Hostname", border_color=ft.Colors.SECONDARY)
-        # TEXTO ATUALIZADO: Indicando que é opcional
         self.txt_user = ft.TextField(label="Usuário (Opcional)", hint_text="Deixe vazio para usar o Global", border_color=ft.Colors.SECONDARY)
         
         self.title = ft.Row([ft.Icon(ft.Icons.STAR, color=ft.Colors.PRIMARY), ft.Text("Cadastrar Favorito", size=18, weight=ft.FontWeight.BOLD)])
@@ -26,7 +25,6 @@ class ModalNovoFavorito(ft.AlertDialog):
         ip = self.txt_ip.value.strip() if self.txt_ip.value else ""
         user = self.txt_user.value.strip() if self.txt_user.value else ""
 
-        # LÓGICA ATUALIZADA: Exige apenas Nome e IP. O usuário pode ser vazio ("")
         if nome and ip:
             self.db.adicionar_favorito(nome, ip, user)
             

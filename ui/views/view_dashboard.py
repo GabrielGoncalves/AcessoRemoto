@@ -259,7 +259,6 @@ class DashboardView(ft.Container):
         dados = e.control.data
         self.txt_ip.value = dados["ip"]
         
-        # MÁGICA: Aplica-se aos cliques no botão de flecha do Histórico
         if dados["user"]:
             self.txt_user.value = dados["user"]
             
@@ -273,7 +272,6 @@ class DashboardView(ft.Container):
         lembra_senha = self.db.obter_configuracao("exigir_senha_sessao", "0")
         self.txt_ip.value = ip
         
-        # MÁGICA: Aplica-se aos cliques vindos das telas de Favoritos e Ambientes
         if user:
             self.txt_user.value = user
             
