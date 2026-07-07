@@ -202,7 +202,9 @@ class DashboardView(ft.Container):
     async def _carregar_favorito_selecionado(self, e):
         dados = e.control.data
         self.txt_ip.value = dados["ip"]
-        self.txt_user.value = dados["user"]
+        if dados["user"]: 
+            self.txt_user.value = dados["user"]
+            
         self.txt_pass.value = "" 
         self.container_sugestoes.visible = False
         self.lv_sugestoes_fav.controls.clear()
@@ -256,12 +258,35 @@ class DashboardView(ft.Container):
     async def _preencher_form(self, e):
         dados = e.control.data
         self.txt_ip.value = dados["ip"]
-        self.txt_user.value = dados["user"]
+        
+        # MÁGICA: Aplica-se aos cliques no botão de flecha do Histórico
+        if dados["user"]:
+            self.txt_user.value = dados["user"]
+            
         self.txt_pass.value = ""
         self.container_sugestoes.visible = False
         
         await self.txt_pass.focus()
         self.update()
+
+    async def preencher_form_externo(self, ip, user):
+        lembra_senha = self.db.obter_configuracao("exigir_senha_sessao", "0")
+        self.txt_ip.value = ip
+        
+        # MÁGICA: Aplica-se aos cliques vindos das telas de Favoritos e Ambientes
+        if user:
+            self.txt_user.value = user
+            
+        if lembra_senha == "1" and self.txt_pass.value: 
+            self.container_sugestoes.visible = False
+            self.update()
+            self._disparar_conexao_rdp(self.txt_ip.value, self.txt_user.value, self.txt_pass.value)
+            return True
+        else: 
+            self.txt_pass.value = "" 
+            self.container_sugestoes.visible = False
+            self.update()
+            return False
 
     async def _btn_conectar_clicked(self, e):
         if not self.txt_ip.value:
@@ -290,20 +315,3 @@ class DashboardView(ft.Container):
             
         self.update()
         self.on_connect_action(ip, user, senha)
-
-    async def preencher_form_externo(self, ip, user):
-        lembra_senha = self.db.obter_configuracao("exigir_senha_sessao", "0")
-        if lembra_senha == "1" and self.txt_pass.value: 
-            self.txt_ip.value = ip
-            self.txt_user.value = user
-            self.container_sugestoes.visible = False
-            self.update()
-            self._disparar_conexao_rdp(ip, user, self.txt_pass.value)
-            return True
-        else: 
-            self.txt_ip.value = ip
-            self.txt_user.value = user
-            self.txt_pass.value = "" 
-            self.container_sugestoes.visible = False
-            self.update()
-            return False

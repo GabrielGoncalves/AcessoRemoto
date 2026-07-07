@@ -10,7 +10,8 @@ class ModalNovaConexaoAmbiente(ft.AlertDialog):
 
         self.txt_nome = ft.TextField(label="Nome de Exibição", autofocus=True, border_color=ft.Colors.SECONDARY)
         self.txt_ip = ft.TextField(label="IP / Hostname", border_color=ft.Colors.SECONDARY)
-        self.txt_user = ft.TextField(label="Usuário", border_color=ft.Colors.SECONDARY)
+        # TEXTO ATUALIZADO
+        self.txt_user = ft.TextField(label="Usuário (Opcional)", hint_text="Deixe vazio para usar o Global", border_color=ft.Colors.SECONDARY)
 
         self.title = ft.Row([ft.Icon(ft.Icons.ADD_LINK, color=ft.Colors.PRIMARY), ft.Text("Vincular Acesso", size=18, weight=ft.FontWeight.BOLD)])
         self.content = ft.Column([self.txt_nome, self.txt_ip, self.txt_user], tight=True, spacing=10)
@@ -29,16 +30,15 @@ class ModalNovaConexaoAmbiente(ft.AlertDialog):
         ip = self.txt_ip.value.strip() if self.txt_ip.value else ""
         user = self.txt_user.value.strip() if self.txt_user.value else ""
         
-        if nome and ip and user and self.ambiente_id:
+        # LÓGICA ATUALIZADA: Exige apenas Nome, IP e a pasta do ambiente.
+        if nome and ip and self.ambiente_id:
             self.db.adicionar_conexao_ambiente(self.ambiente_id, nome, ip, user)
             
             self.txt_nome.value = ""
             self.txt_ip.value = ""
             self.txt_user.value = ""
             
-            # Desempilha o modal de forma nativa e segura
             self.page.pop_dialog()
-
             if self.on_success:
                 self.on_success()
 
