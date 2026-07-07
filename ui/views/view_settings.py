@@ -13,7 +13,7 @@ class ViewSettings(ft.Container):
 
     def build_ui(self):
         tabs_controller = ft.Tabs(
-            length=4,
+            length=5,
             expand=True,
             content=ft.Column(
                 expand=True,
@@ -23,6 +23,7 @@ class ViewSettings(ft.Container):
                             ft.Tab(label="Sessão & Segurança", icon=ft.Icons.SECURITY),
                             ft.Tab(label="Identidades", icon=ft.Icons.PEOPLE_ALT),
                             ft.Tab(label="Dados & Backup", icon=ft.Icons.DATA_USAGE),
+                            ft.Tab(label="Personalização", icon=ft.Icons.PALETTE),
                             ft.Tab(label="Avançado", icon=ft.Icons.CODE),
                         ]
                     ),
@@ -32,6 +33,7 @@ class ViewSettings(ft.Container):
                             self._criar_aba_seguranca(),
                             self._criar_aba_identidades(),
                             self._criar_aba_dados(),
+                            self._criar_aba_personalizacao(),
                             self._criar_aba_avancado(),
                         ],
                     ),
@@ -45,13 +47,16 @@ class ViewSettings(ft.Container):
             tabs_controller
         ], expand=True)
     
+    # ==========================================
+    # ABA 1: SESSÃO & SEGURANÇA
+    # ==========================================
     def _criar_aba_seguranca(self):
         def alternar_flag_seguranca(e):
             valor_salvar = "1" if e.control.value else "0"
             self.db.salvar_configuracao("exigir_senha_sessao", valor_salvar)
             
             self.page.snack_bar = ft.SnackBar(
-                content=ft.Text("Configuração de segurança updated!"),
+                content=ft.Text("Configuração de segurança atualizada!"),
                 bgcolor=ft.Colors.SECONDARY
             )
             self.page.snack_bar.open = True
@@ -147,9 +152,12 @@ class ViewSettings(ft.Container):
             ], spacing=15), padding=15
         )
 
+    # ==========================================
+    # ABA 2: IDENTIDADES
+    # ==========================================
     def _criar_aba_identidades(self):
-        txt_novo_user = ft.TextField(label="Novo Usuário", expand=True, text_size=14, border_color=ft.Colors.SECONDARY)
-        txt_novo_dom = ft.TextField(label="Novo Domínio (ex: empresa.local)", expand=True, text_size=14, border_color=ft.Colors.SECONDARY)
+        txt_novo_user = ft.TextField(label="Novo Usuário", expand=True, border_color=ft.Colors.SECONDARY)
+        txt_novo_dom = ft.TextField(label="Novo Domínio (ex: empresa.local)", expand=True, border_color=ft.Colors.SECONDARY)
         lv_users = ft.ListView(expand=True, spacing=5)
         lv_dominios = ft.ListView(expand=True, spacing=5)
 
@@ -274,17 +282,10 @@ class ViewSettings(ft.Container):
             ], spacing=15), padding=15
         )
 
+    # ==========================================
+    # ABA 3: DADOS & BACKUP
+    # ==========================================
     def _criar_aba_dados(self):
-        from ui.layout import AppTheme
-        tema_atual = self.db.obter_tema()
-        
-        def alterar_tema(e):
-            novo_tema = e.control.value
-            self.page.theme = AppTheme.get_theme(novo_tema)
-            self.page.bgcolor = self.page.theme.color_scheme.surface_container
-            self.page.update()
-            self.db.salvar_tema(novo_tema)
-
         return ft.Container(
             content=ft.ListView([
                 ft.Card(
@@ -301,14 +302,40 @@ class ViewSettings(ft.Container):
                             ft.Switch(label="Ativar Rotina Automática de Backup Diário", value=False, active_color=ft.Colors.PRIMARY),
                         ]), padding=15
                     ), bgcolor=ft.Colors.SURFACE_CONTAINER
-                ),
+                )
+            ], spacing=15), padding=15
+        )
+
+    # ==========================================
+    # ABA 4: PERSONALIZAÇÃO
+    # ==========================================
+    def _criar_aba_personalizacao(self):
+        from ui.layout import AppTheme
+        tema_atual = self.db.obter_tema()
+        
+        def alterar_tema(e):
+            novo_tema = e.control.value
+            self.page.theme = AppTheme.get_theme(novo_tema)
+            self.page.bgcolor = self.page.theme.color_scheme.surface_container
+            self.page.update()
+            self.db.salvar_tema(novo_tema)
+
+        return ft.Container(
+            content=ft.ListView([
                 ft.Card(
                     content=ft.Container(
                         content=ft.Column([
-                            ft.Text("Personalização Visual", size=16, weight=ft.FontWeight.BOLD),
+                            ft.Row([
+                                ft.Icon(ft.Icons.PALETTE, color=ft.Colors.PRIMARY),
+                                ft.Text("Aparência e Estilo", size=16, weight=ft.FontWeight.BOLD)
+                            ]),
                             ft.Divider(color=ft.Colors.SECONDARY),
+                            ft.Text("Selecione o tema para o seu aplicativo.", size=12, color=ft.Colors.ON_SURFACE_VARIANT),
+                            ft.Divider(height=10, color=ft.Colors.TRANSPARENT),
                             ft.Dropdown(
-                                label="Tema do Aplicativo", value=tema_atual, on_select=alterar_tema, 
+                                label="Tema do Aplicativo", 
+                                value=tema_atual, 
+                                on_select=alterar_tema, 
                                 options=[
                                     ft.dropdown.Option("cyberpunk", "Cyberpunk"),
                                     ft.dropdown.Option("neon_tokyo", "Neon Tokyo"),
@@ -320,7 +347,10 @@ class ViewSettings(ft.Container):
                                     ft.dropdown.Option("cereja_doce", "Cereja Doce"),
                                     ft.dropdown.Option("outono_fazenda", "Outono de Fazenda"),
                                 ],
-                                border_color=ft.Colors.SECONDARY
+                                bgcolor=ft.Colors.SURFACE,
+                                border_color=ft.Colors.SECONDARY,
+                                width=350,
+                                menu_height=200
                             )
                         ]), padding=15
                     ), bgcolor=ft.Colors.SURFACE_CONTAINER
@@ -328,6 +358,9 @@ class ViewSettings(ft.Container):
             ], spacing=15), padding=15
         )
 
+    # ==========================================
+    # ABA 5: AVANÇADO
+    # ==========================================
     def _criar_aba_avancado(self):
         txt_api_endpoint = ft.TextField(
             label="Custom API Endpoint URL", border_color=ft.Colors.SECONDARY, disabled=True, value="https://api.remotecraft.internal/v1"
