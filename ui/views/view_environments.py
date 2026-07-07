@@ -15,7 +15,6 @@ class ViewEnvironments(ft.Container):
         self.ambiente_selecionado_id = None
         self.ambiente_selecionado_nome = ""
         
-        # Novo campo de pesquisa em tempo real para as pastas/ambientes
         self.txt_pesquisa_ambientes = ft.TextField(
             hint_text="Buscar ambiente...",
             prefix_icon=ft.Icons.SEARCH,
@@ -41,9 +40,8 @@ class ViewEnvironments(ft.Container):
                     ft.IconButton(ft.Icons.ADD, icon_color=ft.Colors.PRIMARY, tooltip="Novo Ambiente", on_click=self.abrir_modal_ambiente)
                 ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                 
-                self.txt_pesquisa_ambientes, # <-- Barra de pesquisa inserida aqui
+                self.txt_pesquisa_ambientes,
                 ft.Divider(color=ft.Colors.GREY_800),
-                
                 self.lv_ambientes
             ], expand=True),
             expand=1,
@@ -102,7 +100,7 @@ class ViewEnvironments(ft.Container):
                 ft.Container(
                     content=ft.Row([
                         ft.Icon(ft.Icons.FOLDER, color=ft.Colors.SECONDARY if not is_selected else ft.Colors.PRIMARY),
-                        ft.Text(nome, weight=ft.FontWeight.BOLD if is_selected else ft.FontWeight.NORMAL, expand=True),
+                        ft.Text(nome, weight=ft.FontWeight.BOLD if is_selected else ft.FontWeight.NORMAL, expand=True, overflow=ft.TextOverflow.ELLIPSIS),
                         ft.IconButton(
                             ft.Icons.DELETE_OUTLINE, 
                             icon_color=ft.Colors.ERROR, 
@@ -122,7 +120,6 @@ class ViewEnvironments(ft.Container):
     def selecionar_ambiente(self, ambiente_id, nome_ambiente):
         self.ambiente_selecionado_id = ambiente_id
         self.ambiente_selecionado_nome = nome_ambiente
-        # Recarrega mantendo a pesquisa visualmente ativa
         termo = self.txt_pesquisa_ambientes.value.strip().lower() if self.txt_pesquisa_ambientes.value else ""
         self.carregar_ambientes(termo_busca=termo) 
         self.carregar_conexoes()
@@ -148,8 +145,16 @@ class ViewEnvironments(ft.Container):
                         ft.Icon(ft.Icons.MONITOR, color=ft.Colors.YELLOW_700 if is_fav else ft.Colors.PRIMARY),
                         ft.Column([
                             ft.Text(nome_exibicao, weight=ft.FontWeight.BOLD),
-                            ft.Text(f"IP: {ip} | User: {user}", size=12, color=ft.Colors.ON_SURFACE_VARIANT)
+                            ft.Text(f"IP: {ip} | User: {user if user else '[Global]'}", size=12, color=ft.Colors.ON_SURFACE_VARIANT)
                         ], expand=True, spacing=2),
+                        
+                        ft.IconButton(
+                            icon=ft.Icons.DELETE_OUTLINE,
+                            icon_color=ft.Colors.ERROR,
+                            tooltip="Remover Acesso",
+                            on_click=lambda e, cid=id_: self.remover_conexao(cid)
+                        ),
+                        
                         ft.IconButton(
                             icon=ft.Icons.PLAY_ARROW,
                             icon_color=ft.Colors.PRIMARY,
@@ -178,7 +183,13 @@ class ViewEnvironments(ft.Container):
         else:
             self.col_detalhes.controls.append(
                 ft.Row([
-                    ft.Text(f"Acessos: {self.ambiente_selecionado_nome}", size=20, weight=ft.FontWeight.BOLD),
+                    ft.Text(
+                        f"Acessos: {self.ambiente_selecionado_nome}", 
+                        size=20, 
+                        weight=ft.FontWeight.BOLD,
+                        expand=True,
+                        overflow=ft.TextOverflow.ELLIPSIS
+                    ),
                     ft.ElevatedButton(
                         "Vincular Acesso",
                         icon=ft.Icons.ADD,
@@ -186,7 +197,7 @@ class ViewEnvironments(ft.Container):
                         color=ft.Colors.ON_SECONDARY,
                         on_click=self.abrir_modal_conexao
                     )
-                ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
+                ])
             )
             self.col_detalhes.controls.append(ft.Divider(color=ft.Colors.GREY_800))
             self.col_detalhes.controls.append(self.lv_conexoes)
@@ -214,6 +225,14 @@ class ViewEnvironments(ft.Container):
         termo = self.txt_pesquisa_ambientes.value.strip().lower() if self.txt_pesquisa_ambientes.value else ""
         self.carregar_ambientes(termo_busca=termo)
         self.atualizar_painel_detalhes()
+
+    def remover_conexao(self, conexao_id):
+        self.db.excluir_conexao_ambiente(conexao_id)
+        self.carregar_conexoes()
+        
+        self.page.snack_bar = ft.SnackBar(ft.Text("Acesso desvinculado!"), bgcolor=ft.Colors.ERROR)
+        self.page.snack_bar.open = True
+        self.page.update()
 
     async def _disparar_conexao_rdp(self, e):
         dados = e.control.data

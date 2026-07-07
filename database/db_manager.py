@@ -201,6 +201,11 @@ class DatabaseManager:
                 FROM conexoes_ambientes ca 
                 WHERE ca.ambiente_id = ?;
             """, (ambiente_id,)).fetchall()
+        
+    def excluir_conexao_ambiente(self, conexao_id):
+        with self._get_connection() as conn:
+            conn.cursor().execute("DELETE FROM conexoes_ambientes WHERE id = ?;", (conexao_id,))
+            conn.commit()
 
 
     # ==========================================
@@ -231,7 +236,7 @@ class DatabaseManager:
 
 
     # ==========================================
-    # MÉTODOS: HISTÓRICO (REFATORADO)
+    # MÉTODOS: HISTÓRICO
     # ==========================================
     def registrar_historico(self, nome, ip, usuario):
         with self._get_connection() as conn: 
