@@ -15,8 +15,17 @@ class ViewEnvironments(ft.Container):
         self.ambiente_selecionado_id = None
         self.ambiente_selecionado_nome = ""
         
+        # Novo campo de pesquisa em tempo real para as pastas/ambientes
+        self.txt_pesquisa_ambientes = ft.TextField(
+            hint_text="Buscar ambiente...",
+            prefix_icon=ft.Icons.SEARCH,
+            border_color=ft.Colors.SECONDARY,
+            dense=True,
+            on_change=self._filtrar_ambientes
+        )
+        
         self.lv_ambientes = ft.ListView(expand=True, spacing=10)
-        self.modal_ambiente = ModalNovoAmbiente(db=self.db, on_success_callback=self.carregar_ambientes)
+        self.modal_ambiente = ModalNovoAmbiente(db=self.db, on_success_callback=self._atualizar_apos_modal_ambiente)
         
         self.col_detalhes = ft.Column(expand=True)
         self.lv_conexoes = ft.ListView(expand=True, spacing=10)
@@ -31,7 +40,10 @@ class ViewEnvironments(ft.Container):
                     ft.Text("Ambientes", size=20, weight=ft.FontWeight.BOLD),
                     ft.IconButton(ft.Icons.ADD, icon_color=ft.Colors.PRIMARY, tooltip="Novo Ambiente", on_click=self.abrir_modal_ambiente)
                 ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
+                
+                self.txt_pesquisa_ambientes, # <-- Barra de pesquisa inserida aqui
                 ft.Divider(color=ft.Colors.GREY_800),
+                
                 self.lv_ambientes
             ], expand=True),
             expand=1,
@@ -54,16 +66,36 @@ class ViewEnvironments(ft.Container):
         self.carregar_ambientes()
         self.atualizar_painel_detalhes()
 
-    def carregar_ambientes(self):
+    def _filtrar_ambientes(self, e):
+        termo = self.txt_pesquisa_ambientes.value.strip().lower()
+        self.carregar_ambientes(termo_busca=termo)
+
+    def _atualizar_apos_modal_ambiente(self):
+        termo = self.txt_pesquisa_ambientes.value.strip().lower() if self.txt_pesquisa_ambientes.value else ""
+        self.carregar_ambientes(termo_busca=termo)
+
+    def carregar_ambientes(self, termo_busca=""):
         self.lv_ambientes.controls.clear()
-        ambientes = self.db.listar_ambientes()
+        todos_ambientes = self.db.listar_ambientes()
         
-        if not ambientes:
+        if not todos_ambientes:
             self.lv_ambientes.controls.append(
-                ft.Text("Nenhum ambiente criado.", color=ft.Colors.GREY_500, italic=True, size=13)
+                ft.Text("Nenhum ambiente criado.", color=ft.Colors.ON_SURFACE_VARIANT, italic=True, size=13)
             )
-        
-        for id_, nome in ambientes:
+            self.update()
+            return
+            
+        if termo_busca:
+            filtrados = [a for a in todos_ambientes if termo_busca in a[1].lower()]
+        else:
+            filtrados = todos_ambientes
+
+        if not filtrados:
+            self.lv_ambientes.controls.append(
+                ft.Text("Nenhum ambiente encontrado.", color=ft.Colors.ON_SURFACE_VARIANT, italic=True, size=13)
+            )
+
+        for id_, nome in filtrados:
             is_selected = id_ == self.ambiente_selecionado_id
             
             self.lv_ambientes.controls.append(
@@ -90,7 +122,9 @@ class ViewEnvironments(ft.Container):
     def selecionar_ambiente(self, ambiente_id, nome_ambiente):
         self.ambiente_selecionado_id = ambiente_id
         self.ambiente_selecionado_nome = nome_ambiente
-        self.carregar_ambientes() 
+        # Recarrega mantendo a pesquisa visualmente ativa
+        termo = self.txt_pesquisa_ambientes.value.strip().lower() if self.txt_pesquisa_ambientes.value else ""
+        self.carregar_ambientes(termo_busca=termo) 
         self.carregar_conexoes()
         self.atualizar_painel_detalhes()
 
@@ -103,7 +137,7 @@ class ViewEnvironments(ft.Container):
         
         if not conexoes:
             self.lv_conexoes.controls.append(
-                ft.Text("Nenhuma conexão vinculada a este ambiente.", color=ft.Colors.GREY_500, italic=True, size=13)
+                ft.Text("Nenhuma conexão vinculada a este ambiente.", color=ft.Colors.ON_SURFACE_VARIANT, italic=True, size=13)
             )
         
         for id_, nome_exibicao, ip, user, seguro_fav in conexoes:
@@ -161,18 +195,24 @@ class ViewEnvironments(ft.Container):
 
     def abrir_modal_ambiente(self, e):
         self.page.show_dialog(self.modal_ambiente)
+        self.modal_ambiente.open = True
+        self.page.update()
 
     def abrir_modal_conexao(self, e):
         if self.ambiente_selecionado_id:
             self.modal_conexao.configurar_ambiente(self.ambiente_selecionado_id)
             self.page.show_dialog(self.modal_conexao)
+            self.modal_conexao.open = True
+            self.page.update()
 
     def excluir_ambiente(self, ambiente_id):
         self.db.excluir_ambiente(ambiente_id)
         if self.ambiente_selecionado_id == ambiente_id:
             self.ambiente_selecionado_id = None
             self.ambiente_selecionado_nome = ""
-        self.carregar_ambientes()
+        
+        termo = self.txt_pesquisa_ambientes.value.strip().lower() if self.txt_pesquisa_ambientes.value else ""
+        self.carregar_ambientes(termo_busca=termo)
         self.atualizar_painel_detalhes()
 
     async def _disparar_conexao_rdp(self, e):
