@@ -16,7 +16,7 @@ class MainApplication:
         self.page = page
         self.page.title = "Remote Craft"
         self.page.window.width = 900
-        self.page.window.height = 750
+        self.page.window.height = 800
         self.db = DatabaseManager()
 
         tema_salvo = self.db.obter_tema()

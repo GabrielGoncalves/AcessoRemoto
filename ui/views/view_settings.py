@@ -2,6 +2,7 @@ import flet as ft
 import random
 import string
 from database.db_manager import DatabaseManager
+from services.password_service import PasswordService
 
 class ViewSettings(ft.Container):
     def __init__(self, db: DatabaseManager):
@@ -66,7 +67,8 @@ class ViewSettings(ft.Container):
         estado_switch = True if flag_atual == "1" else False
 
         txt_senha_gerada = ft.TextField(
-            label="Senha Forte Gerada",
+            hint_text="Gerador de Senha",
+            hint_style=ft.TextStyle(color=ft.Colors.GREY),
             read_only=True,
             border_color=ft.Colors.SECONDARY,
             expand=True
@@ -79,19 +81,14 @@ class ViewSettings(ft.Container):
 
         def gerar_senha_aleatoria(e):
             comprimento = int(slider_comprimento.value)
-            caracteres = string.ascii_letters + string.digits + "!@#$%&*"
-            senha_final = "".join(random.choice(caracteres) for _ in range(comprimento))
+            senha_final = PasswordService.generate_safe_password(length=comprimento)
             txt_senha_gerada.value = senha_final
             txt_senha_gerada.update()
 
-        def copiar_senha_clipboard(e):
+        async def copiar_senha_clipboard(e):
             if txt_senha_gerada.value:
-                self.page.set_clipboard(txt_senha_gerada.value)
-                self.page.snack_bar = ft.SnackBar(
-                    content=ft.Text("Senha copiada para a área de transferência!"),
-                    bgcolor=ft.Colors.GREEN_700
-                )
-                self.page.snack_bar.open = True
+                await ft.Clipboard().set(txt_senha_gerada.value)                    
+                txt_senha_gerada.value = ""
                 self.page.update()
 
         return ft.Container(
