@@ -5,9 +5,10 @@ from database.db_manager import DatabaseManager
 from services.password_service import PasswordService
 
 class ViewSettings(ft.Container):
-    def __init__(self, db: DatabaseManager):
+    def __init__(self, db: DatabaseManager, on_dev_mode_change=None):
         super().__init__()
         self.db = db
+        self.on_dev_mode_change = on_dev_mode_change
         self.expand = True
         self.padding = 20
         self.build_ui()
@@ -359,12 +360,24 @@ class ViewSettings(ft.Container):
     # ABA 5: AVANÇADO
     # ==========================================
     def _criar_aba_avancado(self):
+        # 1. Lê do banco de dados se o modo dev já estava ativado na última sessão
+        dev_mode_ativo = self.db.obter_configuracao("modo_desenvolvedor", "0") == "1"
+
         txt_api_endpoint = ft.TextField(
-            label="Custom API Endpoint URL", border_color=ft.Colors.SECONDARY, disabled=True, value="https://api.remotecraft.internal/v1"
+            label="Custom API Endpoint URL", border_color=ft.Colors.SECONDARY, disabled=not dev_mode_ativo, value="https://api.remotecraft.internal/v1"
         )
+        
         def toggle_dev_mode(e):
-            txt_api_endpoint.disabled = not e.control.value
+            is_active = e.control.value
+            txt_api_endpoint.disabled = not is_active
+            
+            # 2. Salva a nova escolha no banco de dados
+            self.db.salvar_configuracao("modo_desenvolvedor", "1" if is_active else "0")
             self.update()
+            
+            # 3. Avisa a tela principal (app.py) para redesenhar o menu lateral
+            if self.on_dev_mode_change:
+                self.on_dev_mode_change(is_active)
 
         return ft.Container(
             content=ft.ListView([
@@ -374,7 +387,10 @@ class ViewSettings(ft.Container):
                             ft.Row([ft.Icon(ft.Icons.WARNING, color=ft.Colors.ERROR), ft.Text("Modo Desenvolvedor", size=16, weight=ft.FontWeight.BOLD)]),
                             ft.Text("Permite a manipulação avançada de requisições, testes de latência e injeção de rotas customizadas de API.", size=12, color=ft.Colors.ON_SURFACE_VARIANT),
                             ft.Divider(color=ft.Colors.SECONDARY),
-                            ft.Switch(label="Ativar Recursos de Desenvolvedor Avançado", value=False, on_change=toggle_dev_mode, active_color=ft.Colors.PRIMARY),
+                            
+                            # 4. Inicia com o valor salvo no banco
+                            ft.Switch(label="Ativar Recursos de Desenvolvedor Avançado", value=dev_mode_ativo, on_change=toggle_dev_mode, active_color=ft.Colors.PRIMARY),
+                            
                             ft.Divider(color=ft.Colors.SECONDARY),
                             txt_api_endpoint,
                             ft.Row([
