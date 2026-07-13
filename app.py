@@ -41,6 +41,7 @@ class MainApplication:
             selected_index=0,
             label_type=ft.NavigationRailLabelType.ALL,
             min_width=100,
+            #group_alignment=0.0,
             on_change=self._nav_changed
         )
         

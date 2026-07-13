@@ -18,9 +18,21 @@ class ViewAPI(ft.Container):
         self.btn_send = ft.ElevatedButton(
             "Enviar Requisição",
             icon=ft.Icons.SEND,
-            bgcolor=ft.Colors.PRIMARY,
             color=ft.Colors.ON_PRIMARY,
+            style=ft.ButtonStyle(
+                bgcolor={
+                    ft.ControlState.HOVERED: ft.Colors.PRIMARY,
+                    ft.ControlState.DEFAULT: ft.Colors.SECONDARY,
+                }
+            ),
             on_click=self.fazer_requisicao
+        )
+        self.btn_clear = ft.ElevatedButton(
+            "Limpar Tela",
+            icon=ft.Icons.DELETE_SWEEP,
+            bgcolor=ft.Colors.RED_900, 
+            color=ft.Colors.WHITE,
+            on_click=self.limpar_tela
         )
 
         # Campos de exibição dos resultados
@@ -56,19 +68,18 @@ class ViewAPI(ft.Container):
         self.build_ui()
 
     def build_ui(self):
-        # Lê a URL configurada lá na aba de Configurações, ou usa uma de teste (gratuita e pública)
-        endpoint_salvo = self.db.obter_configuracao("api_endpoint", "https://jsonplaceholder.typicode.com/users")
+        endpoint_salvo = self.db.obter_configuracao("api_endpoint", "https://jsonplaceholder.typicode.com/todos/1")
         self.txt_url.value = endpoint_salvo
 
         self.content = ft.Column([
             ft.Row([
                 ft.Icon(ft.Icons.ACCOUNT_TREE, color=ft.Colors.PRIMARY, size=28),
-                ft.Text("Testador de API e Sanitização", size=24, weight=ft.FontWeight.BOLD)
+                ft.Text("API e Sanitização", size=24, weight=ft.FontWeight.BOLD)
             ]),
             ft.Divider(color=ft.Colors.SECONDARY),
-            ft.Text("Faça chamadas de rede e veja o Python tratar o resultado automaticamente.", color=ft.Colors.ON_SURFACE_VARIANT),
+            ft.Text("Digite seu endpoint mais seus parâmentros da URL.", color=ft.Colors.ON_SURFACE_VARIANT),
             
-            ft.Row([self.txt_url, self.btn_send]),
+            ft.Row([self.txt_url, self.btn_send, self.btn_clear]),
             
             ft.Container(
                 content=self.tabs,
@@ -93,19 +104,13 @@ class ViewAPI(ft.Container):
         self.update()
 
         try:
-            # Faz a requisição GET nativa do Python
             req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
             with urllib.request.urlopen(req, timeout=10) as response:
                 data = response.read().decode('utf-8')
 
             try:
-                # Tenta converter o texto em um objeto JSON (Dicionário ou Lista)
                 json_data = json.loads(data)
-                
-                # Preenche a aba "Bruto" formatando bonito com indentações
                 self.raw_text.value = json.dumps(json_data, indent=4, ensure_ascii=False)
-                
-                # Envia para o motor de sanitização preencher a aba "Sanitizado"
                 self.sanitizar_dados(json_data)
                 
             except json.JSONDecodeError:
@@ -122,16 +127,18 @@ class ViewAPI(ft.Container):
             self.btn_send.disabled = False
             self.update()
 
+    def limpar_tela(self, e):
+        self.raw_text.value = ""
+        self.sanitized_view.controls.clear()
+        self.update()
+
     def sanitizar_dados(self, json_data):
         """Mágica: Analisa o tipo de dado recebido e constrói a interface adequada com filtros dinâmicos"""
         self.sanitized_view.controls.clear()
 
-        # Cenário 1: É uma lista de objetos (Ideal para Tabelas com Filtros Dinâmicos)
         if isinstance(json_data, list) and len(json_data) > 0 and isinstance(json_data[0], dict):
             todas_chaves = list(json_data[0].keys())
             self.colunas_visiveis = todas_chaves.copy()
-
-            # Placeholder flexível que vai segurar a tabela na memória
             container_tabela = ft.Container()
 
             def atualizar_tabela():
@@ -147,10 +154,7 @@ class ViewAPI(ft.Container):
             def on_chip_select(e):
                 chave = e.control.label.value 
                 
-                # Converte para string por segurança antes de validar, blindando contra qualquer tipo de dado
                 is_selected = (str(e.data).lower() == "true")
-                
-                # Atualiza apenas a nossa lista de visibilidade
                 if is_selected:
                     if chave not in self.colunas_visiveis:
                         self.colunas_visiveis.append(chave)
@@ -158,10 +162,7 @@ class ViewAPI(ft.Container):
                     if chave in self.colunas_visiveis:
                         self.colunas_visiveis.remove(chave)
                 
-                # Mantém a ordem original das colunas
                 self.colunas_visiveis.sort(key=lambda x: todas_chaves.index(x))
-                
-                # Reconstrói e atualiza apenas a tabela
                 atualizar_tabela()
                 container_tabela.update()
 
@@ -176,11 +177,8 @@ class ViewAPI(ft.Container):
                         show_checkmark=True
                     )
                 )
-            
-            # Monta a tabela a primeira vez puramente em memória (sem update)
             atualizar_tabela()
-            
-            # Adiciona os chips e o container da tabela à view final
+
             self.sanitized_view.controls.append(
                 ft.Column([
                     ft.Row(chips_filtro, wrap=True),
@@ -188,7 +186,6 @@ class ViewAPI(ft.Container):
                 ], spacing=15, expand=True)
             )
 
-        # Cenário 2: É um único objeto
         elif isinstance(json_data, dict):
             for chave, valor in json_data.items():
                 self.sanitized_view.controls.append(
@@ -202,7 +199,5 @@ class ViewAPI(ft.Container):
                         border_radius=5
                     )
                 )
-        
-        # Cenário 3: Formato desconhecido
         else:
             self.sanitized_view.controls.append(ft.Text("Os dados foram recebidos, mas o formato é muito simples para sanitização complexa."))
