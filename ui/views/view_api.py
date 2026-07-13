@@ -44,9 +44,9 @@ class ViewAPI(ft.Container):
                         expand=True,
                         controls=[
                             # Conteúdo da Aba 1
-                            ft.Container(content=self.sanitized_view, padding=15),
+                            ft.Container(content=self.sanitized_view),
                             # Conteúdo da Aba 2
-                            ft.Container(content=ft.Column([self.raw_text], scroll=ft.ScrollMode.AUTO), padding=15),
+                            ft.Container(content=ft.Column([self.raw_text], scroll=ft.ScrollMode.AUTO)),
                         ],
                     ),
                 ],
@@ -83,8 +83,9 @@ class ViewAPI(ft.Container):
         url = self.txt_url.value.strip()
         if not url:
             return
+        self.db.salvar_configuracao("api_endpoint", url)
+        self.btn_send.disabled = True
 
-        # Trava o botão e avisa que está carregando
         self.btn_send.disabled = True
         self.raw_text.value = "Carregando resposta da API..."
         self.sanitized_view.controls.clear()
@@ -122,25 +123,72 @@ class ViewAPI(ft.Container):
             self.update()
 
     def sanitizar_dados(self, json_data):
-        """Mágica: Analisa o tipo de dado recebido e constrói a interface adequada"""
+        """Mágica: Analisa o tipo de dado recebido e constrói a interface adequada com filtros dinâmicos"""
         self.sanitized_view.controls.clear()
 
-        # Cenário 1: É uma lista de objetos (Ideal para criar Tabelas)
+        # Cenário 1: É uma lista de objetos (Ideal para Tabelas com Filtros Dinâmicos)
         if isinstance(json_data, list) and len(json_data) > 0 and isinstance(json_data[0], dict):
-            # Pega as chaves do primeiro item para criar os cabeçalhos das colunas (limitado a 6 para caber na tela)
-            chaves = list(json_data[0].keys())[:6]
-            colunas = [ft.DataColumn(ft.Text(k.upper(), weight=ft.FontWeight.BOLD, color=ft.Colors.PRIMARY)) for k in chaves]
+            todas_chaves = list(json_data[0].keys())
+            self.colunas_visiveis = todas_chaves.copy()
+
+            # Placeholder flexível que vai segurar a tabela na memória
+            container_tabela = ft.Container()
+
+            def atualizar_tabela():
+                colunas = [ft.DataColumn(ft.Text(k.upper(), weight=ft.FontWeight.BOLD, color=ft.Colors.PRIMARY)) for k in self.colunas_visiveis]
+                linhas = []
+                for item in json_data:
+                    celulas = [ft.DataCell(ft.Text(str(item.get(k, "")), size=12)) for k in self.colunas_visiveis]
+                    linhas.append(ft.DataRow(cells=celulas))
+                
+                tabela = ft.DataTable(columns=colunas, rows=linhas, border=ft.Border.all(1, ft.Colors.SECONDARY))
+                container_tabela.content = ft.Row([tabela], scroll=ft.ScrollMode.ALWAYS)
+
+            def on_chip_select(e):
+                chave = e.control.label.value 
+                
+                # Converte para string por segurança antes de validar, blindando contra qualquer tipo de dado
+                is_selected = (str(e.data).lower() == "true")
+                
+                # Atualiza apenas a nossa lista de visibilidade
+                if is_selected:
+                    if chave not in self.colunas_visiveis:
+                        self.colunas_visiveis.append(chave)
+                else:
+                    if chave in self.colunas_visiveis:
+                        self.colunas_visiveis.remove(chave)
+                
+                # Mantém a ordem original das colunas
+                self.colunas_visiveis.sort(key=lambda x: todas_chaves.index(x))
+                
+                # Reconstrói e atualiza apenas a tabela
+                atualizar_tabela()
+                container_tabela.update()
+
+            chips_filtro = []
+            for chave in todas_chaves:
+                chips_filtro.append(
+                    ft.Chip(
+                        label=ft.Text(chave), 
+                        selected=True,
+                        on_select=on_chip_select,
+                        selected_color=ft.Colors.PRIMARY_CONTAINER,
+                        show_checkmark=True
+                    )
+                )
             
-            linhas = []
-            for item in json_data:
-                # Transforma cada item em uma célula, convertendo para string
-                celulas = [ft.DataCell(ft.Text(str(item.get(k, "")), size=12)) for k in chaves]
-                linhas.append(ft.DataRow(cells=celulas))
+            # Monta a tabela a primeira vez puramente em memória (sem update)
+            atualizar_tabela()
+            
+            # Adiciona os chips e o container da tabela à view final
+            self.sanitized_view.controls.append(
+                ft.Column([
+                    ft.Row(chips_filtro, wrap=True),
+                    container_tabela
+                ], spacing=15, expand=True)
+            )
 
-            tabela = ft.DataTable(columns=colunas, rows=linhas, border=ft.border.all(1, ft.Colors.SECONDARY))
-            self.sanitized_view.controls.append(ft.Row([tabela], scroll=ft.ScrollMode.ALWAYS))
-
-        # Cenário 2: É um único objeto (Ideal para criar uma lista de propriedades)
+        # Cenário 2: É um único objeto
         elif isinstance(json_data, dict):
             for chave, valor in json_data.items():
                 self.sanitized_view.controls.append(

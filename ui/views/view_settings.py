@@ -360,24 +360,42 @@ class ViewSettings(ft.Container):
     # ABA 5: AVANÇADO
     # ==========================================
     def _criar_aba_avancado(self):
-        # 1. Lê do banco de dados se o modo dev já estava ativado na última sessão
         dev_mode_ativo = self.db.obter_configuracao("modo_desenvolvedor", "0") == "1"
+        api_module_ativo = self.db.obter_configuracao("modulo_api_ativo", "0") == "1"
 
-        txt_api_endpoint = ft.TextField(
-            label="Custom API Endpoint URL", border_color=ft.Colors.SECONDARY, disabled=not dev_mode_ativo, value="https://api.remotecraft.internal/v1"
-        )
-        
         def toggle_dev_mode(e):
             is_active = e.control.value
-            txt_api_endpoint.disabled = not is_active
-            
-            # 2. Salva a nova escolha no banco de dados
             self.db.salvar_configuracao("modo_desenvolvedor", "1" if is_active else "0")
-            self.update()
             
-            # 3. Avisa a tela principal (app.py) para redesenhar o menu lateral
+            switch_modulo_api.disabled = not is_active
+            if not is_active:
+                switch_modulo_api.value = False
+                self.db.salvar_configuracao("modulo_api_ativo", "0")
+                
+            self.update()
             if self.on_dev_mode_change:
-                self.on_dev_mode_change(is_active)
+                self.on_dev_mode_change()
+
+        def toggle_api_module(e):
+            is_active = e.control.value
+            self.db.salvar_configuracao("modulo_api_ativo", "1" if is_active else "0")
+            if self.on_dev_mode_change:
+                self.on_dev_mode_change()
+
+        switch_dev_mode = ft.Switch(
+            label="Ativar Recursos de Desenvolvedor Avançado", 
+            value=dev_mode_ativo, 
+            on_change=toggle_dev_mode, 
+            active_color=ft.Colors.PRIMARY
+        )
+        
+        switch_modulo_api = ft.Switch(
+            label="Habilitar Módulo de API no Menu Lateral", 
+            value=api_module_ativo and dev_mode_ativo, 
+            disabled=not dev_mode_ativo, 
+            on_change=toggle_api_module, 
+            active_color=ft.Colors.SECONDARY
+        )
 
         return ft.Container(
             content=ft.ListView([
@@ -385,18 +403,15 @@ class ViewSettings(ft.Container):
                     content=ft.Container(
                         content=ft.Column([
                             ft.Row([ft.Icon(ft.Icons.WARNING, color=ft.Colors.ERROR), ft.Text("Modo Desenvolvedor", size=16, weight=ft.FontWeight.BOLD)]),
-                            ft.Text("Permite a manipulação avançada de requisições, testes de latência e injeção de rotas customizadas de API.", size=12, color=ft.Colors.ON_SURFACE_VARIANT),
+                            ft.Text("Permite a manipulação avançada e ativação de módulos extras.", size=12, color=ft.Colors.ON_SURFACE_VARIANT),
                             ft.Divider(color=ft.Colors.SECONDARY),
                             
-                            # 4. Inicia com o valor salvo no banco
-                            ft.Switch(label="Ativar Recursos de Desenvolvedor Avançado", value=dev_mode_ativo, on_change=toggle_dev_mode, active_color=ft.Colors.PRIMARY),
+                            switch_dev_mode,
                             
-                            ft.Divider(color=ft.Colors.SECONDARY),
-                            txt_api_endpoint,
-                            ft.Row([
-                                ft.ElevatedButton("Testar Endpoint", icon=ft.Icons.NETWORK_CHECK, bgcolor=ft.Colors.PRIMARY, color=ft.Colors.ON_PRIMARY),
-                                ft.ElevatedButton("Resetar Padrões", icon=ft.Icons.RESTORE, bgcolor=ft.Colors.ERROR, color=ft.Colors.ON_PRIMARY),
-                            ], spacing=15)
+                            ft.Container(
+                                content=ft.Column([switch_modulo_api]),
+                                padding=ft.Padding.only(left=20)
+                            )
                         ]), padding=15
                     ), bgcolor=ft.Colors.SURFACE_CONTAINER
                 )
