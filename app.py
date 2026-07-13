@@ -7,6 +7,7 @@ from ui.views.view_dashboard import DashboardView
 from ui.views.view_favorites import ViewFavoritos
 from ui.views.view_environments import ViewEnvironments
 from ui.views.view_settings import ViewSettings
+from ui.views.view_api import ViewAPI
 from ui.layout import AppTheme
 
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -31,7 +32,9 @@ class MainApplication:
             on_connect_action=self.disparar_rdp,
             on_redirect_action=self.redirecionar_para_dashboard
         )
-        # 1. Instanciando com o self da nova função abaixo
+        self.view_api = ViewAPI(self.db) 
+        self.view_settings = ViewSettings(self.db, on_dev_mode_change=self.atualizar_menu_lateral)
+
         self.view_settings = ViewSettings(self.db, on_dev_mode_change=self.atualizar_menu_lateral)
         self.view_container = ft.Container(expand=True)
         
@@ -42,7 +45,6 @@ class MainApplication:
             on_change=self._nav_changed
         )
         
-        # 2. Constrói o menu dinâmico na primeira vez que o app abre
         dev_mode_ativo = self.db.obter_configuracao("modo_desenvolvedor", "0") == "1"
         self.atualizar_menu_lateral(dev_mode_ativo)
 
@@ -58,7 +60,6 @@ class MainApplication:
             ], expand=True)
         )
 
-    # 3. Nova função que constrói as opções do menu com ou sem a API
     def atualizar_menu_lateral(self, dev_mode_ativo):
         destinations = [
             ft.NavigationRailDestination(icon=ft.Icons.DASHBOARD_OUTLINED, selected_icon=ft.Icons.DASHBOARD, label="Dashboard"),
@@ -84,7 +85,6 @@ class MainApplication:
         self._carregar_view(int(e.data))
 
     def _carregar_view(self, index):
-        # 4. Roteamento inteligente independente do número da aba!
         try:
             selected_label = self.nav_rail.destinations[index].label
         except IndexError:
@@ -97,7 +97,7 @@ class MainApplication:
         elif selected_label == "Ambientes":
             self.view_container.content = self.view_environments
         elif selected_label == "API":
-            pass # Substituiremos por: self.view_container.content = self.view_api
+            self.view_container.content = self.view_api
         elif selected_label == "Configurações":
             self.view_container.content = self.view_settings
         elif selected_label == "Informações":
