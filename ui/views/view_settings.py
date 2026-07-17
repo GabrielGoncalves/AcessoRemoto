@@ -3,6 +3,7 @@ import random
 import string
 from database.db_manager import DatabaseManager
 from services.password_service import PasswordService
+from ui.components.notifications import Notification
 
 class ViewSettings(ft.Container):
     def __init__(self, db: DatabaseManager, on_dev_mode_change=None):
@@ -290,16 +291,7 @@ class ViewSettings(ft.Container):
         def alterar_retencao(e):
             valor_escolhido = str(e.control.value)
             self.db.salvar_configuracao("retencao_historico_dias", valor_escolhido)
-            
-            self.page.show_dialog(
-                ft.SnackBar(
-                    content=ft.Text(
-                        f"Retenção automática salva para {valor_escolhido} dias!", 
-                        color=ft.Colors.WHITE
-                    ),
-                    bgcolor=ft.Colors.GREEN_700
-                )
-            )
+            Notification.show_success(self.page, f"Retenção automática salva para {valor_escolhido} dias!")
             self.page.update()
             
         dropdown_retencao = ft.Dropdown(
