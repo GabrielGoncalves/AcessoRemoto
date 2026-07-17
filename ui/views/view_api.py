@@ -1,7 +1,7 @@
 import flet as ft
 import json
-import urllib.request
 from database.db_manager import DatabaseManager
+from services.api_service import ApiService
 
 class ViewAPI(ft.Container):
     def __init__(self, db: DatabaseManager):
@@ -55,9 +55,7 @@ class ViewAPI(ft.Container):
                     ft.TabBarView(
                         expand=True,
                         controls=[
-                            # Conteúdo da Aba 1
                             ft.Container(content=self.sanitized_view),
-                            # Conteúdo da Aba 2
                             ft.Container(content=ft.Column([self.raw_text], scroll=ft.ScrollMode.AUTO)),
                         ],
                     ),
@@ -77,7 +75,7 @@ class ViewAPI(ft.Container):
                 ft.Text("API e Sanitização", size=24, weight=ft.FontWeight.BOLD)
             ]),
             ft.Divider(color=ft.Colors.SECONDARY),
-            ft.Text("Digite seu endpoint mais seus parâmentros da URL.", color=ft.Colors.ON_SURFACE_VARIANT),
+            ft.Text("Digite seu endpoint mais seus parâmetros da URL.", color=ft.Colors.ON_SURFACE_VARIANT),
             
             ft.Row([self.txt_url, self.btn_send, self.btn_clear]),
             
@@ -94,38 +92,33 @@ class ViewAPI(ft.Container):
         url = self.txt_url.value.strip()
         if not url:
             return
+        
         self.db.salvar_configuracao("api_endpoint", url)
-        self.btn_send.disabled = True
-
         self.btn_send.disabled = True
         self.raw_text.value = "Carregando resposta da API..."
         self.sanitized_view.controls.clear()
         self.sanitized_view.controls.append(ft.ProgressRing(color=ft.Colors.PRIMARY))
         self.update()
 
-        try:
-            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-            with urllib.request.urlopen(req, timeout=10) as response:
-                data = response.read().decode('utf-8')
+        # A MÁGICA DO REFACTOR AQUI: Delegamos a busca para o serviço
+        sucesso, json_data, raw_data = ApiService.fetch_json(url)
 
-            try:
-                json_data = json.loads(data)
-                self.raw_text.value = json.dumps(json_data, indent=4, ensure_ascii=False)
-                self.sanitizar_dados(json_data)
-                
-            except json.JSONDecodeError:
-                self.raw_text.value = data
-                self.sanitized_view.controls.clear()
+        self.sanitized_view.controls.clear()
+
+        if sucesso:
+            # Se deu certo, atualizamos a tela com os dados limpos
+            self.raw_text.value = json.dumps(json_data, indent=4, ensure_ascii=False)
+            self.sanitizar_dados(json_data)
+        else:
+            # Tratamento de erro limpo
+            self.raw_text.value = raw_data
+            if "Erro na requisição" in raw_data:
+                self.sanitized_view.controls.append(ft.Text(f"Falha na conexão de rede.", color=ft.Colors.ERROR))
+            else:
                 self.sanitized_view.controls.append(ft.Text("A resposta não é um JSON válido para ser sanitizado.", color=ft.Colors.ERROR))
 
-        except Exception as ex:
-            self.raw_text.value = f"Erro na requisição:\n{str(ex)}"
-            self.sanitized_view.controls.clear()
-            self.sanitized_view.controls.append(ft.Text(f"Falha na conexão de rede.", color=ft.Colors.ERROR))
-
-        finally:
-            self.btn_send.disabled = False
-            self.update()
+        self.btn_send.disabled = False
+        self.update()
 
     def limpar_tela(self, e):
         self.raw_text.value = ""
@@ -133,7 +126,7 @@ class ViewAPI(ft.Container):
         self.update()
 
     def sanitizar_dados(self, json_data):
-        """Mágica: Analisa o tipo de dado recebido e constrói a interface adequada com filtros dinâmicos"""
+        # Todo o seu motor visual de construção de tabelas continua intacto e isolado aqui!
         self.sanitized_view.controls.clear()
 
         if isinstance(json_data, list) and len(json_data) > 0 and isinstance(json_data[0], dict):
@@ -153,30 +146,27 @@ class ViewAPI(ft.Container):
 
             def on_chip_select(e):
                 chave = e.control.label.value 
-                
                 is_selected = (str(e.data).lower() == "true")
-                if is_selected:
-                    if chave not in self.colunas_visiveis:
-                        self.colunas_visiveis.append(chave)
-                else:
-                    if chave in self.colunas_visiveis:
-                        self.colunas_visiveis.remove(chave)
+                
+                if is_selected and chave not in self.colunas_visiveis:
+                    self.colunas_visiveis.append(chave)
+                elif not is_selected and chave in self.colunas_visiveis:
+                    self.colunas_visiveis.remove(chave)
                 
                 self.colunas_visiveis.sort(key=lambda x: todas_chaves.index(x))
                 atualizar_tabela()
                 container_tabela.update()
 
-            chips_filtro = []
-            for chave in todas_chaves:
-                chips_filtro.append(
-                    ft.Chip(
-                        label=ft.Text(chave), 
-                        selected=True,
-                        on_select=on_chip_select,
-                        selected_color=ft.Colors.PRIMARY_CONTAINER,
-                        show_checkmark=True
-                    )
-                )
+            chips_filtro = [
+                ft.Chip(
+                    label=ft.Text(chave), 
+                    selected=True,
+                    on_select=on_chip_select,
+                    selected_color=ft.Colors.PRIMARY_CONTAINER,
+                    show_checkmark=True
+                ) for chave in todas_chaves
+            ]
+            
             atualizar_tabela()
 
             self.sanitized_view.controls.append(
