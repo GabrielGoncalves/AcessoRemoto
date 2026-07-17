@@ -2,6 +2,8 @@ import flet as ft
 import json
 import os
 import shutil
+import sys
+import asyncio
 from database.db_manager import DatabaseManager
 from services.password_service import PasswordService
 from ui.components.notifications import Notification
@@ -408,10 +410,49 @@ class ViewSettings(ft.Container):
             except Exception as ex:
                 Notification.show_error(e.page, "Não foi possível criar o backup.")
 
+        # ------------------------------------------
+        # LÓGICA DE RESTAURAÇÃO (SEGURA)
+        # ------------------------------------------
+        async def restaurar_backup(e):
+            files = await ft.FilePicker().pick_files(
+                dialog_title="Selecione o arquivo de Backup para Restaurar",
+                allowed_extensions=["db"]
+            )
+            if not files: return
+            
+            backup_path = files[0].path
+            
+            try:
+                shutil.copy2(backup_path, "autordp.db")
+                
+                async def fechar_aplicativo(event):
+                    await event.page.window.destroy()
+
+                dialogo_restart = ft.AlertDialog(
+                    modal=True,
+                    title=ft.Row([ft.Icon(ft.Icons.WARNING_AMBER, color=ft.Colors.AMBER), ft.Text("Restauração Concluída")]),
+                    content=ft.Text("O banco de dados foi substituído com sucesso.\n\nPara evitar conflitos de memória e carregar os novos dados, o Remote Craft precisa ser reiniciado."),
+                    actions=[
+                        ft.ElevatedButton("Fechar Aplicativo Agora", on_click=fechar_aplicativo, bgcolor=ft.Colors.ERROR_CONTAINER, color=ft.Colors.ON_ERROR_CONTAINER)
+                    ],
+                    actions_alignment=ft.MainAxisAlignment.END
+                )
+                
+                e.page.overlay.append(dialogo_restart)
+                dialogo_restart.open = True
+                e.page.update()
+                
+            except Exception as ex:
+                print(f"Erro ao restaurar: {ex}")
+                Notification.show_error(e.page, "Erro ao restaurar o banco de dados. O arquivo pode estar corrompido.")
+
+        # ------------------------------------------
+        # INTERFACE VISUAL (DIVIDIDA EM 3 CARDS)
+        # ------------------------------------------
         return ft.Container(
             content=ft.ListView([
                 
-                # Card 1: Manutenção
+                # Card 1: Limpeza do histórico
                 ft.Card(
                     content=ft.Container(
                         content=ft.Column([
@@ -423,7 +464,7 @@ class ViewSettings(ft.Container):
                     ), bgcolor=ft.Colors.SURFACE_CONTAINER
                 ),
 
-                # Card 2: Importação e Legado
+                # Card 2: Importação
                 ft.Card(
                     content=ft.Container(
                         content=ft.Column([
@@ -438,18 +479,33 @@ class ViewSettings(ft.Container):
                     ), bgcolor=ft.Colors.SURFACE_CONTAINER
                 ),
 
-                # Card 3: Backup Manual
+                # Card 3: Backup
                 ft.Card(
                     content=ft.Container(
                         content=ft.Column([
                             ft.Row([ft.Icon(ft.Icons.SAVE_ALT, color=ft.Colors.PRIMARY), ft.Text("Backup do Sistema", size=16, weight=ft.FontWeight.BOLD)]),
                             ft.Divider(color=ft.Colors.SECONDARY),
-                            ft.Text("Exporte uma cópia completa do seu banco de dados atual para um local seguro.", size=12, color=ft.Colors.ON_SURFACE_VARIANT),
-                            ft.ElevatedButton("Fazer Backup Agora", icon=ft.Icons.BACKUP, bgcolor=ft.Colors.PRIMARY, color=ft.Colors.ON_PRIMARY, on_click=realizar_backup_manual),
+                            ft.Text("Exporte uma cópia completa do seu banco de dados atual ou restaure um backup existente. A restauração reiniciará o aplicativo.", size=12, color=ft.Colors.ON_SURFACE_VARIANT),
+                            
+                            ft.Row([
+                                ft.ElevatedButton(
+                                    "Fazer Backup", 
+                                    icon=ft.Icons.BACKUP, 
+                                    bgcolor=ft.Colors.PRIMARY, 
+                                    color=ft.Colors.ON_PRIMARY, 
+                                    on_click=realizar_backup_manual
+                                ),
+                                ft.ElevatedButton(
+                                    "Restaurar Backup", 
+                                    icon=ft.Icons.RESTORE, 
+                                    bgcolor=ft.Colors.ERROR_CONTAINER, 
+                                    color=ft.Colors.ON_ERROR_CONTAINER, 
+                                    on_click=restaurar_backup
+                                ),
+                            ], spacing=15),   
                         ]), padding=15
                     ), bgcolor=ft.Colors.SURFACE_CONTAINER
-                )
-                
+                )  
             ], spacing=15), padding=15
         )
 
