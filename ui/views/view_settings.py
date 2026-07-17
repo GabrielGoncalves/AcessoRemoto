@@ -1,6 +1,6 @@
 import flet as ft
-import random
-import string
+import json
+import os
 from database.db_manager import DatabaseManager
 from services.password_service import PasswordService
 from ui.components.notifications import Notification
@@ -195,6 +195,9 @@ class ViewSettings(ft.Container):
                 lv_dominios.update()
             except Exception:
                 pass
+        
+        self.atualizar_lista_usuarios = atualizar_lista_usuarios
+        self.atualizar_lista_dominios = atualizar_lista_dominios
 
         def salvar_usuario(e):
             nome = txt_novo_user.value.strip()
@@ -285,14 +288,12 @@ class ViewSettings(ft.Container):
     # ABA 3: DADOS & BACKUP
     # ==========================================
     def _criar_aba_dados(self):
-        # Lê a configuração, por padrão será "0"
         retencao_atual = str(self.db.obter_configuracao("retencao_historico_dias", "0"))
         
         def alterar_retencao(e):
             valor_escolhido = str(e.control.value)
             self.db.salvar_configuracao("retencao_historico_dias", valor_escolhido)
             Notification.show_success(self.page, f"Retenção automática salva para {valor_escolhido} dias!")
-            self.page.update()
             
         dropdown_retencao = ft.Dropdown(
             label="Retenção de Histórico",
@@ -311,6 +312,78 @@ class ViewSettings(ft.Container):
             ]
         )
 
+        async def abrir_janela_arquivos(e):
+            files = await ft.FilePicker().pick_files(allow_multiple=True, allowed_extensions=["json"])
+            
+            if not files:
+                return
+                
+            arquivos_processados = 0
+            arquivos_com_erro = []
+            
+            for f in files:
+                try:
+                    with open(f.path, 'r', encoding='utf-8') as file:
+                        dados = json.load(file)
+                        
+                    nome_arquivo = f.name
+                    nome_min = nome_arquivo.lower()
+                    
+                    if nome_min == "config.json":
+                        perfil = dados.get("perfil", "")
+                        if "@" in perfil:
+                            usuario, dominio = perfil.split("@", 1)
+                            if usuario: self.db.adicionar_usuario(usuario)
+                            if dominio: self.db.adicionar_dominio(dominio)
+                        elif perfil:
+                            self.db.adicionar_usuario(perfil)
+                        arquivos_processados += 1
+                        
+                    elif nome_min == "favoritos.json":
+                        for i in range(1, 100):
+                            chave_ip = f"fav{i}"
+                            chave_nome = f"button_fav{i}"
+                            
+                            if chave_ip in dados and chave_nome in dados:
+                                ip = dados[chave_ip].strip()
+                                nome = dados[chave_nome].strip()
+                                if nome and ip: 
+                                    self.db.adicionar_favorito(nome, ip, "")
+                        arquivos_processados += 1
+                        
+                    else:
+                        nome_ambiente = os.path.splitext(nome_arquivo)[0]
+                        self.db.adicionar_ambiente(nome_ambiente)
+                        
+                        ambientes = self.db.listar_ambientes()
+                        ambiente_id = next((amb[0] for amb in ambientes if amb[1] == nome_ambiente), None)
+                        
+                        if ambiente_id:
+                            for chave, valor in dados.items():
+                                nome_conexao = chave.strip()
+                                ip_conexao = str(valor).strip()
+                                if nome_conexao and ip_conexao:
+                                    self.db.adicionar_conexao_ambiente(ambiente_id, nome_conexao, ip_conexao, "")
+                            arquivos_processados += 1
+                            
+                except Exception as ex:
+                    print(f"Erro interno ao processar {f.name}: {ex}")
+                    arquivos_com_erro.append(f.name)
+                    continue 
+
+            if hasattr(self, 'atualizar_lista_usuarios'):
+                self.atualizar_lista_usuarios()
+            if hasattr(self, 'atualizar_lista_dominios'):
+                self.atualizar_lista_dominios()
+
+            if arquivos_processados > 0:
+                msg = f"Importação concluída! {arquivos_processados} migrado(s)."
+                if arquivos_com_erro:
+                    msg += f" Erro em: {', '.join(arquivos_com_erro)}"
+                Notification.show_success(e.page, msg)
+            elif arquivos_com_erro:
+                Notification.show_error(e.page, f"Falha ao importar: {', '.join(arquivos_com_erro)}")
+
         return ft.Container(
             content=ft.ListView([
                 ft.Card(
@@ -324,8 +397,17 @@ class ViewSettings(ft.Container):
                             ft.Divider(color=ft.Colors.TRANSPARENT, height=10),
                             
                             ft.Row([
-                                ft.ElevatedButton("Importar JSON/CSV", icon=ft.Icons.UPLOAD_FILE, bgcolor=ft.Colors.SECONDARY),
-                                ft.ElevatedButton("Exportar Dados", icon=ft.Icons.DOWNLOAD, bgcolor=ft.Colors.SECONDARY_CONTAINER),
+                                ft.ElevatedButton(
+                                    "Importar Dados Legados", 
+                                    icon=ft.Icons.UPLOAD_FILE, 
+                                    bgcolor=ft.Colors.SECONDARY,
+                                    on_click=abrir_janela_arquivos
+                                ),
+                                ft.ElevatedButton(
+                                    "Exportar Dados", 
+                                    icon=ft.Icons.DOWNLOAD, 
+                                    bgcolor=ft.Colors.SECONDARY_CONTAINER
+                                ),
                             ], spacing=15),
                         ]), padding=15
                     ), bgcolor=ft.Colors.SURFACE_CONTAINER
