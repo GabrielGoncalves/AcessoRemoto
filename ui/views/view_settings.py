@@ -1,6 +1,7 @@
 import flet as ft
 import json
 import os
+import shutil
 from database.db_manager import DatabaseManager
 from services.password_service import PasswordService
 from ui.components.notifications import Notification
@@ -288,6 +289,9 @@ class ViewSettings(ft.Container):
     # ABA 3: DADOS & BACKUP
     # ==========================================
     def _criar_aba_dados(self):
+        # ------------------------------------------
+        # LÓGICA 1: RETENÇÃO DE HISTÓRICO
+        # ------------------------------------------
         retencao_atual = str(self.db.obter_configuracao("retencao_historico_dias", "0"))
         
         def alterar_retencao(e):
@@ -296,7 +300,7 @@ class ViewSettings(ft.Container):
             Notification.show_success(self.page, f"Retenção automática salva para {valor_escolhido} dias!")
             
         dropdown_retencao = ft.Dropdown(
-            label="Retenção de Histórico",
+            label="Período de Retenção",
             value=retencao_atual,
             on_select=alterar_retencao,
             border_color=ft.Colors.SECONDARY,
@@ -312,11 +316,12 @@ class ViewSettings(ft.Container):
             ]
         )
 
+        # ------------------------------------------
+        # LÓGICA 2: IMPORTAÇÃO E MODELOS
+        # ------------------------------------------
         async def abrir_janela_arquivos(e):
             files = await ft.FilePicker().pick_files(allow_multiple=True, allowed_extensions=["json"])
-            
-            if not files:
-                return
+            if not files: return
                 
             arquivos_processados = 0
             arquivos_com_erro = []
@@ -326,8 +331,7 @@ class ViewSettings(ft.Container):
                     with open(f.path, 'r', encoding='utf-8') as file:
                         dados = json.load(file)
                         
-                    nome_arquivo = f.name
-                    nome_min = nome_arquivo.lower()
+                    nome_min = f.name.lower()
                     
                     if nome_min == "config.json":
                         perfil = dados.get("perfil", "")
@@ -341,77 +345,111 @@ class ViewSettings(ft.Container):
                         
                     elif nome_min == "favoritos.json":
                         for i in range(1, 100):
-                            chave_ip = f"fav{i}"
-                            chave_nome = f"button_fav{i}"
-                            
-                            if chave_ip in dados and chave_nome in dados:
-                                ip = dados[chave_ip].strip()
-                                nome = dados[chave_nome].strip()
-                                if nome and ip: 
-                                    self.db.adicionar_favorito(nome, ip, "")
+                            if f"fav{i}" in dados and f"button_fav{i}" in dados:
+                                ip, nome = dados[f"fav{i}"].strip(), dados[f"button_fav{i}"].strip()
+                                if nome and ip: self.db.adicionar_favorito(nome, ip, "")
                         arquivos_processados += 1
                         
                     else:
-                        nome_ambiente = os.path.splitext(nome_arquivo)[0]
+                        nome_ambiente = os.path.splitext(f.name)[0]
                         self.db.adicionar_ambiente(nome_ambiente)
-                        
                         ambientes = self.db.listar_ambientes()
-                        ambiente_id = next((amb[0] for amb in ambientes if amb[1] == nome_ambiente), None)
+                        ambiente_id = next((a[0] for a in ambientes if a[1] == nome_ambiente), None)
                         
                         if ambiente_id:
                             for chave, valor in dados.items():
-                                nome_conexao = chave.strip()
-                                ip_conexao = str(valor).strip()
-                                if nome_conexao and ip_conexao:
-                                    self.db.adicionar_conexao_ambiente(ambiente_id, nome_conexao, ip_conexao, "")
+                                if chave.strip() and str(valor).strip():
+                                    self.db.adicionar_conexao_ambiente(ambiente_id, chave.strip(), str(valor).strip(), "")
                             arquivos_processados += 1
-                            
-                except Exception as ex:
-                    print(f"Erro interno ao processar {f.name}: {ex}")
+                except:
                     arquivos_com_erro.append(f.name)
                     continue 
 
-            if hasattr(self, 'atualizar_lista_usuarios'):
-                self.atualizar_lista_usuarios()
-            if hasattr(self, 'atualizar_lista_dominios'):
-                self.atualizar_lista_dominios()
+            if hasattr(self, 'atualizar_lista_usuarios'): self.atualizar_lista_usuarios()
+            if hasattr(self, 'atualizar_lista_dominios'): self.atualizar_lista_dominios()
 
             if arquivos_processados > 0:
                 msg = f"Importação concluída! {arquivos_processados} migrado(s)."
-                if arquivos_com_erro:
-                    msg += f" Erro em: {', '.join(arquivos_com_erro)}"
+                if arquivos_com_erro: msg += f" Erro em: {', '.join(arquivos_com_erro)}"
                 Notification.show_success(e.page, msg)
             elif arquivos_com_erro:
                 Notification.show_error(e.page, f"Falha ao importar: {', '.join(arquivos_com_erro)}")
 
+        async def gerar_modelos(e):
+            dir_path = await ft.FilePicker().get_directory_path(dialog_title="Selecione a pasta para salvar os modelos")
+            if not dir_path: return
+
+            modelo_config = {"perfil": "usuario@dominio.com.br"}
+            modelo_fav = {"fav1": "192.168.0.100", "button_fav1": "Nome de Exibição 01"}
+            modelo_amb = {"SRV-APP-01": "10.0.0.50", "SRV-BD-01": "10.0.0.51"}
+
+            try:
+                with open(os.path.join(dir_path, "config.json"), "w") as f: json.dump(modelo_config, f, indent=4)
+                with open(os.path.join(dir_path, "favoritos.json"), "w") as f: json.dump(modelo_fav, f, indent=4)
+                with open(os.path.join(dir_path, "Modelo_Fazenda.json"), "w") as f: json.dump(modelo_amb, f, indent=4)
+                Notification.show_success(e.page, "Modelos gerados com sucesso na pasta selecionada!")
+            except Exception as ex:
+                Notification.show_error(e.page, "Erro ao gerar os modelos de importação.")
+
+        # ------------------------------------------
+        # LÓGICA 3: BACKUP MANUAL
+        # ------------------------------------------
+        async def realizar_backup_manual(e):
+            save_path = await ft.FilePicker().save_file(
+                dialog_title="Salvar Backup do Banco de Dados",
+                file_name="autordp_backup.db",
+                allowed_extensions=["db"]
+            )
+            if not save_path: return
+
+            try:
+                shutil.copy2("autordp.db", save_path)
+                Notification.show_success(e.page, "Cópia de segurança criada com sucesso!")
+            except Exception as ex:
+                Notification.show_error(e.page, "Não foi possível criar o backup.")
+
         return ft.Container(
             content=ft.ListView([
+                
+                # Card 1: Manutenção
                 ft.Card(
                     content=ft.Container(
                         content=ft.Column([
-                            ft.Text("Sincronização e Cópias de Segurança", size=16, weight=ft.FontWeight.BOLD),
-                            ft.Text("Importe, exporte ou configure a retenção de dados locais.", size=12, color=ft.Colors.ON_SURFACE_VARIANT),
+                            ft.Row([ft.Icon(ft.Icons.CLEANING_SERVICES, color=ft.Colors.PRIMARY), ft.Text("Manutenção de Dados", size=16, weight=ft.FontWeight.BOLD)]),
                             ft.Divider(color=ft.Colors.SECONDARY),
-                            
+                            ft.Text("Defina a política de limpeza automática do histórico de conexões.", size=12, color=ft.Colors.ON_SURFACE_VARIANT),
                             dropdown_retencao,
-                            ft.Divider(color=ft.Colors.TRANSPARENT, height=10),
-                            
+                        ]), padding=15
+                    ), bgcolor=ft.Colors.SURFACE_CONTAINER
+                ),
+
+                # Card 2: Importação e Legado
+                ft.Card(
+                    content=ft.Container(
+                        content=ft.Column([
+                            ft.Row([ft.Icon(ft.Icons.DRIVE_FOLDER_UPLOAD, color=ft.Colors.PRIMARY), ft.Text("Carga de Dados e Legado", size=16, weight=ft.FontWeight.BOLD)]),
+                            ft.Divider(color=ft.Colors.SECONDARY),
+                            ft.Text("Importe usuários, favoritos ou cargas completas de ambientes de versões anteriores em formato JSON.", size=12, color=ft.Colors.ON_SURFACE_VARIANT),
                             ft.Row([
-                                ft.ElevatedButton(
-                                    "Importar Dados Legados", 
-                                    icon=ft.Icons.UPLOAD_FILE, 
-                                    bgcolor=ft.Colors.SECONDARY,
-                                    on_click=abrir_janela_arquivos
-                                ),
-                                ft.ElevatedButton(
-                                    "Exportar Dados", 
-                                    icon=ft.Icons.DOWNLOAD, 
-                                    bgcolor=ft.Colors.SECONDARY_CONTAINER
-                                ),
+                                ft.ElevatedButton("Importar Arquivos", icon=ft.Icons.UPLOAD_FILE, bgcolor=ft.Colors.SECONDARY, on_click=abrir_janela_arquivos),
+                                ft.ElevatedButton("Gerar Modelos", icon=ft.Icons.FILE_DOWNLOAD_OUTLINED, bgcolor=ft.Colors.SURFACE_CONTAINER_HIGHEST, on_click=gerar_modelos),
                             ], spacing=15),
                         ]), padding=15
                     ), bgcolor=ft.Colors.SURFACE_CONTAINER
+                ),
+
+                # Card 3: Backup Manual
+                ft.Card(
+                    content=ft.Container(
+                        content=ft.Column([
+                            ft.Row([ft.Icon(ft.Icons.SAVE_ALT, color=ft.Colors.PRIMARY), ft.Text("Backup do Sistema", size=16, weight=ft.FontWeight.BOLD)]),
+                            ft.Divider(color=ft.Colors.SECONDARY),
+                            ft.Text("Exporte uma cópia completa do seu banco de dados atual para um local seguro.", size=12, color=ft.Colors.ON_SURFACE_VARIANT),
+                            ft.ElevatedButton("Fazer Backup Agora", icon=ft.Icons.BACKUP, bgcolor=ft.Colors.PRIMARY, color=ft.Colors.ON_PRIMARY, on_click=realizar_backup_manual),
+                        ]), padding=15
+                    ), bgcolor=ft.Colors.SURFACE_CONTAINER
                 )
+                
             ], spacing=15), padding=15
         )
 
