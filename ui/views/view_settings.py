@@ -412,14 +412,14 @@ class ViewSettings(ft.Container):
                 self.on_dev_mode_change()
 
         switch_dev_mode = ft.Switch(
-            label="Ativar Recursos de Desenvolvedor Avançado", 
+            label="Ativar Recursos Avançados", 
             value=dev_mode_ativo, 
             on_change=toggle_dev_mode, 
             active_color=ft.Colors.PRIMARY
         )
         
         switch_modulo_api = ft.Switch(
-            label="Habilitar Módulo de API no Menu Lateral", 
+            label="Habilitar Módulo de API", 
             value=api_module_ativo and dev_mode_ativo, 
             disabled=not dev_mode_ativo, 
             on_change=toggle_api_module, 
@@ -431,7 +431,7 @@ class ViewSettings(ft.Container):
                 ft.Card(
                     content=ft.Container(
                         content=ft.Column([
-                            ft.Row([ft.Icon(ft.Icons.WARNING, color=ft.Colors.ERROR), ft.Text("Modo Desenvolvedor", size=16, weight=ft.FontWeight.BOLD)]),
+                            ft.Row([ft.Icon(ft.Icons.WARNING, color=ft.Colors.ERROR), ft.Text("Módulos Avançados", size=16, weight=ft.FontWeight.BOLD)]),
                             ft.Text("Permite a manipulação avançada e ativação de módulos extras.", size=12, color=ft.Colors.ON_SURFACE_VARIANT),
                             ft.Divider(color=ft.Colors.SECONDARY),
                             
