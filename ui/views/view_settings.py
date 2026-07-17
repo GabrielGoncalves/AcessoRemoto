@@ -284,20 +284,57 @@ class ViewSettings(ft.Container):
     # ABA 3: DADOS & BACKUP
     # ==========================================
     def _criar_aba_dados(self):
+        # Lê a configuração, por padrão será "0"
+        retencao_atual = str(self.db.obter_configuracao("retencao_historico_dias", "0"))
+        
+        def alterar_retencao(e):
+            valor_escolhido = str(e.control.value)
+            self.db.salvar_configuracao("retencao_historico_dias", valor_escolhido)
+            
+            self.page.show_dialog(
+                ft.SnackBar(
+                    content=ft.Text(
+                        f"Retenção automática salva para {valor_escolhido} dias!", 
+                        color=ft.Colors.WHITE
+                    ),
+                    bgcolor=ft.Colors.GREEN_700
+                )
+            )
+            self.page.update()
+            
+        dropdown_retencao = ft.Dropdown(
+            label="Retenção de Histórico",
+            value=retencao_atual,
+            on_select=alterar_retencao,
+            border_color=ft.Colors.SECONDARY,
+            width=350,
+            options=[
+                ft.dropdown.Option("0", "0 Dias (Limpar histórico ao iniciar)"),
+                ft.dropdown.Option("1", "Manter por 1 dia"),
+                ft.dropdown.Option("3", "Manter por 3 dias"),
+                ft.dropdown.Option("7", "Manter por 7 dias"),
+                ft.dropdown.Option("15", "Manter por 15 dias"),
+                ft.dropdown.Option("30", "Manter por 30 dias"),
+                ft.dropdown.Option("-1", "Manter para sempre (Nunca apagar)"),
+            ]
+        )
+
         return ft.Container(
             content=ft.ListView([
                 ft.Card(
                     content=ft.Container(
                         content=ft.Column([
                             ft.Text("Sincronização e Cópias de Segurança", size=16, weight=ft.FontWeight.BOLD),
-                            ft.Text("Importe, exporte ou agende rotinas para proteger seus dados locais.", size=12, color=ft.Colors.ON_SURFACE_VARIANT),
+                            ft.Text("Importe, exporte ou configure a retenção de dados locais.", size=12, color=ft.Colors.ON_SURFACE_VARIANT),
                             ft.Divider(color=ft.Colors.SECONDARY),
+                            
+                            dropdown_retencao,
+                            ft.Divider(color=ft.Colors.TRANSPARENT, height=10),
+                            
                             ft.Row([
                                 ft.ElevatedButton("Importar JSON/CSV", icon=ft.Icons.UPLOAD_FILE, bgcolor=ft.Colors.SECONDARY),
                                 ft.ElevatedButton("Exportar Dados", icon=ft.Icons.DOWNLOAD, bgcolor=ft.Colors.SECONDARY_CONTAINER),
                             ], spacing=15),
-                            ft.Divider(color=ft.Colors.SECONDARY),
-                            ft.Switch(label="Ativar Rotina Automática de Backup Diário", value=False, active_color=ft.Colors.PRIMARY),
                         ]), padding=15
                     ), bgcolor=ft.Colors.SURFACE_CONTAINER
                 )

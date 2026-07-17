@@ -265,3 +265,16 @@ class DatabaseManager:
         except Exception as e:
             print(f"Erro ao limpar histórico: {e}")
             return False
+        
+    def limpar_historico_por_retencao(self, dias: int):
+        try:
+            with self._get_connection() as conn:
+                if dias == 0:
+                    conn.cursor().execute("DELETE FROM conexoes_historico")
+                elif dias > 0:
+                    conn.cursor().execute(f"DELETE FROM conexoes_historico WHERE ultima_conexao <= datetime('now', '-{dias} days')")
+                conn.commit()
+            return True
+        except Exception as e:
+            print(f"Erro ao executar rotina de limpeza automática: {e}")
+            return False

@@ -20,6 +20,9 @@ class MainApplication:
         self.page.window.height = 700
         self.db = DatabaseManager()
 
+        dias_retencao = int(self.db.obter_configuracao("retencao_historico_dias", "0"))
+        self.db.limpar_historico_por_retencao(dias_retencao)
+
         tema_salvo = self.db.obter_tema()
         self.page.theme = AppTheme.get_theme(tema_salvo)
         self.page.bgcolor = self.page.theme.color_scheme.surface_container
