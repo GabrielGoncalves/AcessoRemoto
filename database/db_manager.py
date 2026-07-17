@@ -256,3 +256,12 @@ class DatabaseManager:
                 FROM conexoes_historico h
                 ORDER BY h.ultima_conexao DESC LIMIT ?;
             """, (limite,)).fetchall()
+        
+    def limpar_historico_completo(self):
+        try:
+            with self._get_connection() as conn:
+                conn.execute("DELETE FROM conexoes_historico") 
+            return True
+        except Exception as e:
+            print(f"Erro ao limpar histórico: {e}")
+            return False

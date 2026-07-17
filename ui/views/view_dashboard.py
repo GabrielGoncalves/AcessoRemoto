@@ -84,13 +84,28 @@ class DashboardView(ft.Container):
 
         col_historico = ft.Container(
             content=ft.Column([
-                ft.Row([ft.Icon(ft.Icons.HISTORY, color=ft.Colors.PRIMARY), ft.Text("Conexões Recentes", size=18, weight=ft.FontWeight.BOLD)]),
+                ft.Row([
+                    ft.Row([ft.Icon(ft.Icons.HISTORY, color=ft.Colors.PRIMARY), ft.Text("Conexões Recentes", size=18, weight=ft.FontWeight.BOLD)]),
+                    ft.IconButton(
+                        icon=ft.Icons.DELETE_SWEEP, 
+                        icon_color=ft.Colors.ON_SURFACE_VARIANT, 
+                        tooltip="Limpar Histórico", 
+                        on_click=self.limpar_historico_ui
+                    )
+                ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                 self.lv_historico
             ]),
             padding=20, bgcolor=ft.Colors.SURFACE, border_radius=12, expand=1
         )
 
         self.content = ft.Row([col_form, col_historico], spacing=15, expand=True)
+
+    def limpar_historico_ui(self, e):
+        self.db.limpar_historico_completo()
+        
+        self.lv_historico.controls.clear()
+        self.lv_historico.controls.append(ft.Text("Histórico vazio.", color=ft.Colors.ON_SURFACE_VARIANT, italic=True))
+        self.update()
 
     def did_mount(self):
         self._atualizar_lista_historico()
