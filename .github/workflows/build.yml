@@ -42,6 +42,8 @@ jobs:
 
       - name: Compilar no Windows
         if: runner.os == 'Windows'
+        env:
+          PYTHONIOENCODING: utf-8
         run: echo y | flet build windows --module-name app
 
       - name: Compilar no macOS
