@@ -181,6 +181,26 @@ class DashboardView(ft.Container):
     def did_mount(self):
         self._atualizar_lista_historico()
         self.atualizar_menu_identidades_rapido()
+        if self.db.obter_configuracao("historico_iniciar_recolhido", "0") == "1":
+            self.historico_minimizado = True
+            self.col_historico.width = 70
+            self.col_conteudo_historico.visible = False
+            self.col_minimizado_historico.visible = True
+
+        usar_user_padrao = self.db.obter_configuracao("usar_usuario_padrao", "0") == "1"
+        usar_dom_padrao = self.db.obter_configuracao("usar_dominio_padrao", "0") == "1" 
+        
+        user_padrao = self.db.obter_configuracao("usuario_padrao_texto", "")
+        dom_padrao = self.db.obter_configuracao("dominio_padrao_texto", "")
+
+        if usar_user_padrao and usar_dom_padrao and user_padrao and dom_padrao:
+            self.txt_user.value = f"{dom_padrao}\\{user_padrao}"
+        elif usar_user_padrao and user_padrao:
+            self.txt_user.value = user_padrao
+        elif usar_dom_padrao and dom_padrao:
+            self.txt_user.value = f"{dom_padrao}\\"
+            
+        self.update()
 
         usar_user_padrao = self.db.obter_configuracao("usar_usuario_padrao", "0") == "1"
         usar_dom_padrao = self.db.obter_configuracao("usar_dominio_padrao", "0") == "1" 

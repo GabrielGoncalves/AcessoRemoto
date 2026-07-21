@@ -25,6 +25,8 @@ class ViewSettings(ft.Container):
                 expand=True,
                 controls=[
                     ft.TabBar(
+                        scrollable=True,                    
+                        tab_alignment=ft.TabAlignment.START,
                         tabs=[
                             ft.Tab(label="Sessão & Segurança", icon=ft.Icons.SECURITY),
                             ft.Tab(label="Identidades", icon=ft.Icons.PEOPLE_ALT),
@@ -515,6 +517,8 @@ class ViewSettings(ft.Container):
     def _criar_aba_personalizacao(self):
         from ui.layout import AppTheme
         tema_atual = self.db.obter_tema()
+        nav_recolhido_ativo = self.db.obter_configuracao("nav_rail_iniciar_recolhido", "0") == "1"
+        hist_recolhido_ativo = self.db.obter_configuracao("historico_iniciar_recolhido", "0") == "1"
         
         def alterar_tema(e):
             novo_tema = e.control.value
@@ -530,6 +534,28 @@ class ViewSettings(ft.Container):
         def restaurar_tamanho(e):
             self.window_service.restaurar_padrao()
             Notification.show_success(e.page, "Janela restaurada para o tamanho padrão.")
+
+        def toggle_nav_recolhido(e):
+            self.db.salvar_configuracao("nav_rail_iniciar_recolhido", "1" if e.control.value else "0")
+            Notification.show_info(e.page, "Configuração do Menu Lateral salva para a próxima inicialização")
+
+        def toggle_hist_recolhido(e):
+            self.db.salvar_configuracao("historico_iniciar_recolhido", "1" if e.control.value else "0")
+            Notification.show_info(e.page, "Configuração do Histórico salva para a próxima inicialização")
+
+        switch_nav_recolhido = ft.Switch(
+            label="Iniciar Menu Lateral recolhido",
+            value=nav_recolhido_ativo,
+            on_change=toggle_nav_recolhido,
+            active_color=ft.Colors.PRIMARY
+        )
+        
+        switch_hist_recolhido = ft.Switch(
+            label="Iniciar Histórico de Conexões recolhido",
+            value=hist_recolhido_ativo,
+            on_change=toggle_hist_recolhido,
+            active_color=ft.Colors.PRIMARY
+        )
 
         return ft.Container(
             content=ft.ListView([
@@ -595,9 +621,25 @@ class ViewSettings(ft.Container):
                             ], spacing=15)
                         ]), padding=15
                     ), bgcolor=ft.Colors.SURFACE_CONTAINER
+                ),
+
+                ft.Card(
+                    content=ft.Container(
+                        content=ft.Column([
+                            ft.Row([
+                                ft.Icon(ft.Icons.VIEW_COMPACT, color=ft.Colors.PRIMARY),
+                                ft.Text("Comportamento de Interface na Inicialização", size=16, weight=ft.FontWeight.BOLD)
+                            ]),
+                            ft.Text("Defina o estado inicial dos painéis retráteis da aplicação.", size=12, color=ft.Colors.ON_SURFACE_VARIANT),
+                            ft.Divider(color=ft.Colors.SECONDARY),
+                            switch_nav_recolhido,
+                            switch_hist_recolhido,
+                        ]), padding=15
+                    ), bgcolor=ft.Colors.SURFACE_CONTAINER
                 )
             ], spacing=15), padding=15
         )
+
     # ==========================================
     # ABA 5: AVANÇADO
     # ==========================================
@@ -644,7 +686,10 @@ class ViewSettings(ft.Container):
                 ft.Card(
                     content=ft.Container(
                         content=ft.Column([
-                            ft.Row([ft.Icon(ft.Icons.WARNING, color=ft.Colors.ERROR), ft.Text("Módulos Avançados", size=16, weight=ft.FontWeight.BOLD)]),
+                            ft.Row([
+                                ft.Icon(ft.Icons.WARNING, color=ft.Colors.ERROR), 
+                                ft.Text("Módulos Avançados", size=16, weight=ft.FontWeight.BOLD)
+                            ]),
                             ft.Text("Permite a manipulação avançada e ativação de módulos extras.", size=12, color=ft.Colors.ON_SURFACE_VARIANT),
                             ft.Divider(color=ft.Colors.SECONDARY),
                             

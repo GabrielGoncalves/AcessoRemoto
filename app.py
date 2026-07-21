@@ -21,14 +21,31 @@ class MainApplication:
         window_service = WindowService(page, self.db)
         window_service.inicializar_janela()
 
+        # Limpeza por retenção de histórico
         dias_retencao = int(self.db.obter_configuracao("retencao_historico_dias", "0"))
         self.db.limpar_historico_por_retencao(dias_retencao)
 
+        # Configuração de Tema
         tema_salvo = self.db.obter_tema()
         self.page.theme = AppTheme.get_theme(tema_salvo)
         self.page.bgcolor = self.page.theme.color_scheme.surface_container
-        self.page.update()
 
+        # Consulta se o menu deve nascer recolhido segundo as preferências do banco
+        nav_recolhido = self.db.obter_configuracao("nav_rail_iniciar_recolhido", "0") == "1"
+
+        # Instanciação Única do NavigationRail
+        self.nav_rail = ft.NavigationRail(
+            selected_index=0,
+            extended=not nav_recolhido,
+            label_type=ft.NavigationRailLabelType.NONE,
+            min_width=50,
+            min_extended_width=150,
+            bgcolor=ft.Colors.TRANSPARENT,
+            leading=ft.IconButton(icon=ft.Icons.MENU, on_click=self._toggle_nav_rail),
+            on_change=self._nav_changed
+        )
+
+        # Instanciação das Views
         self.view_dashboard = DashboardView(self.db, on_connect_action=self.disparar_rdp)
         self.view_favorites = ViewFavoritos(self.db)
         self.view_environments = ViewEnvironments(
@@ -37,23 +54,23 @@ class MainApplication:
             on_redirect_action=self.redirecionar_para_dashboard
         )
         self.view_api = ViewAPI(self.db) 
-        self.view_settings = ViewSettings(self.db, window_service=window_service, on_dev_mode_change=self.atualizar_menu_lateral)
-        
-        self.view_container = ft.Container(expand=True)
-        
-        self.nav_rail = ft.NavigationRail(
-            selected_index=0,
-            label_type=ft.NavigationRailLabelType.ALL,
-            min_width=100,
-            #group_alignment=0.0,
-            on_change=self._nav_changed
+        self.view_settings = ViewSettings(
+            self.db, 
+            window_service=window_service, 
+            on_dev_mode_change=self.atualizar_menu_lateral
         )
         
-        # Chama a função vazia, pois ela já busca a flag sozinha no banco de dados
-        self.atualizar_menu_lateral()
+        self.view_container = ft.Container(expand=True)
 
+        # Montagem do Layout
+        self.atualizar_menu_lateral()
         self.build_structure()
         self._carregar_view(0)
+    
+    def _toggle_nav_rail(self, e):
+        """Alterna entre o menu expandido (com texto) e o compactado (apenas ícones)"""
+        self.nav_rail.extended = not self.nav_rail.extended
+        self.page.update()
 
     def build_structure(self):
         self.page.add(
@@ -104,7 +121,7 @@ class MainApplication:
         elif selected_label == "Configurações":
             self.view_container.content = self.view_settings
         elif selected_label == "Informações":
-            pass # Substituiremos por: self.view_container.content = self.view_info
+            pass # Reservado para a view de informações do sistema
             
         self.page.update()
 

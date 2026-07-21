@@ -4,7 +4,7 @@ from database.db_manager import DatabaseManager
 class WindowService:
     DEFAULT_WIDTH = 900
     DEFAULT_HEIGHT = 700
-    MIN_WIDTH = 700
+    MIN_WIDTH = 600
     MIN_HEIGHT = 500
 
     def __init__(self, page: ft.Page, db: DatabaseManager):

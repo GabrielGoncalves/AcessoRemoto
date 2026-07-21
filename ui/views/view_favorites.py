@@ -1,13 +1,13 @@
 import flet as ft
 from database.db_manager import DatabaseManager
 from ui.components.modal_favorites import ModalNovoFavorito
+from ui.components.notifications import Notification
 
 class ViewFavoritos(ft.Container):
     def __init__(self, db: DatabaseManager):
         super().__init__()
         self.db = db
         self.expand = True
-        self.padding = 20 
         
         # Campo de pesquisa em tempo real
         self.txt_pesquisa = ft.TextField(
@@ -42,10 +42,11 @@ class ViewFavoritos(ft.Container):
         self.content = ft.Container(
             content=ft.Column([
                 cabecalho,
+                ft.Divider(height=10, color=ft.Colors.TRANSPARENT),
                 self.txt_pesquisa,
-                ft.Divider(color=ft.Colors.GREY_800),
+                ft.Divider(color=ft.Colors.SECONDARY),
                 self.lista_favoritos
-            ], expand=True),
+            ], expand=True, horizontal_alignment=ft.CrossAxisAlignment.STRETCH),
             bgcolor=ft.Colors.SURFACE,
             padding=20,
             border_radius=12,
@@ -64,6 +65,8 @@ class ViewFavoritos(ft.Container):
         """Garante que ao adicionar um favorito, o filtro de texto não se perca"""
         termo = self.txt_pesquisa.value.strip().lower() if self.txt_pesquisa.value else ""
         self.carregar_lista(termo_busca=termo)
+        if self.page:
+            Notification.show_success(self.page, "Novo favorito salvo com sucesso!")
 
     def carregar_lista(self, termo_busca=""):
         self.lista_favoritos.controls.clear()
@@ -120,6 +123,4 @@ class ViewFavoritos(ft.Container):
         self.carregar_lista(termo_busca=termo_atual)
         
         if self.page:
-            self.page.snack_bar = ft.SnackBar(ft.Text("Favorito removido com sucesso!"), bgcolor=ft.Colors.ERROR)
-            self.page.snack_bar.open = True
-            self.page.update()
+            Notification.show_warning(self.page, "Favorito removido com sucesso!")

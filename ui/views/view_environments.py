@@ -2,6 +2,7 @@ import flet as ft
 from database.db_manager import DatabaseManager
 from ui.components.modal_environments import ModalNovoAmbiente
 from ui.components.modal_connecting_spaces import ModalNovaConexaoAmbiente
+from ui.components.notifications import Notification
 
 class ViewEnvironments(ft.Container):
     def __init__(self, db: DatabaseManager, on_connect_action, on_redirect_action=None):
@@ -10,7 +11,6 @@ class ViewEnvironments(ft.Container):
         self.on_connect_action = on_connect_action
         self.on_redirect_action = on_redirect_action  
         self.expand = True
-        self.padding = 20
         
         self.ambiente_selecionado_id = None
         self.ambiente_selecionado_nome = ""
@@ -43,7 +43,7 @@ class ViewEnvironments(ft.Container):
                 self.txt_pesquisa_ambientes,
                 ft.Divider(color=ft.Colors.GREY_800),
                 self.lv_ambientes
-            ], expand=True),
+            ], expand=True, horizontal_alignment=ft.CrossAxisAlignment.STRETCH),
             expand=1,
             bgcolor=ft.Colors.SURFACE,
             padding=15,
@@ -174,13 +174,26 @@ class ViewEnvironments(ft.Container):
         self.col_detalhes.controls.clear()
         
         if not self.ambiente_selecionado_id:
+            # --- TELA VAZIA: Centraliza a coluna principal ---
+            self.col_detalhes.alignment = ft.MainAxisAlignment.CENTER
+            self.col_detalhes.horizontal_alignment = ft.CrossAxisAlignment.CENTER
+            
             self.col_detalhes.controls.append(
-                ft.Column([
-                    ft.Icon(ft.Icons.CHEVRON_LEFT, size=40, color=ft.Colors.ON_SURFACE_VARIANT),
-                    ft.Text("Selecione um ambiente ao lado para gerenciar os acessos", color=ft.Colors.ON_SURFACE_VARIANT, italic=True)
-                ], alignment=ft.MainAxisAlignment.CENTER, horizontal_alignment=ft.CrossAxisAlignment.CENTER, expand=True)
+                ft.Icon(ft.Icons.CHEVRON_LEFT, size=40, color=ft.Colors.ON_SURFACE_VARIANT)
+            )
+            self.col_detalhes.controls.append(
+                ft.Text(
+                    "Selecione um ambiente ao lado para gerenciar os acessos", 
+                    color=ft.Colors.ON_SURFACE_VARIANT, 
+                    italic=True,
+                    text_align=ft.TextAlign.CENTER
+                )
             )
         else:
+            # --- TELA PREENCHIDA: Volta a alinhar no topo e à esquerda ---
+            self.col_detalhes.alignment = ft.MainAxisAlignment.START
+            self.col_detalhes.horizontal_alignment = ft.CrossAxisAlignment.START
+            
             self.col_detalhes.controls.append(
                 ft.Row([
                     ft.Text(
@@ -224,14 +237,16 @@ class ViewEnvironments(ft.Container):
         
         termo = self.txt_pesquisa_ambientes.value.strip().lower() if self.txt_pesquisa_ambientes.value else ""
         self.carregar_ambientes(termo_busca=termo)
+        if self.page:
+            Notification.show_success(self.page, "Ambiente apagado com sucesso")
         self.atualizar_painel_detalhes()
 
     def remover_conexao(self, conexao_id):
         self.db.excluir_conexao_ambiente(conexao_id)
         self.carregar_conexoes()
         
-        self.page.snack_bar = ft.SnackBar(ft.Text("Acesso desvinculado!"), bgcolor=ft.Colors.ERROR)
-        self.page.snack_bar.open = True
+        if self.page:
+            Notification.show_success(self.page, "Conexão removida com sucesso!")
         self.page.update()
 
     async def _disparar_conexao_rdp(self, e):
