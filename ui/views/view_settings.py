@@ -2,19 +2,19 @@ import flet as ft
 import json
 import os
 import shutil
-import sys
-import asyncio
 from database.db_manager import DatabaseManager
 from services.password_service import PasswordService
+from services.window_service import WindowService
 from ui.components.notifications import Notification
 
 class ViewSettings(ft.Container):
-    def __init__(self, db: DatabaseManager, on_dev_mode_change=None):
+    def __init__(self, db: DatabaseManager, window_service: WindowService, on_dev_mode_change=None):
         super().__init__()
         self.db = db
         self.on_dev_mode_change = on_dev_mode_change
         self.expand = True
         self.padding = 20
+        self.window_service = window_service
         self.build_ui()
 
     def build_ui(self):
@@ -523,6 +523,14 @@ class ViewSettings(ft.Container):
             self.page.update()
             self.db.salvar_tema(novo_tema)
 
+        def salvar_tamanho(e):
+            self.window_service.salvar_tamanho_atual()
+            Notification.show_info(e.page, "Tamanho atual e estado da janela foram salvos com sucesso!")
+
+        def restaurar_tamanho(e):
+            self.window_service.restaurar_padrao()
+            Notification.show_success(e.page, "Janela restaurada para o tamanho padrão.")
+
         return ft.Container(
             content=ft.ListView([
                 ft.Card(
@@ -557,10 +565,39 @@ class ViewSettings(ft.Container):
                             )
                         ]), padding=15
                     ), bgcolor=ft.Colors.SURFACE_CONTAINER
+                ),
+                
+                ft.Card(
+                    content=ft.Container(
+                        content=ft.Column([
+                            ft.Row([
+                                ft.Icon(ft.Icons.ASPECT_RATIO, color=ft.Colors.PRIMARY),
+                                ft.Text("Dimensionamento da Janela", size=16, weight=ft.FontWeight.BOLD)
+                            ]),
+                            ft.Divider(color=ft.Colors.SECONDARY),
+                            ft.Text("Ajuste a janela para o tamanho desejado e clique em salvar para que sempre abra nesta resolução.", size=12, color=ft.Colors.ON_SURFACE_VARIANT),
+                            ft.Divider(height=10, color=ft.Colors.TRANSPARENT),
+                            ft.Row([
+                                ft.ElevatedButton(
+                                    "Salvar Tamanho Atual",
+                                    icon=ft.Icons.SAVE,
+                                    bgcolor=ft.Colors.PRIMARY,
+                                    color=ft.Colors.ON_SECONDARY,
+                                    on_click=salvar_tamanho
+                                ),
+                                ft.ElevatedButton(
+                                    "Restaurar Padrão",
+                                    icon=ft.Icons.RESTORE,
+                                    bgcolor=ft.Colors.SECONDARY,
+                                    color=ft.Colors.ON_SECONDARY,
+                                    on_click=restaurar_tamanho
+                                )
+                            ], spacing=15)
+                        ]), padding=15
+                    ), bgcolor=ft.Colors.SURFACE_CONTAINER
                 )
             ], spacing=15), padding=15
         )
-
     # ==========================================
     # ABA 5: AVANÇADO
     # ==========================================

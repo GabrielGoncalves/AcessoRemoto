@@ -3,6 +3,7 @@ import ssl
 
 from database.db_manager import DatabaseManager
 from core.rdp_engine import RDPAngine
+from services.window_service import WindowService
 from ui.views.view_dashboard import DashboardView
 from ui.views.view_favorites import ViewFavoritos
 from ui.views.view_environments import ViewEnvironments
@@ -16,9 +17,9 @@ class MainApplication:
     def __init__(self, page: ft.Page):
         self.page = page
         self.page.title = "Remote Craft"
-        self.page.window.width = 900
-        self.page.window.height = 700
         self.db = DatabaseManager()
+        window_service = WindowService(page, self.db)
+        window_service.inicializar_janela()
 
         dias_retencao = int(self.db.obter_configuracao("retencao_historico_dias", "0"))
         self.db.limpar_historico_por_retencao(dias_retencao)
@@ -36,7 +37,7 @@ class MainApplication:
             on_redirect_action=self.redirecionar_para_dashboard
         )
         self.view_api = ViewAPI(self.db) 
-        self.view_settings = ViewSettings(self.db, on_dev_mode_change=self.atualizar_menu_lateral)
+        self.view_settings = ViewSettings(self.db, window_service=window_service, on_dev_mode_change=self.atualizar_menu_lateral)
         
         self.view_container = ft.Container(expand=True)
         
@@ -48,7 +49,7 @@ class MainApplication:
             on_change=self._nav_changed
         )
         
-        # CORREÇÃO: Chama a função vazia, pois ela já busca a flag sozinha no banco de dados
+        # Chama a função vazia, pois ela já busca a flag sozinha no banco de dados
         self.atualizar_menu_lateral()
 
         self.build_structure()
