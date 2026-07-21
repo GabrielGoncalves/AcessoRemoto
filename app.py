@@ -9,6 +9,7 @@ from ui.views.view_favorites import ViewFavoritos
 from ui.views.view_environments import ViewEnvironments
 from ui.views.view_settings import ViewSettings
 from ui.views.view_api import ViewAPI
+from ui.views.view_info import ViewInfo
 from ui.layout import AppTheme
 
 ssl._create_default_https_context = ssl._create_unverified_context
@@ -59,6 +60,7 @@ class MainApplication:
             window_service=window_service, 
             on_dev_mode_change=self.atualizar_menu_lateral
         )
+        self.view_info = ViewInfo(self.db)
         
         self.view_container = ft.Container(expand=True)
 
@@ -121,7 +123,7 @@ class MainApplication:
         elif selected_label == "Configurações":
             self.view_container.content = self.view_settings
         elif selected_label == "Informações":
-            pass # Reservado para a view de informações do sistema
+            self.view_container.content = self.view_info
             
         self.page.update()
 
