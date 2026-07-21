@@ -71,7 +71,7 @@ jobs:
           path: |
             ${{ runner.os == 'macOS' && 'build/macos' || runner.os == 'Windows' && 'build/windows_installer/Instalador_RemoteCraft.exe' || 'build/linux' }}
           retention-days: 1
-          
+
   release:
     name: Criar Página de Download
     needs: build
@@ -92,7 +92,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: "🚀 Remote Craft ${{ github.ref_name }}"
+          name: "Remote Craft ${{ github.ref_name }}"
           body: "Faça o download dos executáveis do Remote Craft para a versão **${{ github.ref_name }}** abaixo.\n\nPara Windows, baixe o **Instalador_RemoteCraft.exe**."
           files: |
             artefatos/*.zip
