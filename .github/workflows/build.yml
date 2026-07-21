@@ -35,25 +35,20 @@ jobs:
             echo "REQ_FILE=requirements.in" >> $GITHUB_ENV 
           fi
 
-      - name: Instalar dependências
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r ${{ env.REQ_FILE }}
-
       - name: Compilar no Windows
         if: runner.os == 'Windows'
-        run: flet build windows --module-name app
+        run: echo y | flet build windows --module-name app
 
       - name: Compilar no macOS
         if: runner.os == 'macOS'
-        run: flet build macos --module-name app
+        run: yes | flet build macos --module-name app
 
       - name: Compilar no Linux
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y xvfb
-          flet build linux --module-name app
+          yes | flet build linux --module-name app
 
       - name: Disponibilizar o Executável para Download
         uses: actions/upload-artifact@v4
