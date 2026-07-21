@@ -11,6 +11,7 @@ Construído com Python e Flet, ele oferece uma interface nativa, rápida e fluid
 *   **Gestão de Identidades Inteligente:** Separação automática de usuários e domínios de rede para facilitar a seleção de credenciais e evitar digitação repetitiva.
 *   **Organização por Ambientes:** Agrupe dezenas de conexões e servidores em "Fazendas" (Ambientes) para manter sua área de trabalho limpa e organizada.
 *   **Cofre de Favoritos:** Acesso rápido aos servidores e máquinas mais acessados do seu dia a dia.
+*   **Dimensionamento de Janela Persistente:** Ajuste a interface para o tamanho ou proporção ideal do seu monitor e salve a configuração (incluindo o estado de janela maximizada) para que o aplicativo sempre inicie exatamente do seu jeito.
 *   **Backup e Restauração Nativa:** Crie cópias de segurança de toda a sua configuração com um clique. Em caso de problemas, o sistema faz a restauração segura e reinicia a aplicação automaticamente.
 *   **Limpeza Automática:** Configure o aplicativo para reter o histórico de conexões por 1, 3, 7, 30 dias, ou limpar os rastros automaticamente a cada inicialização.
 
@@ -65,3 +66,9 @@ Fornece um gerador de senhas robusto e "CLI-Safe" (seguro para linha de comando)
 *   **Criptograficamente Seguro:** Utiliza a biblioteca nativa `secrets` do Python para garantir entropia real.
 *   **Sanitização de Caracteres Especiais:** Restringe a pontuação apenas para `_-.`, evitando falhas de injeção ou quebra de *strings* ao acionar binários como o `xfreerdp`.
 *   **Proteção de Argumentos:** Impede proativamente que a credencial comece com um símbolo, garantindo que o interpretador do sistema operacional não confunda a senha com uma *flag* ou argumento de comando.
+
+### 6. Gerenciamento de Geometria e UI (`services/window_service.py`)
+O módulo responsável por orquestrar o redimensionamento e a persistência visual do aplicativo.
+*   **Isolamento de Estado:** Retira o controle de pixels e resolução do arquivo `app.py`, evitando acoplamento e mantendo a inicialização do programa mais fluida.
+*   **Persistência sob Demanda:** Substitui o salvamento em tempo real (que causa eventos de restrição e `lock` por concorrência no SQLite) por ações explícitas orientadas pelo usuário através de botões de UI. Captura com exatidão dimensões estáticas e propriedades booleanas, como a flag `maximized` do sistema operacional.
+*   **Limites Protetivos:** Intervém na classe `Page` do Flet definindo constantes base de resolução (`MIN_WIDTH` e `MIN_HEIGHT`) para evitar que a interface encolha além dos limites funcionais previstos pelo design responsivo do projeto.
