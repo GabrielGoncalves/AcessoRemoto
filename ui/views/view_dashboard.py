@@ -53,14 +53,19 @@ class DashboardView(ft.Container):
         self.build_ui()
 
     def build_ui(self):
+        self.historico_minimizado = False
+
+        # --- 1. GRUPO DE PESQUISA COM ALINHAMENTO DE ESTICAMENTO (STRETCH) ---
         grupo_pesquisa_colada = ft.Column(
             controls=[
                 self.txt_ip,
                 self.container_sugestoes
             ],
-            spacing=0
+            spacing=0,
+            horizontal_alignment=ft.CrossAxisAlignment.STRETCH # Estica o campo de IP e sugestões
         )
 
+        # --- 2. COLUNA DO FORMULÁRIO COM STRETCH ---
         col_form = ft.Container(
             content=ft.Column([
                 ft.Row([ft.Text("Acesso Rápido", size=18, weight=ft.FontWeight.BOLD)]),
@@ -78,27 +83,93 @@ class DashboardView(ft.Container):
                     on_click=self._btn_conectar_clicked
                 )
                 
-            ], spacing=12),
-            padding=20, bgcolor=ft.Colors.SURFACE, border_radius=12, expand=1
+            ], spacing=12, horizontal_alignment=ft.CrossAxisAlignment.STRETCH), # Estica todos os inputs
+            padding=20, 
+            bgcolor=ft.Colors.SURFACE, 
+            border_radius=12,
+            expand=True # Permite que o card do formulário ocupe o espaço livre
         )
 
-        col_historico = ft.Container(
-            content=ft.Column([
+        # 3. LAYOUT DO HISTÓRICO COMPLETO (EXPANDIDO)
+        self.col_conteudo_historico = ft.Column(
+            controls=[
                 ft.Row([
-                    ft.Row([ft.Icon(ft.Icons.HISTORY, color=ft.Colors.PRIMARY), ft.Text("Conexões Recentes", size=18, weight=ft.FontWeight.BOLD)]),
-                    ft.IconButton(
-                        icon=ft.Icons.DELETE_SWEEP, 
-                        icon_color=ft.Colors.ON_SURFACE_VARIANT, 
-                        tooltip="Limpar Histórico", 
-                        on_click=self.limpar_historico_ui
-                    )
+                    ft.Row([
+                        ft.Icon(ft.Icons.HISTORY, color=ft.Colors.PRIMARY), 
+                        ft.Text("Conexões Recentes", size=18, weight=ft.FontWeight.BOLD)
+                    ]),
+                    ft.Row([
+                        ft.IconButton(
+                            icon=ft.Icons.DELETE_SWEEP, 
+                            icon_color=ft.Colors.ON_SURFACE_VARIANT, 
+                            tooltip="Limpar Histórico", 
+                            on_click=self.limpar_historico_ui
+                        ),
+                        ft.IconButton(
+                            icon=ft.Icons.CHEVRON_RIGHT, 
+                            icon_color=ft.Colors.PRIMARY, 
+                            tooltip="Minimizar Histórico", 
+                            on_click=self.toggle_historico_lateral
+                        )
+                    ], spacing=0)
                 ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN),
                 self.lv_historico
-            ]),
-            padding=20, bgcolor=ft.Colors.SURFACE, border_radius=12, expand=1
+            ],
+            spacing=10,
+            expand=True,
+            visible=True
         )
 
-        self.content = ft.Row([col_form, col_historico], spacing=15, expand=True)
+        # 4. LAYOUT DO HISTÓRICO MINIMIZADO (BARRA COMPACTA)
+        self.col_minimizado_historico = ft.Column(
+            controls=[
+                ft.Icon(ft.Icons.HISTORY, color=ft.Colors.PRIMARY, size=24),
+                ft.Divider(height=10, color=ft.Colors.TRANSPARENT),
+                ft.IconButton(
+                    icon=ft.Icons.CHEVRON_LEFT, 
+                    icon_color=ft.Colors.PRIMARY, 
+                    tooltip="Expandir Histórico", 
+                    on_click=self.toggle_historico_lateral
+                )
+            ],
+            horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+            alignment=ft.MainAxisAlignment.START,
+            spacing=10,
+            visible=False
+        )
+
+        # 5. CONTAINER DO HISTÓRICO COM TRANSIÇÃO
+        self.col_historico = ft.Container(
+            content=ft.Stack([
+                self.col_conteudo_historico,
+                self.col_minimizado_historico
+            ]),
+            padding=15, 
+            bgcolor=ft.Colors.SURFACE, 
+            border_radius=12,
+            width=350,
+            animate=ft.Animation(300, ft.AnimationCurve.EASE_IN_OUT),
+            animate_opacity=200
+        )
+
+        self.content = ft.Row([col_form, self.col_historico], spacing=15, expand=True)
+
+    # --- FUNÇÃO DE ALTERNÂNCIA COM ANIMAÇÃO ---
+    def toggle_historico_lateral(self, e):
+        self.historico_minimizado = not self.historico_minimizado
+        
+        if self.historico_minimizado:
+            # Encolhe a barra e alterna a visibilidade dos elementos internos
+            self.col_historico.width = 70
+            self.col_conteudo_historico.visible = False
+            self.col_minimizado_historico.visible = True
+        else:
+            # Expande a barra e exibe o conteúdo completo novamente
+            self.col_historico.width = 350
+            self.col_conteudo_historico.visible = True
+            self.col_minimizado_historico.visible = False
+            
+        self.update()
 
     def limpar_historico_ui(self, e):
         self.db.limpar_historico_completo()
