@@ -29,3 +29,7 @@ class Notification:
     @staticmethod
     def show_info(page: ft.Page, message: str):
         Notification._show_snackbar(page, message, bgcolor=ft.Colors.BLUE_700, icon_name=ft.Icons.INFO)
+
+    @staticmethod
+    def show_warning(page: ft.Page, message: str):
+        Notification._show_snackbar(page, message, bgcolor=ft.Colors.ORANGE_700, icon_name=ft.Icons.WARNING_AMBER)

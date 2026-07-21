@@ -2,8 +2,12 @@ name: Build Remote Craft
 
 on:
   push:
-    branches: [ "v2" ]
+    tags:
+      - 'v*.*.*'
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -20,9 +24,9 @@ jobs:
       - name: Configurar o Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12' 
+          python-version: '3.12'
 
-      - name: Determinar arquivo de dependências (Smart Selector)
+      - name: Determinar arquivo de dependências
         id: set-reqs
         shell: bash
         run: |
@@ -31,7 +35,6 @@ jobs:
           elif [ "$RUNNER_OS" == "macOS" ]; then
             echo "REQ_FILE=requirements-mac.txt" >> $GITHUB_ENV
           else
-            # Para Linux, usamos o arquivo .in cru para ele resolver na hora
             echo "REQ_FILE=requirements.in" >> $GITHUB_ENV 
           fi
 
@@ -45,6 +48,10 @@ jobs:
         env:
           PYTHONIOENCODING: utf-8
         run: echo y | flet build windows --module-name app
+        - name: Gerar Instalador Windows (Inno Setup)
+        if: runner.os == 'Windows'
+        run: |
+          "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" /DMyAppVersion="${{ github.ref_name }}" setup.iss
 
       - name: Compilar no macOS
         if: runner.os == 'macOS'
@@ -57,8 +64,36 @@ jobs:
           sudo apt-get install -y xvfb libgtk-3-dev pkg-config ninja-build mesa-utils
           yes | flet build linux --module-name app
 
-      - name: Disponibilizar o Executável para Download
+      - name: Disponibilizar Artefato Interno
         uses: actions/upload-artifact@v4
         with:
           name: RemoteCraft-${{ runner.os }}
-          path: build/${{ runner.os == 'macOS' && 'macos' || runner.os == 'Windows' && 'windows' || 'linux' }}
+          path: |
+            ${{ runner.os == 'macOS' && 'build/macos' || runner.os == 'Windows' && 'build/windows_installer/Instalador_RemoteCraft.exe' || 'build/linux' }}
+          retention-days: 1
+          
+  release:
+    name: Criar Página de Download
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar todos os executáveis da nuvem
+        uses: actions/download-artifact@v4
+        with:
+          path: artefatos
+
+      - name: Compactar em ZIP para download (Apenas Mac e Linux)
+        run: |
+          cd artefatos
+          zip -r RemoteCraft-macOS.zip RemoteCraft-macOS/
+          zip -r RemoteCraft-Linux.zip RemoteCraft-Linux/
+
+      - name: Publicar na página de Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: "🚀 Remote Craft ${{ github.ref_name }}"
+          body: "Faça o download dos executáveis do Remote Craft para a versão **${{ github.ref_name }}** abaixo.\n\nPara Windows, baixe o **Instalador_RemoteCraft.exe**."
+          files: |
+            artefatos/*.zip
+            artefatos/RemoteCraft-Windows/Instalador_RemoteCraft.exe

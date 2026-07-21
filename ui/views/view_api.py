@@ -2,6 +2,7 @@ import flet as ft
 import json
 from database.db_manager import DatabaseManager
 from services.api_service import ApiService
+from ui.components.notifications import Notification
 
 class ViewAPI(ft.Container):
     def __init__(self, db: DatabaseManager):
@@ -147,7 +148,14 @@ class ViewAPI(ft.Container):
             def on_chip_select(e):
                 chave = e.control.label.value 
                 is_selected = (str(e.data).lower() == "true")
-                
+                # --- LÓGICA DE BLOQUEIO (EARLY RETURN) ---
+                if not is_selected and len(self.colunas_visiveis) == 1 and chave in self.colunas_visiveis:
+                    e.control.selected = True
+                    e.control.update()
+
+                    Notification.show_warning(e.page, "É necessário manter pelo menos uma coluna selecionada!")
+                    return
+                # -----------------------------------------
                 if is_selected and chave not in self.colunas_visiveis:
                     self.colunas_visiveis.append(chave)
                 elif not is_selected and chave in self.colunas_visiveis:
