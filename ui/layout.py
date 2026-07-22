@@ -7,9 +7,10 @@ class AppTheme:
     """
     
     @staticmethod
-    def get_theme(nome_tema: str) -> ft.Theme:
+    def get_theme(nome_tema: str):
         paletas = {
-            "cyberpunk": {  # Tema padrão tons de azul 
+            "cyberpunk": {  
+                "mode": ft.ThemeMode.DARK,
                 "surface": "#1a1a2e",   
                 "surface_container": "#242438",           
                 "secondary_container": "#222235",  
@@ -19,7 +20,8 @@ class AppTheme:
                 "on_surface": ft.Colors.WHITE,     
                 "on_surface_variant": "#e2e8f0"    
             },
-            "neon_tokyo": {  # Roxo profundo e rosa choque
+            "neon_tokyo": {  
+                "mode": ft.ThemeMode.DARK,
                 "surface": "#0f0f1b",
                 "surface_container": "#252540",
                 "surface_variant": "#1a1a2e",
@@ -30,7 +32,8 @@ class AppTheme:
                 "on_surface": ft.Colors.WHITE,
                 "on_surface_variant": "#d1d1e0"
             },
-            "floresta_boreal": {  # Tons de verde escuro e esmeralda
+            "floresta_boreal": {  
+                "mode": ft.ThemeMode.DARK,
                 "surface": "#0d1a15",
                 "surface_container": "#1f3b2f",
                 "surface_variant": "#162a22",
@@ -41,7 +44,8 @@ class AppTheme:
                 "on_surface": ft.Colors.WHITE,
                 "on_surface_variant": "#b3d4c6"
             },
-            "cafe_expresso": {  # Tons amadeirados e quentes (sépia escuro)
+            "cafe_expresso": {  
+                "mode": ft.ThemeMode.DARK,
                 "surface": "#1c1714",
                 "surface_container": "#3e322c",
                 "surface_variant": "#2b231f",
@@ -52,7 +56,8 @@ class AppTheme:
                 "on_surface": ft.Colors.WHITE,
                 "on_surface_variant": "#d1c7c3"
             },
-            "dracula_dev": {  # Tema Drácula padrão
+            "dracula_dev": {  
+                "mode": ft.ThemeMode.DARK,
                 "surface": "#282a36",
                 "surface_container": "#44475a",
                 "surface_variant": "#343746",
@@ -67,7 +72,8 @@ class AppTheme:
             # ==========================================
             # TEMAS CLAROS (LIGHT MODE)
             # ==========================================
-            "gelo_claro": {  # O claro tradicional
+            "gelo_claro": {  
+                "mode": ft.ThemeMode.LIGHT,
                 "surface": "#f4f5f7",
                 "surface_container": "#e2e8f0",
                 "surface_variant": "#ffffff",
@@ -78,7 +84,8 @@ class AppTheme:
                 "on_surface": ft.Colors.BLACK,
                 "on_surface_variant": "#555555"
             },
-            "creme_de_baunilha": {  # Um tema claro aquecido, estilo páginas de livro antigo
+            "creme_de_baunilha": {  
+                "mode": ft.ThemeMode.LIGHT,
                 "surface": "#fdf6e3",
                 "surface_container": "#e1dabb",
                 "surface_variant": "#eee8d5",
@@ -93,7 +100,8 @@ class AppTheme:
             # ==========================================
             # TEMAS VIBRANTES
             # ==========================================
-            "cereja_doce": {  # Tons de vinho e vermelho
+            "cereja_doce": {  
+                "mode": ft.ThemeMode.DARK,
                 "surface": "#2b1219",
                 "surface_container": "#532537",
                 "surface_variant": "#3d1c28",
@@ -104,7 +112,8 @@ class AppTheme:
                 "on_surface": ft.Colors.WHITE,
                 "on_surface_variant": "#ffb5a7"
             },
-            "outono_fazenda": {  # Tons de laranja e terra
+            "outono_fazenda": {  
+                "mode": ft.ThemeMode.DARK,
                 "surface": "#2e1c10",
                 "surface_container": "#5c3921",
                 "surface_variant": "#422918",
@@ -120,7 +129,7 @@ class AppTheme:
         # Fallback de segurança: se o tema não existir, carrega o cyberpunk
         c = paletas.get(nome_tema.lower().strip(), paletas["cyberpunk"])
         
-        return ft.Theme(
+        tema_obj = ft.Theme(
             color_scheme=ft.ColorScheme(
                 surface=c["surface"],
                 surface_container=c["surface_container"],
@@ -132,3 +141,5 @@ class AppTheme:
                 on_surface_variant=c["on_surface_variant"]
             )
         )
+        
+        return tema_obj, c["mode"]

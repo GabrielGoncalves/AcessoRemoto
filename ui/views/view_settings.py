@@ -522,7 +522,10 @@ class ViewSettings(ft.Container):
         
         def alterar_tema(e):
             novo_tema = e.control.value
-            self.page.theme = AppTheme.get_theme(novo_tema)
+            tema_obj, tema_modo = AppTheme.get_theme(novo_tema)
+            
+            self.page.theme = tema_obj
+            self.page.theme_mode = tema_modo
             self.page.bgcolor = self.page.theme.color_scheme.surface_container
             self.page.update()
             self.db.salvar_tema(novo_tema)

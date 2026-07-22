@@ -28,7 +28,9 @@ class MainApplication:
 
         # Configuração de Tema
         tema_salvo = self.db.obter_tema()
-        self.page.theme = AppTheme.get_theme(tema_salvo)
+        tema_obj, tema_modo = AppTheme.get_theme(tema_salvo)
+        self.page.theme = tema_obj
+        self.page.theme_mode = tema_modo
         self.page.bgcolor = self.page.theme.color_scheme.surface_container
 
         # Consulta se o menu deve nascer recolhido segundo as preferências do banco
