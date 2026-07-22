@@ -1,8 +1,15 @@
 import flet as ft
 import os
-import sys
 import platform
+import urllib.request
+import json
 from database.db_manager import DatabaseManager
+from ui.components.notifications import Notification
+
+VERSAO_ATUAL = "2.0.0-beta"
+GITHUB_USER = "GabrielGoncalves"
+GITHUB_REPO = "AcessoRemoto"
+URL_DOCS = f"https://github.com/{GITHUB_USER}/{GITHUB_REPO}/tree/v2#README.md"
 
 class ViewInfo(ft.Container):
     def __init__(self, db: DatabaseManager):
@@ -26,9 +33,17 @@ class ViewInfo(ft.Container):
         ], expand=True)
 
     # ==========================================
-    # CARD 1: IDENTIDADE E VERSÃO
+    # CARD 1: IDENTIDADE E VERIFICAÇÃO DE VERSÃO
     # ==========================================
     def _criar_card_versao(self):
+        so_detectado = platform.system() # 'Darwin' (macOS), 'Windows', 'Linux'
+        if so_detectado == "Darwin":
+            so_detectado = "macOS"
+
+        # Função assíncrona para abrir a documentação
+        async def abrir_documentacao(e):
+            await self.page.launch_url(URL_DOCS)
+
         return ft.Card(
             content=ft.Container(
                 content=ft.Column([
@@ -36,10 +51,12 @@ class ViewInfo(ft.Container):
                         ft.Icon(ft.Icons.TERMINAL, size=32, color=ft.Colors.PRIMARY),
                         ft.Column([
                             ft.Text("Remote Craft", size=20, weight=ft.FontWeight.BOLD),
-                            ft.Text("Versão 1.2.0 • Build Estável", size=12, color=ft.Colors.ON_SURFACE_VARIANT)
+                            ft.Text(f"Versão {VERSAO_ATUAL} • Build Estável", size=12, color=ft.Colors.ON_SURFACE_VARIANT)
                         ], spacing=2, expand=True),
+                        
+                        # Tag visual com o SO detectado
                         ft.Container(
-                            content=ft.Text("Sistema Operacional", size=11, weight=ft.FontWeight.BOLD, color=ft.Colors.ON_PRIMARY),
+                            content=ft.Text(so_detectado, size=11, weight=ft.FontWeight.BOLD, color=ft.Colors.ON_PRIMARY),
                             bgcolor=ft.Colors.PRIMARY,
                             padding=ft.Padding.symmetric(horizontal=10, vertical=4),
                             border_radius=12
@@ -49,16 +66,54 @@ class ViewInfo(ft.Container):
                     ft.Text(
                         "Gerenciador moderno e centralizado de conexões de Área de Trabalho Remota (RDP) focado em alta produtividade e organização corporativa.",
                         size=13, color=ft.Colors.ON_SURFACE_VARIANT
-                    )
+                    ),
+                    ft.Divider(height=10, color=ft.Colors.TRANSPARENT),
+                    ft.Row([
+                        ft.ElevatedButton(
+                            "Verificar Atualizações",
+                            icon=ft.Icons.UPDATE,
+                            bgcolor=ft.Colors.PRIMARY,
+                            color=ft.Colors.ON_PRIMARY,
+                            on_click=self._verificar_atualizacoes
+                        ),
+                        ft.OutlinedButton(
+                            "Documentação",
+                            icon=ft.Icons.MENU_BOOK,
+                            on_click=abrir_documentacao
+                        )
+                    ], spacing=10)
                 ]), padding=15
             ), bgcolor=ft.Colors.SURFACE_CONTAINER
         )
 
     # ==========================================
+    # LÓGICA DE VALIDAÇÃO DE VERSÃO ONLINE
+    # ==========================================
+    async def _verificar_atualizacoes(self, e):
+        url_api = f"https://api.github.com/repos/{GITHUB_USER}/{GITHUB_REPO}/releases/latest"
+        
+        try:
+            req = urllib.request.Request(url_api, headers={'User-Agent': 'RemoteCraftApp'})
+            with urllib.request.urlopen(req, timeout=4) as response:
+                dados = json.loads(response.read().decode())
+                
+                tag_online = dados.get("tag_name", "").replace("v", "").strip()
+                url_download = dados.get("html_url", f"https://github.com/{GITHUB_USER}/{GITHUB_REPO}/releases")
+
+                if tag_online and tag_online > VERSAO_ATUAL:
+                    Notification.show_info(self.page, f"Nova versão v{tag_online} disponível! Redirecionando para download...")
+                    # Como é assíncrono, agora podemos usar o await sem erro
+                    await self.page.launch_url(url_download)
+                else:
+                    Notification.show_success(self.page, "O Remote Craft já está atualizado na versão mais recente!")
+
+        except Exception:
+            Notification.show_error(self.page, "Não foi possível consultar as atualizações. Verifique os links ou a conexão com a internet.")
+
+    # ==========================================
     # CARD 2: DIAGNÓSTICO E SAÚDE DO SISTEMA
     # ==========================================
     def _criar_card_diagnostico(self):
-        # 1. Coleta dados do banco
         tamanho_db_kb = 0
         if os.path.exists("autordp.db"):
             tamanho_db_kb = round(os.path.getsize("autordp.db") / 1024, 2)
@@ -68,7 +123,6 @@ class ViewInfo(ft.Container):
         qtd_users = len(self.db.listar_usuarios())
         qtd_historico = len(self.db.listar_historico(limite=999))
 
-        # 2. Coleta dados do sistema
         so_nome = f"{platform.system()} {platform.release()} ({platform.machine()})"
         py_version = platform.python_version()
         flet_version = ft.__version__
@@ -83,7 +137,6 @@ class ViewInfo(ft.Container):
                     ft.Divider(color=ft.Colors.SECONDARY),
                     
                     ft.ResponsiveRow([
-                        # Coluna do Banco de Dados
                         ft.Column([
                             ft.Text("Métricas do Banco de Dados", size=13, weight=ft.FontWeight.BOLD, color=ft.Colors.PRIMARY),
                             ft.Row([ft.Icon(ft.Icons.STORAGE, size=16), ft.Text(f"Arquivo SQLite: {tamanho_db_kb} KB")]),
@@ -93,7 +146,6 @@ class ViewInfo(ft.Container):
                             ft.Row([ft.Icon(ft.Icons.HISTORY, size=16), ft.Text(f"Registros no Histórico: {qtd_historico}")]),
                         ], col={"sm": 12, "md": 6}, spacing=6),
 
-                        # Coluna do Executável e Engine
                         ft.Column([
                             ft.Text("Ambiente de Execução", size=13, weight=ft.FontWeight.BOLD, color=ft.Colors.PRIMARY),
                             ft.Row([ft.Icon(ft.Icons.COMPUTER, size=16), ft.Text(f"S.O.: {so_nome}")]),
@@ -141,19 +193,37 @@ class ViewInfo(ft.Container):
         )
 
     # ==========================================
-    # CARD 4: CRÉDITOS E SUPORTE
+    # CARD 4: CRÉDITOS E LICENÇA
     # ==========================================
     def _criar_card_creditos(self):
+        # Função assíncrona para abrir o repositório
+        async def abrir_repositorio(e):
+            await self.page.launch_url(f"https://github.com/{GITHUB_USER}/{GITHUB_REPO}")
+
         return ft.Card(
             content=ft.Container(
                 content=ft.Column([
                     ft.Row([
-                        ft.Icon(ft.Icons.INFO_OUTLINE, color=ft.Colors.PRIMARY),
-                        ft.Text("Créditos e Suporte", size=16, weight=ft.FontWeight.BOLD)
+                        ft.Icon(ft.Icons.CODE_OFF, color=ft.Colors.PRIMARY),
+                        ft.Text("Desenvolvimento e Licenciamento", size=16, weight=ft.FontWeight.BOLD)
                     ]),
                     ft.Divider(color=ft.Colors.SECONDARY),
-                    ft.Text("Remote Craft • Desenvolvido com Python & Flet UI Engine.", size=12, color=ft.Colors.ON_SURFACE_VARIANT),
-                    ft.Text("Licença: Uso Corporativo / Pessoal.", size=12, color=ft.Colors.ON_SURFACE_VARIANT)
+                    ft.Text("Projetado e mantido por Gabriel Aragão.", size=13, weight=ft.FontWeight.W_500),
+                    ft.Row([
+                        ft.Text("Licença de Código Aberto:", size=12, color=ft.Colors.ON_SURFACE_VARIANT),
+                        ft.Container(
+                            content=ft.Text("MIT License", size=11, weight=ft.FontWeight.BOLD, color=ft.Colors.PRIMARY),
+                            border=ft.Border.all(1, ft.Colors.PRIMARY),
+                            padding=ft.Padding.symmetric(horizontal=8, vertical=2),
+                            border_radius=4
+                        )
+                    ]),
+                    ft.Divider(height=5, color=ft.Colors.TRANSPARENT),
+                    ft.TextButton(
+                        "Acessar Repositório Oficial no GitHub",
+                        icon=ft.Icons.OPEN_IN_NEW,
+                        on_click=abrir_repositorio
+                    )
                 ]), padding=15
             ), bgcolor=ft.Colors.SURFACE_CONTAINER
         )
