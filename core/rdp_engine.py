@@ -1,16 +1,25 @@
 import os
 import platform
 import subprocess
-import ctypes
 import threading
 import time
-import ctypes.wintypes
+import sys
 from pathlib import Path
+from security import CredencialSegura
 
 class RDPAngine:
     @staticmethod
+    def _obter_caminho_wfreerdp() -> str:
+        """Resolve o caminho absoluto do sdl-freerdp.exe, seja rodando local ou compilado"""
+        if getattr(sys, 'frozen', False):
+            base_path = Path(sys._MEIPASS)
+        else:
+            base_path = Path(__file__).parent.parent
+        return str(base_path / "assets" / "sdl-freerdp.exe")
+
+    @staticmethod
     def obter_caminho_salvamento() -> Path:
-        """Retorna a pasta de cache ideal dependendo do Sistema Operacional"""
+        """Retorna a pasta de cache ideal dependendo do Sistema Operacional (usado por Mac)"""
         home = Path.home()
         if platform.system() == "Windows":
             diretorio = home / "AppData" / "Local" / "RemoteCraft"
@@ -21,55 +30,46 @@ class RDPAngine:
         return diretorio / "launcher.rdp"
 
     @staticmethod
-    def _criptografar_senha_dpapi(senha: str) -> str:
-        """Criptografa a senha nativamente usando a API DPAPI do Windows"""
-        if not senha:
-            return ""
-        pwd_bytes = (senha + '\0').encode('utf-16le')
-
-        class DATA_BLOB(ctypes.Structure):
-            _fields_ = [("cbData", ctypes.wintypes.DWORD),
-                        ("pbData", ctypes.POINTER(ctypes.c_byte))]
-
-        data_in = DATA_BLOB(len(pwd_bytes), ctypes.cast(pwd_bytes, ctypes.POINTER(ctypes.c_byte)))
-        data_out = DATA_BLOB()
-
-        ret = ctypes.windll.crypt32.CryptProtectData(
-            ctypes.byref(data_in),
-            None, None, None, None, 0x01,
-            ctypes.byref(data_out)
-        )
-
-        if not ret:
-            return ""
-
-        out_bytes = ctypes.string_at(data_out.pbData, data_out.cbData)
-        ctypes.windll.kernel32.LocalFree(data_out.pbData)
-        return out_bytes.hex().upper()
-
-    @staticmethod
     def executar(ip, user, senha):
         sistema = platform.system()
-        arquivo_rdp = RDPAngine.obter_caminho_salvamento()
-
+        
+        # ==========================================
+        # ENGINE MODERNA: WINDOWS COM FREE RDP
+        # ==========================================
         if sistema == "Windows":
-            conteudo_rdp = (
-                f"full address:s:{ip}\n"
-                f"username:s:{user}\n"
-                f"prompt for credentials:i:0\n"
-                f"authentication level:i:2\n"
-            )      
+            caminho_binario = RDPAngine._obter_caminho_wfreerdp()
+            
+            comando = [
+                caminho_binario,
+                f"/v:{ip}",
+                f"/u:{user}",
+                "/from-stdin",        
+                "/dynamic-resolution",
+                "/cert:ignore",       
+                "+clipboard"          
+            ]
+
+            CREATE_NO_WINDOW = 0x08000000
+            
+            processo = subprocess.Popen(
+                comando,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                creationflags=CREATE_NO_WINDOW
+            )
             if senha:
-                hash_dpapi = RDPAngine._criptografar_senha_dpapi(senha)
-                if hash_dpapi:
-                    conteudo_rdp += f"password 51:b:{hash_dpapi}\n"
+                with CredencialSegura(senha) as cred:
+                    processo.stdin.write(cred.obter_bytes() + b"\n")
+                    processo.stdin.flush()      
+            if processo.stdin:
+                processo.stdin.close()
 
-            with open(arquivo_rdp, "w", encoding="utf-8") as f:
-                f.write(conteudo_rdp)
-            subprocess.Popen(["mstsc", str(arquivo_rdp)])
-            threading.Thread(target=RDPAngine._limpar_arquivo_temporario, args=(arquivo_rdp,), daemon=True).start()
-
+        # ==========================================
+        # ENGINE LEGADA: MACOS
+        # ==========================================
         elif sistema == "Darwin":
+            arquivo_rdp = RDPAngine.obter_caminho_salvamento()
             conteudo_rdp = (
                 f"full address:s:{ip}\n"
                 f"username:s:{user}\n"
@@ -83,8 +83,12 @@ class RDPAngine:
             if senha:
                 subprocess.run(["pbcopy"], text=True, input=senha)
             subprocess.Popen(["open", str(arquivo_rdp)])
+            threading.Thread(target=RDPAngine._limpar_arquivo_temporario, args=(arquivo_rdp,), daemon=True).start()
 
-        else: # Linux
+        # ==========================================
+        # ENGINE LEGADA: LINUX
+        # ==========================================
+        else: 
             env_seguro = os.environ.copy()
             env_seguro["XFREERDP_PASSWORD"] = senha
             subprocess.Popen(
@@ -94,10 +98,7 @@ class RDPAngine:
 
     @staticmethod
     def _limpar_arquivo_temporario(caminho_arquivo: Path):
-        """Deleta o arquivo RDP 5 segundos após a execução para não deixar rastros"""
+        """Deleta o arquivo RDP 5 segundos após a execução para não deixar rastros no Mac/Linux"""
         time.sleep(5)
-        #try:
         if caminho_arquivo.exists():
-                caminho_arquivo.unlink() # Comando Pathlib para deletar arquivo
-        #except Exception:
-        #    pass
+            caminho_arquivo.unlink()
