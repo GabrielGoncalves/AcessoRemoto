@@ -5,7 +5,7 @@ import threading
 import time
 import sys
 from pathlib import Path
-from security import CredencialSegura
+from core.security import CredencialSegura
 
 class RDPAngine:
     @staticmethod
@@ -43,10 +43,11 @@ class RDPAngine:
                 caminho_binario,
                 f"/v:{ip}",
                 f"/u:{user}",
-                "/from-stdin",        
-                "/dynamic-resolution",
-                "/cert:ignore",       
-                "+clipboard"          
+                "/size:85%",           
+                "/from-stdin",         
+                "/smart-sizing", 
+                "/cert:ignore",        
+                "+clipboard"           
             ]
 
             CREATE_NO_WINDOW = 0x08000000

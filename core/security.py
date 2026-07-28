@@ -9,10 +9,13 @@ class CredencialSegura:
         return bytes(self._buffer)
 
     def destruir(self):
+        """Sobrescreve a memória ocupada com zeros físicos para prevenir Memory Dumping."""
         if self._buffer:
             tamanho = len(self._buffer)
             endereco = (ctypes.c_char * tamanho).from_buffer(self._buffer)
             ctypes.memset(ctypes.addressof(endereco), 0, tamanho)
+            
+            del endereco
             self._buffer.clear()
 
     def __enter__(self):
