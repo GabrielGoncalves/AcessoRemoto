@@ -1,4 +1,4 @@
-name: Build Remote Craft
+name: Build RemoteDesk
 
 on:
   push:
@@ -69,9 +69,9 @@ jobs:
       - name: Disponibilizar Artefato Interno
         uses: actions/upload-artifact@v4
         with:
-          name: RemoteCraft-${{ runner.os }}
+          name: RemoteDesk-${{ runner.os }}
           path: |
-            ${{ runner.os == 'macOS' && 'build/macos' || runner.os == 'Windows' && 'build/windows_installer/Instalador_RemoteCraft.exe' || 'build/linux' }}
+            ${{ runner.os == 'macOS' && 'build/macos' || runner.os == 'Windows' && 'build/windows_installer/Instalador_RemoteDesk.exe' || 'build/linux' }}
           retention-days: 1
 
   release:
@@ -87,15 +87,15 @@ jobs:
       - name: Compactar em ZIP para download (Apenas Mac e Linux)
         run: |
           cd artefatos
-          zip -r RemoteCraft-macOS.zip RemoteCraft-macOS/
-          zip -r RemoteCraft-Linux.zip RemoteCraft-Linux/
+          zip -r RemoteDesk-macOS.zip RemoteDesk-macOS/
+          zip -r RemoteDesk-Linux.zip RemoteDesk-Linux/
 
       - name: Publicar na página de Releases
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.ref_name }}
-          name: "Remote Craft ${{ github.ref_name }}"
-          body: "Faça o download dos executáveis do Remote Craft para a versão **${{ github.ref_name }}** abaixo.\n\nPara Windows, baixe o **Instalador_RemoteCraft.exe**."
+          name: "RemoteDesk ${{ github.ref_name }}"
+          body: "Faça o download dos executáveis do RemoteDesk para a versão **${{ github.ref_name }}** abaixo.\n\nPara Windows, baixe o **Instalador_RemoteDesk.exe**."
           files: |
             artefatos/*.zip
-            artefatos/RemoteCraft-Windows/Instalador_RemoteCraft.exe
+            artefatos/RemoteDesk-Windows/Instalador_RemoteDesk.exe

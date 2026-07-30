@@ -1,11 +1,11 @@
 [Setup]
 ; Configurações Gerais do Programa
-AppName=Remote Craft
+AppName=RemoteDesk
 AppVersion={#MyAppVersion}
-DefaultDirName={autopf}\Remote Craft
+DefaultDirName={autopf}\RemoteDesk
 DisableProgramGroupPage=yes
-; Nome e local do arquivo final gerado
-OutputBaseFilename=Instalador_RemoteCraft
+; Nome e local do arquivo final gerado (Ajustado)
+OutputBaseFilename=Instalador_RemoteDesk
 OutputDir=build\windows_installer
 ; Melhor compressão possível
 Compression=lzma2/ultra64
@@ -21,7 +21,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "build\windows\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-; Cria o atalho no Menu Iniciar
-Name: "{autoprograms}\Remote Craft"; Filename: "{app}\AcessoRemoto.exe"
-; Cria o atalho na Área de Trabalho (vinculado à caixinha da seção Tasks)
-Name: "{autodesktop}\Remote Craft"; Filename: "{app}\AcessoRemoto.exe"; Tasks: desktopicon
+; Cria o atalho no Menu Iniciar (Ajustado para RemoteDesk.exe)
+Name: "{autoprograms}\RemoteDesk"; Filename: "{app}\RemoteDesk.exe"
+; Cria o atalho na Área de Trabalho (Ajustado para RemoteDesk.exe)
+Name: "{autodesktop}\RemoteDesk"; Filename: "{app}\RemoteDesk.exe"; Tasks: desktopicon
