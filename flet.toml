@@ -1,0 +1,9 @@
+name = "RemoteDesk"
+description = "RemoteDesk"
+version = "1.0.0"
+author = "Gabriel Aragão"
+
+[product]
+name = "RemoteDesk"
+company = "Gabriel Aragão"
+copyright = "Copyright (c) 2024 Gabriel Aragão"
