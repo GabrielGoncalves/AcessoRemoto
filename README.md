@@ -1,6 +1,6 @@
-# 🚀 Remote Craft
+# 🚀 RemoteDesk
 
-O **Remote Craft** é um gerenciador moderno e centralizado de conexões remotas, projetado para simplificar a administração de servidores, ambientes corporativos e identidades de acesso. 
+O **RemoteDesk** é um gerenciador moderno e centralizado de conexões remotas, projetado para simplificar a administração de servidores, ambientes corporativos e identidades de acesso. 
 
 Construído com Python e Flet, ele oferece uma interface nativa, rápida e fluida, operando de forma 100% autônoma (*cross-platform*) e mantendo seus dados seguros localmente através de um banco de dados SQLite.
 
@@ -19,7 +19,7 @@ Construído com Python e Flet, ele oferece uma interface nativa, rápida e fluid
 
 ## 📦 Importando Dados Legados
 
-Se você é usuário de versões anteriores, o Remote Craft facilita a migração dos seus dados utilizando arquivos `.json`.
+Se você é usuário de versões anteriores, o RemoteDesk facilita a migração dos seus dados utilizando arquivos `.json`.
 
 1. Vá até a aba **Configurações > Dados & Backup**.
 2. Clique em **Importar Arquivos**.
