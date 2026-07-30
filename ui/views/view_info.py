@@ -6,7 +6,7 @@ import json
 from database.db_manager import DatabaseManager
 from ui.components.notifications import Notification
 
-VERSAO_ATUAL = "2.0.0-beta"
+VERSAO_ATUAL = "2.0.5-beta"
 GITHUB_USER = "GabrielGoncalves"
 GITHUB_REPO = "AcessoRemoto"
 URL_DOCS = f"https://github.com/{GITHUB_USER}/{GITHUB_REPO}/tree/v2#README.md"
