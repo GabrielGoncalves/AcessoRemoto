@@ -91,12 +91,30 @@ class RDPAngine:
         # ENGINE LINUX
         # ==========================================
         else: 
-            env_seguro = os.environ.copy()
-            env_seguro["XFREERDP_PASSWORD"] = senha
-            subprocess.Popen(
-                ["xfreerdp", f"/v:{ip}", f"/u:{user}", "/cert:ignore", "/f"],
-                env=env_seguro
+            comando = [
+                "xfreerdp",
+                f"/v:{ip}",
+                f"/u:{user}",
+                f"/t:Remote Craft - Conectado em {ip}",
+                "/size:1280x720",
+                "/from-stdin",
+                "/dynamic-resolution",
+                "/cert:ignore",
+                "+clipboard"
+            ]
+            processo = subprocess.Popen(
+                comando,
+                stdin=subprocess.PIPE,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
             )
+            if senha:
+                with CredencialSegura(senha) as cred:
+                    processo.stdin.write(cred.obter_bytes() + b"\n")
+                    processo.stdin.flush()
+            
+            if processo.stdin:
+                processo.stdin.close()
 
     @staticmethod
     def _limpar_arquivo_temporario(caminho_arquivo: Path):
