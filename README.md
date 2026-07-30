@@ -44,11 +44,9 @@ O arquivo principal orquestra a inicialização e o roteamento da interface grá
 
 ### 2. Motor de Conexão Cross-Platform (`core/rdp_engine.py`)
 A classe `RDPAngine` traduz o pedido de conexão da interface para comandos nativos do sistema operacional de forma isolada e segura.
-*   **Geração Dinâmica:** Constrói um arquivo `launcher.rdp` temporário em diretórios ocultos do usuário (`AppData` no Windows ou `Application Support` no Mac).
-*   **Segurança no Windows:** Utiliza a biblioteca `ctypes` para criptografar a senha do usuário nativamente através da API **DPAPI** (`CryptProtectData`), injetando um hash blindado diretamente no arquivo RDP.
-*   **Segurança no macOS:** Como o cliente de RDP do Mac não aceita injeção direta por arquivo, o aplicativo copia a senha silenciosamente para a área de transferência (usando `pbcopy`), bastando o usuário colar (`Cmd+V`) na tela de login.
-*   **Segurança no Linux:** Utiliza o `xfreerdp` injetando a senha em uma variável de ambiente efêmera (`XFREERDP_PASSWORD`), impedindo que a credencial vaze no histórico do terminal.
-*   **Anti-Rastreio (Auto-Delete):** Uma *thread* paralela apaga o arquivo RDP físico após 5 segundos, não deixando rastros na máquina.
+*   **Engine Moderna no Windows (FreeRDP):** Substitui a API nativa legada pelo poderoso motor embutido `sdl-freerdp.exe`, entregando ajustes dinâmicos de tela (`/dynamic-resolution`) e títulos de janela personalizados, sem depender da estrutura do sistema hospedeiro.
+*   **Injeção Invisível via Piping (Windows e Linux):** A geração de arquivos `.rdp` físicas foi totalmente abolida do Windows e o uso de variáveis de ambiente foi suprimido no Linux (`xfreerdp`). O aplicativo cria um túnel direto para a memória RAM (*Standard Input*) do processo filho, repassando a credencial sem deixar arquivos-fantasma no disco ou expor dados em ferramentas de depuração do SO.
+*   **Segurança no macOS:** Como o cliente de RDP do Mac não aceita injeção direta por arquivo ou *stdin*, o aplicativo copia a senha silenciosamente para a área de transferência (usando `pbcopy`), bastando o usuário colar (`Cmd+V`) na tela de login.
 
 ### 3. Persistência de Dados (`database/db_manager.py`)
 O banco de dados SQLite (`autordp.db`) opera em regime estrito com controle de integridade transacional.
@@ -61,10 +59,11 @@ O módulo de testes de API foi desacoplado.
 *   **Isolamento de Rede:** O `ApiService` encapsula toda a complexidade do módulo nativo `urllib`, lidando com *timeouts*, *headers* e o decodificador UTF-8, devolvendo os dados limpos.
 *   **Sanitização Visual:** A view recebe a resposta da rede e constrói dinamicamente tabelas interativas (`DataTables`) ou listas baseadas na estrutura profunda do JSON recebido.
 
-### 5. Segurança e Credenciais (`services/password_service.py`)
-Fornece um gerador de senhas robusto e "CLI-Safe" (seguro para linha de comando).
-*   **Criptograficamente Seguro:** Utiliza a biblioteca nativa `secrets` do Python para garantir entropia real.
-*   **Sanitização de Caracteres Especiais:** Restringe a pontuação apenas para `_-.`, evitando falhas de injeção ou quebra de *strings* ao acionar binários como o `xfreerdp`.
+### 5. Segurança e Credenciais Isoladas (`core/security.py` e `services/password_service.py`)
+A arquitetura blinda as informações sensíveis e gerencia senhas de forma segura.
+*   **Proteção contra Memory Dumping (RAM Scraping):** Implementa um *Context Manager* (`CredencialSegura`) independente que converte a string da senha para um buffer mutável de bytes. Após a injeção no motor de RDP, ponteiros de nível C (`ctypes`) são acionados para aniquilar fisicamente a variável da memória RAM com zeros (0), frustrando malwares de extração forense.
+*   **Gerador Criptograficamente Seguro:** Utiliza a biblioteca nativa `secrets` do Python para garantir entropia real.
+*   **Sanitização de Caracteres Especiais:** Restringe a pontuação apenas para `_-.`, evitando falhas de injeção ou quebra de *strings* ao acionar binários do sistema.
 *   **Proteção de Argumentos:** Impede proativamente que a credencial comece com um símbolo, garantindo que o interpretador do sistema operacional não confunda a senha com uma *flag* ou argumento de comando.
 
 ### 6. Gerenciamento de Geometria e UI (`services/window_service.py`)
