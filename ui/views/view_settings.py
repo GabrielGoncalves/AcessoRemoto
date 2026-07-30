@@ -165,8 +165,48 @@ class ViewSettings(ft.Container):
         lv_users = ft.ListView(expand=True, spacing=5)
         lv_dominios = ft.ListView(expand=True, spacing=5)
 
+        # ------------------------------------------
+        # 1. ESTADO INICIAL E DROPDOWNS
+        # ------------------------------------------
+        val_user_padrao = self.db.obter_configuracao("usuario_padrao_texto", "")
+        val_dom_padrao = self.db.obter_configuracao("dominio_padrao_texto", "")
+        
+        flag_user = self.db.obter_configuracao("usar_usuario_padrao", "0") == "1"
+        flag_dom = self.db.obter_configuracao("usar_dominio_padrao", "0") == "1"
+
+        def atualizar_texto_user_padrao(e):
+            if e.control.value:
+                self.db.salvar_configuracao("usuario_padrao_texto", e.control.value.strip())
+
+        def atualizar_texto_dominio_padrao(e):
+            if e.control.value:
+                self.db.salvar_configuracao("dominio_padrao_texto", e.control.value.strip())
+
+        dropdown_user_padrao = ft.Dropdown(
+            label="Selecione o Usuário Padrão", 
+            value=val_user_padrao if val_user_padrao else None, 
+            on_select=atualizar_texto_user_padrao,
+            width=250, 
+            border_color=ft.Colors.SECONDARY,
+            disabled=not flag_user
+        )
+        
+        dropdown_dominio_padrao = ft.Dropdown(
+            label="Selecione o Domínio Padrão", 
+            value=val_dom_padrao if val_dom_padrao else None, 
+            on_select=atualizar_texto_dominio_padrao,
+            width=250, 
+            border_color=ft.Colors.SECONDARY,
+            disabled=not flag_dom
+        )
+
+        # ------------------------------------------
+        # 2. ATUALIZAÇÃO DINÂMICA (LISTA + DROPDOWNS)
+        # ------------------------------------------
         def atualizar_lista_usuarios():
             lv_users.controls.clear()
+            opcoes_user = [] 
+            
             for id_, nome in self.db.listar_usuarios():
                 lv_users.controls.append(
                     ft.Row([
@@ -178,13 +218,19 @@ class ViewSettings(ft.Container):
                         )
                     ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
                 )
+                opcoes_user.append(ft.dropdown.Option(nome))
+                
+            dropdown_user_padrao.options = opcoes_user
             try:
                 lv_users.update()
+                dropdown_user_padrao.update()
             except Exception:
                 pass
 
         def atualizar_lista_dominios():
             lv_dominios.controls.clear()
+            opcoes_dom = [] 
+            
             for id_, dom in self.db.listar_dominios():
                 lv_dominios.controls.append(
                     ft.Row([
@@ -196,14 +242,21 @@ class ViewSettings(ft.Container):
                         )
                     ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
                 )
+                opcoes_dom.append(ft.dropdown.Option(dom))
+                
+            dropdown_dominio_padrao.options = opcoes_dom
             try:
                 lv_dominios.update()
+                dropdown_dominio_padrao.update()
             except Exception:
                 pass
         
         self.atualizar_lista_usuarios = atualizar_lista_usuarios
         self.atualizar_lista_dominios = atualizar_lista_dominios
 
+        # ------------------------------------------
+        # 3. LÓGICA DE CRUD
+        # ------------------------------------------
         def salvar_usuario(e):
             nome = txt_novo_user.value.strip()
             if nome and self.db.adicionar_usuario(nome):
@@ -227,25 +280,23 @@ class ViewSettings(ft.Container):
             atualizar_lista_dominios()
 
         def alternar_flag_user_padrao(e):
-            self.db.salvar_configuracao("usar_usuario_padrao", "1" if e.control.value else "0")
+            is_active = e.control.value
+            self.db.salvar_configuracao("usar_usuario_padrao", "1" if is_active else "0")
+            dropdown_user_padrao.disabled = not is_active
+            dropdown_user_padrao.update()
 
         def alternar_flag_dominio_padrao(e):
-            self.db.salvar_configuracao("usar_dominio_padrao", "1" if e.control.value else "0")
-            
-        def atualizar_texto_user_padrao(e):
-            self.db.salvar_configuracao("usuario_padrao_texto", e.control.value.strip())
-
-        def atualizar_texto_dominio_padrao(e):
-            self.db.salvar_configuracao("dominio_padrao_texto", e.control.value.strip())
-
-        flag_user = self.db.obter_configuracao("usar_usuario_padrao", "0") == "1"
-        flag_dom = self.db.obter_configuracao("usar_dominio_padrao", "0") == "1"
-        val_user_padrao = self.db.obter_configuracao("usuario_padrao_texto", "")
-        val_dom_padrao = self.db.obter_configuracao("dominio_padrao_texto", "")
+            is_active = e.control.value
+            self.db.salvar_configuracao("usar_dominio_padrao", "1" if is_active else "0")
+            dropdown_dominio_padrao.disabled = not is_active
+            dropdown_dominio_padrao.update()
 
         atualizar_lista_usuarios()
         atualizar_lista_dominios()
 
+        # ------------------------------------------
+        # 4. INTERFACE VISUAL
+        # ------------------------------------------
         return ft.Container(
             content=ft.Column([
                 ft.Card(
@@ -256,12 +307,12 @@ class ViewSettings(ft.Container):
                             ft.Row([
                                 ft.Column([
                                     ft.Switch(label="Iniciar com Usuário Padrão", value=flag_user, on_change=alternar_flag_user_padrao, active_color=ft.Colors.PRIMARY),
-                                    ft.TextField(label="Definir Usuário Padrão", value=val_user_padrao, on_change=atualizar_texto_user_padrao, width=250, border_color=ft.Colors.SECONDARY)
+                                    dropdown_user_padrao
                                 ], spacing=5),
                                 ft.VerticalDivider(width=20),
                                 ft.Column([
                                     ft.Switch(label="Iniciar com Domínio Padrão", value=flag_dom, on_change=alternar_flag_dominio_padrao, active_color=ft.Colors.PRIMARY),
-                                    ft.TextField(label="Definir Domínio Padrão", value=val_dom_padrao, on_change=atualizar_texto_dominio_padrao, width=250, border_color=ft.Colors.SECONDARY)
+                                    dropdown_dominio_padrao
                                 ], spacing=5),
                             ], alignment=ft.MainAxisAlignment.START, spacing=30)
                         ]), padding=12
