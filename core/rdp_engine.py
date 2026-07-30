@@ -34,7 +34,7 @@ class RDPAngine:
         sistema = platform.system()
         
         # ==========================================
-        # ENGINE MODERNA: WINDOWS COM FREE RDP
+        # ENGINE WINDOWS COM FREE RDP
         # ==========================================
         if sistema == "Windows":
             caminho_binario = RDPAngine._obter_caminho_wfreerdp()
@@ -43,9 +43,10 @@ class RDPAngine:
                 caminho_binario,
                 f"/v:{ip}",
                 f"/u:{user}",
+                f'{ip}',
                 "/size:85%",           
                 "/from-stdin",         
-                "/smart-sizing", 
+                "/dynamic-resolution", 
                 "/cert:ignore",        
                 "+clipboard"           
             ]
@@ -67,7 +68,7 @@ class RDPAngine:
                 processo.stdin.close()
 
         # ==========================================
-        # ENGINE LEGADA: MACOS
+        # ENGINE MACOS
         # ==========================================
         elif sistema == "Darwin":
             arquivo_rdp = RDPAngine.obter_caminho_salvamento()
@@ -87,7 +88,7 @@ class RDPAngine:
             threading.Thread(target=RDPAngine._limpar_arquivo_temporario, args=(arquivo_rdp,), daemon=True).start()
 
         # ==========================================
-        # ENGINE LEGADA: LINUX
+        # ENGINE LINUX
         # ==========================================
         else: 
             env_seguro = os.environ.copy()
