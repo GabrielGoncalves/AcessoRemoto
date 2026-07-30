@@ -17,7 +17,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 class MainApplication:
     def __init__(self, page: ft.Page):
         self.page = page
-        self.page.title = "Remote Craft"
+        self.page.title = "RemoteDesk"
         self.db = DatabaseManager()
         window_service = WindowService(page, self.db)
         window_service.inicializar_janela()

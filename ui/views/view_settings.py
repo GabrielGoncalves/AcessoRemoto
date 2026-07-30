@@ -452,13 +452,13 @@ class ViewSettings(ft.Container):
         async def realizar_backup_manual(e):
             save_path = await ft.FilePicker().save_file(
                 dialog_title="Salvar Backup do Banco de Dados",
-                file_name="autordp_backup.db",
+                file_name="remotedesk_backup.db",
                 allowed_extensions=["db"]
             )
             if not save_path: return
 
             try:
-                shutil.copy2("autordp.db", save_path)
+                shutil.copy2("remotedesk.db", save_path)
                 Notification.show_success(e.page, "Cópia de segurança criada com sucesso!")
             except Exception as ex:
                 Notification.show_error(e.page, "Não foi possível criar o backup.")
@@ -476,7 +476,7 @@ class ViewSettings(ft.Container):
             backup_path = files[0].path
             
             try:
-                shutil.copy2(backup_path, "autordp.db")
+                shutil.copy2(backup_path, "remotedesk.db")
                 
                 async def fechar_aplicativo(event):
                     await event.page.window.destroy()

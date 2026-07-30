@@ -1,6 +1,6 @@
 import sqlite3
 
-DB_NAME = "autordp.db"
+DB_NAME = "remotedesk.db"
 
 class DatabaseManager:
     def __init__(self):

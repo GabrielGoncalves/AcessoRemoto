@@ -22,9 +22,9 @@ class RDPAngine:
         """Retorna a pasta de cache ideal dependendo do Sistema Operacional (usado por Mac)"""
         home = Path.home()
         if platform.system() == "Windows":
-            diretorio = home / "AppData" / "Local" / "RemoteCraft"
+            diretorio = home / "AppData" / "Local" / "RemoteDesk"
         else:
-            diretorio = home / "Library" / "Application Support" / "RemoteCraft"
+            diretorio = home / "Library" / "Application Support" / "RemoteDesk"
             
         diretorio.mkdir(parents=True, exist_ok=True)
         return diretorio / "launcher.rdp"
