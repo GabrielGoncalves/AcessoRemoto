@@ -2,7 +2,7 @@ import flet as ft
 import ssl
 
 from database.db_manager import DatabaseManager
-from core.rdp_engine import RDPAngine
+from core.rdp_engine import RDPEngine
 from services.window_service import WindowService
 from ui.views.view_dashboard import DashboardView
 from ui.views.view_favorites import ViewFavoritos
@@ -142,7 +142,7 @@ class MainApplication:
         self.page.snack_bar = ft.SnackBar(ft.Text(f"Abrindo RDP para {ip}..."), bgcolor="green")
         self.page.snack_bar.open = True
         self.page.update()
-        RDPAngine.executar(ip, user, senha)
+        RDPEngine.executar(ip, user, senha)
 
 if __name__ == "__main__":
     ft.run(MainApplication)
