@@ -49,6 +49,13 @@ jobs:
           PYTHONIOENCODING: utf-8
         run: echo y | flet build windows --module-name app
 
+      - name: Posicionar Binário do FreeRDP no pacote
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          mkdir build\windows\assets
+          copy assets\sdl-freerdp.exe build\windows\assets\sdl-freerdp.exe
+
       - name: Gerar Instalador Windows (Inno Setup)
         if: runner.os == 'Windows'
         shell: cmd

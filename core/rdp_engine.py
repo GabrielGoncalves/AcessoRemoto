@@ -1,4 +1,3 @@
-import os
 import platform
 import subprocess
 import threading
@@ -7,14 +6,16 @@ import sys
 from pathlib import Path
 from core.security import CredencialSegura
 
-class RDPAngine:
+class RDPEngine:
     @staticmethod
     def _obter_caminho_wfreerdp() -> str:
-        """Resolve o caminho absoluto do sdl-freerdp.exe, seja rodando local ou compilado"""
-        if getattr(sys, 'frozen', False):
-            base_path = Path(sys._MEIPASS)
-        else:
+        """Resolve o caminho absoluto do sdl-freerdp.exe, seja rodando local ou compilado via Flet"""
+
+        if "python" in sys.executable.lower():
             base_path = Path(__file__).parent.parent
+        else:
+            base_path = Path(sys.executable).parent
+            
         return str(base_path / "assets" / "sdl-freerdp.exe")
 
     @staticmethod
@@ -37,12 +38,13 @@ class RDPAngine:
         # ENGINE WINDOWS COM FREE RDP
         # ==========================================
         if sistema == "Windows":
-            caminho_binario = RDPAngine._obter_caminho_wfreerdp()
+            caminho_binario = RDPEngine._obter_caminho_wfreerdp()
             
             comando = [
                 caminho_binario,
                 f"/v:{ip}",
                 f"/u:{user}",
+                f"/t:RemoteDesk - Conectado em {ip}",
                 f'{ip}',
                 "/size:85%",           
                 "/from-stdin",         
@@ -71,7 +73,7 @@ class RDPAngine:
         # ENGINE MACOS
         # ==========================================
         elif sistema == "Darwin":
-            arquivo_rdp = RDPAngine.obter_caminho_salvamento()
+            arquivo_rdp = RDPEngine.obter_caminho_salvamento()
             conteudo_rdp = (
                 f"full address:s:{ip}\n"
                 f"username:s:{user}\n"
@@ -85,7 +87,7 @@ class RDPAngine:
             if senha:
                 subprocess.run(["pbcopy"], text=True, input=senha)
             subprocess.Popen(["open", str(arquivo_rdp)])
-            threading.Thread(target=RDPAngine._limpar_arquivo_temporario, args=(arquivo_rdp,), daemon=True).start()
+            threading.Thread(target=RDPEngine._limpar_arquivo_temporario, args=(arquivo_rdp,), daemon=True).start()
 
         # ==========================================
         # ENGINE LINUX
@@ -95,7 +97,7 @@ class RDPAngine:
                 "xfreerdp",
                 f"/v:{ip}",
                 f"/u:{user}",
-                f"/t:Remote Craft - Conectado em {ip}",
+                f"/t:RemoteDesk - Conectado em {ip}",
                 "/size:1280x720",
                 "/from-stdin",
                 "/dynamic-resolution",
