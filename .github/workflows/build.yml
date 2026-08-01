@@ -38,16 +38,18 @@ jobs:
             echo "REQ_FILE=requirements.in" >> $GITHUB_ENV 
           fi
 
-      - name: Instalar dependências
+      - name: Instalar dependências e preparar requirements
+        shell: bash
         run: |
           python -m pip install --upgrade pip
           pip install -r ${{ env.REQ_FILE }}
+          cp ${{ env.REQ_FILE }} requirements.txt
 
       - name: Compilar no Windows
         if: runner.os == 'Windows'
         env:
           PYTHONIOENCODING: utf-8
-        run: echo y | flet build windows
+        run: flet build windows .
 
       - name: Posicionar Binário do FreeRDP no pacote
         if: runner.os == 'Windows'
@@ -64,14 +66,14 @@ jobs:
 
       - name: Compilar no macOS
         if: runner.os == 'macOS'
-        run: yes | flet build macos
+        run: flet build macos .
 
       - name: Compilar no Linux
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y xvfb libgtk-3-dev pkg-config ninja-build mesa-utils
-          yes | flet build linux
+          flet build linux .
 
       - name: Disponibilizar Artefato Interno
         uses: actions/upload-artifact@v4
@@ -85,7 +87,7 @@ jobs:
     name: Criar Página de Download
     needs: build
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'ref/tags/')
+    if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Baixar todos os executáveis da nuvem
         uses: actions/download-artifact@v4
