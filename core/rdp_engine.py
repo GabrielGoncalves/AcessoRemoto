@@ -39,6 +39,15 @@ class RDPEngine:
         # ==========================================
         if sistema == "Windows":
             caminho_binario = RDPEngine._obter_caminho_wfreerdp()
+
+            import traceback
+            caminho_log = Path.home() / "Desktop" / "rdp_debug.txt"
+            
+            with open(caminho_log, "a", encoding="utf-8") as log:
+                log.write("--- NOVA TENTATIVA DE CONEXÃO ---\n")
+                log.write(f"sys.executable aponta para: {sys.executable}\n")
+                log.write(f"Caminho Binario resolvido: {caminho_binario}\n")
+                log.write(f"O FreeRDP existe neste caminho? {Path(caminho_binario).exists()}\n")
             
             comando = [
                 caminho_binario,
