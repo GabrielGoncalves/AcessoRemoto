@@ -49,9 +49,8 @@ jobs:
         if: runner.os == 'Windows'
         env:
           PYTHONIOENCODING: utf-8
-          FLET_DISABLE_TELEMETRY: "true"
         shell: cmd
-        run: flet build windows .
+        run: echo y | flet build windows .
 
       - name: Posicionar Binário do FreeRDP no pacote
         if: runner.os == 'Windows'
