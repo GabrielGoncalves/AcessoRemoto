@@ -144,5 +144,8 @@ class MainApplication:
         self.page.update()
         RDPEngine.executar(ip, user, senha)
 
+def main(page: ft.Page):
+    MainApplication(page)
+
 if __name__ == "__main__":
-    ft.run(MainApplication)
+    ft.app(target=main)

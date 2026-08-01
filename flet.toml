@@ -3,6 +3,9 @@ description = "RemoteDesk"
 version = "2.0.5-beta"
 author = "Gabriel Aragão"
 
+[app]
+script = "main.py"
+
 [product]
 name = "RemoteDesk"
 company = "Gabriel Aragão"
