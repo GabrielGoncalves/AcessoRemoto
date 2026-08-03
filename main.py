@@ -160,11 +160,8 @@ class MainApplication:
         sucesso, caminho_log = RDPEngine.executar(ip, user, senha)
         
         if not sucesso:
-            if self.page.snack_bar:
-                self.page.snack_bar.open = False
-                self.page.update()
             import time
-            time.sleep(0.2)
+            time.sleep(2.5)
             
             Notification.show_error(
                 page=self.page,
@@ -178,4 +175,4 @@ def main(page: ft.Page):
     MainApplication(page)
 
 if __name__ == "__main__":
-    ft.app(target=main)
+    ft.run(main)
