@@ -52,6 +52,14 @@ class RDPEngine:
         # ==========================================
         if sistema == "Windows":
             caminho_binario = RDPEngine._obter_caminho_wfreerdp()
+            if not Path(caminho_binario).exists():
+                caminho_log = RDPEngine.obter_caminho_log()
+                with open(caminho_log, "w", encoding="utf-8") as log:
+                    log.write("--- ERRO CRÍTICO: COMPONENTE AUSENTE ---\n")
+                    log.write("O arquivo executável do FreeRDP não foi encontrado.\n")
+                    log.write(f"Caminho esperado: {caminho_binario}\n")
+                    log.write("Possível causa: Arquivo renomeado, deletado ou bloqueado pelo Antivírus.\n")
+                return False, str(caminho_log)
             
             comando = [
                 caminho_binario,
@@ -64,36 +72,45 @@ class RDPEngine:
                 "/cert:ignore",        
                 "+clipboard"           
             ]
-
             CREATE_NO_WINDOW = 0x08000000
             
-            processo = subprocess.Popen(
-                comando,
-                stdin=subprocess.PIPE,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.PIPE,
-                creationflags=CREATE_NO_WINDOW
-            )
-            
-            if senha:
-                with CredencialSegura(senha) as cred:
-                    processo.stdin.write(cred.obter_bytes() + b"\n")
-                    processo.stdin.flush()      
-            if processo.stdin:
-                processo.stdin.close()
-
-            time.sleep(0.5) 
-            codigo_saida = processo.poll() 
-            
-            if codigo_saida is not None and codigo_saida != 0:
-                erro_real = processo.stderr.read().decode('utf-8', errors='ignore')
-                caminho_log = RDPEngine.obter_caminho_log()
+            try:
+                processo = subprocess.Popen(
+                    comando,
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.PIPE,
+                    creationflags=CREATE_NO_WINDOW
+                )
                 
+                if senha:
+                    with CredencialSegura(senha) as cred:
+                        processo.stdin.write(cred.obter_bytes() + b"\n")
+                        processo.stdin.flush()      
+                if processo.stdin:
+                    processo.stdin.close()
+
+                time.sleep(0.5) 
+                codigo_saida = processo.poll() 
+                
+                if codigo_saida is not None and codigo_saida != 0:
+                    erro_real = processo.stderr.read().decode('utf-8', errors='ignore')
+                    caminho_log = RDPEngine.obter_caminho_log()
+                    
+                    with open(caminho_log, "w", encoding="utf-8") as log:
+                        log.write(f"--- FALHA AO ABRIR FREERDP ---\n")
+                        log.write(f"IP Alvo: {ip}\n")
+                        log.write(f"Código de Saída: {codigo_saida}\n")
+                        log.write(f"Detalhes do Erro:\n{erro_real}\n")
+                    
+                    return False, str(caminho_log)
+                    
+            except Exception as e:
+                caminho_log = RDPEngine.obter_caminho_log()
                 with open(caminho_log, "w", encoding="utf-8") as log:
-                    log.write(f"--- FALHA AO ABRIR FREERDP ---\n")
-                    log.write(f"IP Alvo: {ip}\n")
-                    log.write(f"Código de Saída: {codigo_saida}\n")
-                    log.write(f"Detalhes do Erro:\n{erro_real}\n")
+                    log.write("--- ERRO FATAL NO SISTEMA OPERACIONAL ---\n")
+                    log.write(f"O Windows impediu a execução do RDP.\n")
+                    log.write(f"Detalhes técnicos: {str(e)}\n")
                 return False, str(caminho_log)
 
         # ==========================================
