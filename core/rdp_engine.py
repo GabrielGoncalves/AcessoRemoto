@@ -54,7 +54,6 @@ class RDPEngine:
                 f"/v:{ip}",
                 f"/u:{user}",
                 f"/t:RemoteDesk - Conectado em {ip}",
-                f'{ip}',
                 "/size:85%",           
                 "/from-stdin",         
                 "/dynamic-resolution", 
