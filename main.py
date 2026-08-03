@@ -160,12 +160,18 @@ class MainApplication:
         sucesso, caminho_log = RDPEngine.executar(ip, user, senha)
         
         if not sucesso:
+            if self.page.snack_bar:
+                self.page.snack_bar.open = False
+                self.page.update()
+            import time
+            time.sleep(0.2)
+            
             Notification.show_error(
                 page=self.page,
                 message="A conexão falhou. Um arquivo de log foi gerado.",
                 action="Abrir Log",
                 on_action=lambda e: self._abrir_local_do_log(caminho_log),
-                duration=10000
+                duration=10000 
             )
 
 def main(page: ft.Page):
