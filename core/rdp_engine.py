@@ -31,6 +31,19 @@ class RDPEngine:
         return diretorio / "launcher.rdp"
 
     @staticmethod
+    def obter_caminho_log() -> Path:
+        """Retorna o caminho seguro para salvar os logs de erro sem exigir permissão de Administrador"""
+        home = Path.home()
+        if platform.system() == "Windows":
+            diretorio = home / "AppData" / "Local" / "RemoteDesk" / "logs"
+        else:
+            diretorio = home / "Library" / "Application Support" / "RemoteDesk" / "logs"
+            
+        diretorio.mkdir(parents=True, exist_ok=True)
+        nome_arquivo = f"erro_rdp_{int(time.time())}.txt"
+        return diretorio / nome_arquivo
+
+    @staticmethod
     def executar(ip, user, senha):
         sistema = platform.system()
         
@@ -39,15 +52,6 @@ class RDPEngine:
         # ==========================================
         if sistema == "Windows":
             caminho_binario = RDPEngine._obter_caminho_wfreerdp()
-
-            import traceback
-            caminho_log = Path.home() / "Desktop" / "rdp_debug.txt"
-            
-            with open(caminho_log, "a", encoding="utf-8") as log:
-                log.write("--- NOVA TENTATIVA DE CONEXÃO ---\n")
-                log.write(f"sys.executable aponta para: {sys.executable}\n")
-                log.write(f"Caminho Binario resolvido: {caminho_binario}\n")
-                log.write(f"O FreeRDP existe neste caminho? {Path(caminho_binario).exists()}\n")
             
             comando = [
                 caminho_binario,
@@ -67,15 +71,30 @@ class RDPEngine:
                 comando,
                 stdin=subprocess.PIPE,
                 stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
                 creationflags=CREATE_NO_WINDOW
             )
+            
             if senha:
                 with CredencialSegura(senha) as cred:
                     processo.stdin.write(cred.obter_bytes() + b"\n")
                     processo.stdin.flush()      
             if processo.stdin:
                 processo.stdin.close()
+
+            time.sleep(0.5) 
+            codigo_saida = processo.poll() 
+            
+            if codigo_saida is not None and codigo_saida != 0:
+                erro_real = processo.stderr.read().decode('utf-8', errors='ignore')
+                caminho_log = RDPEngine.obter_caminho_log()
+                
+                with open(caminho_log, "w", encoding="utf-8") as log:
+                    log.write(f"--- FALHA AO ABRIR FREERDP ---\n")
+                    log.write(f"IP Alvo: {ip}\n")
+                    log.write(f"Código de Saída: {codigo_saida}\n")
+                    log.write(f"Detalhes do Erro:\n{erro_real}\n")
+                return False, str(caminho_log)
 
         # ==========================================
         # ENGINE MACOS

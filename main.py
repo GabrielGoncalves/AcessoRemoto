@@ -1,9 +1,13 @@
 import flet as ft
 import ssl
+import subprocess
+import platform
+import os
 
 from database.db_manager import DatabaseManager
 from core.rdp_engine import RDPEngine
 from services.window_service import WindowService
+from ui.components.notifications import Notification
 from ui.views.view_dashboard import DashboardView
 from ui.views.view_favorites import ViewFavoritos
 from ui.views.view_environments import ViewEnvironments
@@ -138,11 +142,31 @@ class MainApplication:
             self.page.update()
             await self.view_dashboard.txt_pass.focus()
 
+    def _abrir_local_do_log(self, caminho_log):
+        """Abre o explorador nativo e seleciona o arquivo de erro"""
+        sistema = platform.system()
+        try:
+            if sistema == "Windows":
+                subprocess.run(["explorer", "/select,", caminho_log])
+            elif sistema == "Darwin":
+                subprocess.run(["open", "-R", caminho_log])
+            else:
+                subprocess.run(["xdg-open", os.path.dirname(caminho_log)])
+        except Exception as e:
+            print(f"Não foi possível abrir o explorador: {e}")
+
     def disparar_rdp(self, ip, user, senha):
-        self.page.snack_bar = ft.SnackBar(ft.Text(f"Abrindo RDP para {ip}..."), bgcolor="green")
-        self.page.snack_bar.open = True
-        self.page.update()
-        RDPEngine.executar(ip, user, senha)
+        Notification.show_success(self.page, f"Conectando a {ip}...")
+        sucesso, caminho_log = RDPEngine.executar(ip, user, senha)
+        
+        if not sucesso:
+            Notification.show_error(
+                page=self.page,
+                message="A conexão falhou. Um arquivo de log foi gerado.",
+                action="Abrir Log",
+                on_action=lambda e: self._abrir_local_do_log(caminho_log),
+                duration=10000
+            )
 
 def main(page: ft.Page):
     MainApplication(page)
