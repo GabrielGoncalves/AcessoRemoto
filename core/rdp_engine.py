@@ -76,7 +76,7 @@ class RDPEngine:
                     f"/t:RemoteDesk - Conectado em {ip}",
                     "/f",
                     "+grab-keyboard",
-                    "/kbd:0x0416",           
+                    "/kbd:0x00000416",           
                     "/from-stdin",         
                     "/dynamic-resolution", 
                     "/cert:ignore",        
