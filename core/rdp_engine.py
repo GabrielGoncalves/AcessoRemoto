@@ -50,7 +50,7 @@ class RDPEngine:
             caminho_arquivo.unlink()
 
     @staticmethod
-    def executar(ip, user, senha) -> tuple[bool, str]:
+    def executar(ip, user, senha, modo_janela="fullscreen") -> tuple[bool, str]:
         sistema = platform.system()
         
         try:
@@ -73,14 +73,21 @@ class RDPEngine:
                     caminho_binario,
                     f"/v:{ip}",
                     f"/u:{user}",
-                    f"/t:RemoteDesk - Conectado em {ip}",
-                    "/f",
+                    f"/t:RemoteDesk - Conectado em {ip}"
+                ]
+
+                if modo_janela == "fullscreen":
+                    comando.append("/f")
+                else:
+                    comando.append("/size:85%")
+
+                comando.extend([
                     "+grab-keyboard",           
                     "/from-stdin",         
                     "/dynamic-resolution", 
                     "/cert:ignore",        
                     "+clipboard"           
-                ]
+                ])
 
                 CREATE_NO_WINDOW = 0x08000000
                 
@@ -113,7 +120,6 @@ class RDPEngine:
                         log.write(f"Detalhes do Erro:\n{erro_real}\n")
                     
                     return False, str(caminho_log)
-
                 return True, ""
 
             # ==========================================

@@ -570,6 +570,7 @@ class ViewSettings(ft.Container):
         tema_atual = self.db.obter_tema()
         nav_recolhido_ativo = self.db.obter_configuracao("nav_rail_iniciar_recolhido", "0") == "1"
         hist_recolhido_ativo = self.db.obter_configuracao("historico_iniciar_recolhido", "0") == "1"
+        modo_janela_atual = self.db.obter_configuracao("rdp_modo_janela", "fullscreen")
         
         def alterar_tema(e):
             novo_tema = e.control.value
@@ -597,6 +598,11 @@ class ViewSettings(ft.Container):
             self.db.salvar_configuracao("historico_iniciar_recolhido", "1" if e.control.value else "0")
             Notification.show_info(e.page, "Configuração do Histórico salva para a próxima inicialização")
 
+        # --- NOVA FUNÇÃO DE SALVAMENTO DO MODO DE TELA ---
+        def alterar_modo_rdp(e):
+            self.db.salvar_configuracao("rdp_modo_janela", e.control.value)
+            Notification.show_success(e.page, "Preferência de exibição da sessão remota atualizada!")
+
         switch_nav_recolhido = ft.Switch(
             label="Iniciar Menu Lateral recolhido",
             value=nav_recolhido_ativo,
@@ -613,7 +619,7 @@ class ViewSettings(ft.Container):
 
         return ft.Container(
             content=ft.ListView([
-                ft.Card(
+                ft.Card(                    # --- CARD: TEMA ---
                     content=ft.Container(
                         content=ft.Column([
                             ft.Row([
@@ -646,7 +652,7 @@ class ViewSettings(ft.Container):
                         ]), padding=15
                     ), bgcolor=ft.Colors.SURFACE_CONTAINER
                 ),
-                
+                # --- CARD: TAMANHO DA JANELA ---
                 ft.Card(
                     content=ft.Container(
                         content=ft.Column([
@@ -673,6 +679,33 @@ class ViewSettings(ft.Container):
                                     on_click=restaurar_tamanho
                                 )
                             ], spacing=15)
+                        ]), padding=15
+                    ), bgcolor=ft.Colors.SURFACE_CONTAINER
+                ),
+
+                # --- CARD: EXPERIÊNCIA DA SESSÃO REMOTA ---
+                ft.Card(
+                    content=ft.Container(
+                        content=ft.Column([
+                            ft.Row([
+                                ft.Icon(ft.Icons.DESKTOP_WINDOWS, color=ft.Colors.PRIMARY),
+                                ft.Text("Experiência da Sessão Remota", size=16, weight=ft.FontWeight.BOLD)
+                            ]),
+                            ft.Divider(color=ft.Colors.SECONDARY),
+                            ft.Text("Escolha como a janela do Windows remoto deve ser exibida ao conectar.", size=12, color=ft.Colors.ON_SURFACE_VARIANT),
+                            ft.Divider(height=10, color=ft.Colors.TRANSPARENT),
+                            ft.Dropdown(
+                                label="Modo de Inicialização do RDP", 
+                                value=modo_janela_atual, 
+                                on_select=alterar_modo_rdp, 
+                                options=[
+                                    ft.dropdown.Option("fullscreen", "Tela Cheia (Imersivo)"),
+                                    ft.dropdown.Option("window", "Modo Janela (Permite Minimizar)"),
+                                ],
+                                bgcolor=ft.Colors.SURFACE,
+                                border_color=ft.Colors.SECONDARY,
+                                width=350
+                            )
                         ]), padding=15
                     ), bgcolor=ft.Colors.SURFACE_CONTAINER
                 ),

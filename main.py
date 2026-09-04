@@ -156,8 +156,15 @@ class MainApplication:
             print(f"Não foi possível abrir o explorador: {e}")
 
     def disparar_rdp(self, ip, user, senha):
-        Notification.show_success(self.page, f"Conectando a {ip}...")
-        sucesso, caminho_log = RDPEngine.executar(ip, user, senha)
+        modo_janela = self.db.obter_configuracao("rdp_modo_janela", "fullscreen")
+        
+        if modo_janela == "fullscreen":
+            mensagem = f"Conectando a {ip}... (Dica: Use Ctrl+Alt+Enter para sair da tela cheia)"
+        else:
+            mensagem = f"Conectando a {ip}..."
+            
+        Notification.show_success(self.page, mensagem)
+        sucesso, caminho_log = RDPEngine.executar(ip, user, senha, modo_janela)
         
         if not sucesso:
             import time
