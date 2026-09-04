@@ -11,6 +11,7 @@ Construído com Python e Flet, ele oferece uma interface nativa, rápida e fluid
 *   **Gestão de Identidades Inteligente:** Separação automática de usuários e domínios de rede para facilitar a seleção de credenciais e evitar digitação repetitiva.
 *   **Organização por Ambientes:** Agrupe dezenas de conexões e servidores em "Fazendas" (Ambientes) para manter sua área de trabalho limpa e organizada.
 *   **Cofre de Favoritos:** Acesso rápido aos servidores e máquinas mais acessados do seu dia a dia.
+*   **Experiência de Sessão Personalizada:** Escolha entre inicializar acessos remotos em Modo Janela (permitindo redimensionamento e minimização) ou Tela Cheia imersiva.
 *   **Dimensionamento de Janela Persistente:** Ajuste a interface para o tamanho ou proporção ideal do seu monitor e salve a configuração (incluindo o estado de janela maximizada) para que o aplicativo sempre inicie exatamente do seu jeito.
 *   **Backup e Restauração Nativa:** Crie cópias de segurança de toda a sua configuração com um clique. Em caso de problemas, o sistema faz a restauração segura e reinicia a aplicação automaticamente.
 *   **Limpeza Automática:** Configure o aplicativo para reter o histórico de conexões por 1, 3, 7, 30 dias, ou limpar os rastros automaticamente a cada inicialização.
@@ -36,20 +37,22 @@ Se você é usuário de versões anteriores, o RemoteDesk facilita a migração 
 
 O sistema foi estritamente modularizado seguindo padrões de projeto (como o MVC e o Single Responsibility Principle) para separar a interface visual (UI) da lógica de negócios e segurança.
 
-### 1. Núcleo da Aplicação (`app.py`)
+### 1. Núcleo da Aplicação (`main.py`)
 O arquivo principal orquestra a inicialização e o roteamento da interface gráfica.
 *   **Gestão de Estado:** A classe `MainApplication` centraliza as instâncias do banco de dados e repassa via injeção de dependência para as *Views* (Telas).
 *   **Manutenção de Boot:** Na inicialização, o sistema verifica a regra de retenção do usuário e realiza a exclusão de históricos antigos antes mesmo da interface ser renderizada.
 *   **Roteamento Dinâmico:** Utiliza o componente `NavigationRail` do Flet, montando o menu lateral de forma dinâmica (ex: exibindo a aba "API" apenas se a flag correspondente estiver ativada no banco).
 
 ### 2. Motor de Conexão Cross-Platform (`core/rdp_engine.py`)
-A classe `RDPAngine` traduz o pedido de conexão da interface para comandos nativos do sistema operacional de forma isolada e segura.
+A classe `RDPEngine` traduz o pedido de conexão da interface para comandos nativos do sistema operacional de forma isolada e segura.
+*   **Validação Fail-Fast e Sistema de Logs:** O motor verifica a integridade física dos binários antes da execução e isola chamadas de sistema em blocos de exceção. Falhas de parâmetro ou permissão geram arquivos de log detalhados em áreas seguras (AppData/Application Support) acionando alertas visuais rastreáveis na interface.
+*   **Captura de Teclado em Baixo Nível:** Implementação da flag `+grab-keyboard` no ecossistema FreeRDP para sequestro de scancodes, permitindo que atalhos globais (como WinKey e Alt+Tab) e mapeamentos ABNT2 sejam processados nativamente pelo servidor remoto.
 *   **Engine Moderna no Windows (FreeRDP):** Substitui a API nativa legada pelo poderoso motor embutido `sdl-freerdp.exe`, entregando ajustes dinâmicos de tela (`/dynamic-resolution`) e títulos de janela personalizados, sem depender da estrutura do sistema hospedeiro.
 *   **Injeção Invisível via Piping (Windows e Linux):** A geração de arquivos `.rdp` físicas foi totalmente abolida do Windows e o uso de variáveis de ambiente foi suprimido no Linux (`xfreerdp`). O aplicativo cria um túnel direto para a memória RAM (*Standard Input*) do processo filho, repassando a credencial sem deixar arquivos-fantasma no disco ou expor dados em ferramentas de depuração do SO.
 *   **Segurança no macOS:** Como o cliente de RDP do Mac não aceita injeção direta por arquivo ou *stdin*, o aplicativo copia a senha silenciosamente para a área de transferência (usando `pbcopy`), bastando o usuário colar (`Cmd+V`) na tela de login.
 
 ### 3. Persistência de Dados (`database/db_manager.py`)
-O banco de dados SQLite (`autordp.db`) opera em regime estrito com controle de integridade transacional.
+O banco de dados SQLite (`remotedesk.db`) opera em regime estrito com controle de integridade transacional.
 *   **Autocura e Migração:** A inicialização do banco (`_init_db`) aplica rotinas para dropar esquemas obsoletos de versões antigas do app.
 *   **Modelagem Relacional:** Relacionamento com chave estrangeira nativa (`FOREIGN KEY`) entre `ambientes` e `conexoes_ambientes` com exclusão em cascata (`ON DELETE CASCADE`).
 *   **Chave-Valor:** Preferências e configurações de interface operam em uma tabela simplificada (`configuracoes`) facilitando o _upsert_ (`INSERT OR REPLACE`).
@@ -68,6 +71,6 @@ A arquitetura blinda as informações sensíveis e gerencia senhas de forma segu
 
 ### 6. Gerenciamento de Geometria e UI (`services/window_service.py`)
 O módulo responsável por orquestrar o redimensionamento e a persistência visual do aplicativo.
-*   **Isolamento de Estado:** Retira o controle de pixels e resolução do arquivo `app.py`, evitando acoplamento e mantendo a inicialização do programa mais fluida.
+*   **Isolamento de Estado:** Retira o controle de pixels e resolução do arquivo de orquestração, evitando acoplamento e mantendo a inicialização do programa mais fluida.
 *   **Persistência sob Demanda:** Substitui o salvamento em tempo real (que causa eventos de restrição e `lock` por concorrência no SQLite) por ações explícitas orientadas pelo usuário através de botões de UI. Captura com exatidão dimensões estáticas e propriedades booleanas, como a flag `maximized` do sistema operacional.
 *   **Limites Protetivos:** Intervém na classe `Page` do Flet definindo constantes base de resolução (`MIN_WIDTH` e `MIN_HEIGHT`) para evitar que a interface encolha além dos limites funcionais previstos pelo design responsivo do projeto.
